@@ -1,0 +1,22 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:myF="/jp/ikedam/jenkins/plugins/taglib/form">
+    <!--
+        ビルド時のパラメータ指定時に使用されるビュー。
+        このビューでは、実際に扱うデータがDescriable/Descriptorの仕組みで扱われる
+        オブジェクトの値ではないため、他のビューと異なりjellyを使わずに
+        HTMLコードを手動で書く必要がある場合がある。
+    -->
+    <f:entry title="${it.name}" description="${it.description}">
+        <div name="parameter" description="${it.description}">
+            <input type="hidden" name="name" value="${it.name}" />
+            <j:scope>
+                <j:set var="instance" value="${it.defaultParameterValue}" />
+                <myF:staticSelect
+                    name="value"
+                    field="value"
+                    items="${it.choiceList}"
+                    editable="${it.editable}"
+                />
+            </j:scope>
+        </div>
+    </f:entry>
+</j:jelly>

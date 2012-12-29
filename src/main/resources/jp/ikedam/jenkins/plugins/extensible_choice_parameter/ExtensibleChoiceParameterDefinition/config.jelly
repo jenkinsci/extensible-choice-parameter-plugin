@@ -1,0 +1,39 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <!--
+        ジョブ設定時にビルドパラメータを設定する際に使用されるビュー。
+    -->
+    <f:entry title="${%Name}" field="name" help="/help/parameter/name.html">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="${%Description}" field="description" help="/help/parameter/description.html">
+        <f:textarea />
+    </f:entry>
+    <f:dropdownList title="${%Choice Provider}" field="choiceListProvider" help="${descriptor.getHelpFile('choiceListProvider')}">
+        <j:forEach
+                var="curDescriptor"
+                items="${descriptor.choiceListProviderList.iterator()}"
+                varStatus="loop">
+            <j:scope>
+            <j:set
+                var="choiceListProvider"
+                value="${curDescriptor==instance.choiceListProvider.descriptor?instance.choiceListProvider:null}"
+            />
+            <f:dropdownListBlock
+                title="${curDescriptor.displayName}"
+                value="${loop.index}"
+                selected="${choiceListProvider != null}"
+                staplerClass="${curDescriptor.clazz.name}"
+            ><j:scope>
+                <!-- 各ChoiceProviderが選択されている場合にのみ表示される。 -->
+                <j:set var="descriptor" value="${curDescriptor}" />
+                <j:set var="instance" value="${choiceListProvider}" />
+                <!-- 各ChoiceProviderが提供しているconfig.jellyを描画する。ない場合は何もしない -->
+                <st:include page="config.jelly" class="${curDescriptor.clazz}" optional="${true}" />
+            </j:scope></f:dropdownListBlock>
+            </j:scope>
+        </j:forEach>
+    </f:dropdownList>
+    <f:entry title="${%Editable}" field="editable">
+        <f:checkbox />
+    </f:entry>
+</j:jelly>

@@ -1,0 +1,6 @@
+<div>
+  With Extensible Choice Parameter, you can define choices for build parameters globally.
+  Same choices can be used in multiple jobs.
+  This plugin also provides a extension point,
+  to define a new method to provide choices for choice parameters.
+</div>
