@@ -8,7 +8,7 @@
 
   <groupId>jp.ikedam.jenkins.plugins</groupId>
   <artifactId>extensible-choice-parameter</artifactId>
-  <version>0.1</version>
+  <version>0.11</version>
   <packaging>hpi</packaging>
   <name>Extensible Choice Parameter</name>
   <url>http://dev.ikedam.jp/jenkins/extensible-choice-parameter/</url>

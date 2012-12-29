@@ -8,7 +8,7 @@
     <f:entry title="${%Description}" field="description" help="/help/parameter/description.html">
         <f:textarea />
     </f:entry>
-    <f:dropdownList title="${%Choice Provider}" field="choiceListProvider" help="${descriptor.getHelpFile('choiceListProvider')}">
+    <f:dropdownList title="${%Choice Provider}" name="choiceListProvider" help="${descriptor.getHelpFile('choiceListProvider')}">
         <j:forEach
                 var="curDescriptor"
                 items="${descriptor.choiceListProviderList.iterator()}"
