@@ -1,5 +1,6 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Arrays;
 import org.apache.commons.lang.StringUtils;
@@ -13,7 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * テキストエリアに書いて選択肢を定義する。
  * Jenkins組み込みの選択パラメータと一緒。
  */
-public class TextareaChoiceListProvider extends ChoiceListProvider
+public class TextareaChoiceListProvider extends ChoiceListProvider implements Serializable
 {
     private static final long serialVersionUID = 1L;
     

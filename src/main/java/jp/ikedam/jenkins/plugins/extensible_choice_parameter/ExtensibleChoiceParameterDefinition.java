@@ -1,9 +1,6 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import java.util.List;
-import java.util.Arrays;
-
-import org.apache.commons.lang.StringUtils;
 
 import hudson.Extension;
 import hudson.DescriptorExtensionList;

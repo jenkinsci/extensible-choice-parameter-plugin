@@ -1,13 +1,12 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.ComboBoxModel;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
@@ -17,7 +16,7 @@ import net.sf.json.JSONObject;
 /**
  * システム設定で選択肢をプロジェクト共通に定義できる選択パラメータ
  */
-public class GlobalTextareaChoiceListProvider extends ChoiceListProvider
+public class GlobalTextareaChoiceListProvider extends ChoiceListProvider implements Serializable
 {
     private static final long serialVersionUID = 1L;
     
@@ -111,7 +110,6 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider
          */
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GlobalTextareaChoiceListProvider.class.getName());
             setChoiceListEntryList(req.bindJSONToList(GlobalTextareaChoiceListEntry.class, formData.get("choiceListEntryList")));
             
             // TODO: ここでパラメータチェックを行う
