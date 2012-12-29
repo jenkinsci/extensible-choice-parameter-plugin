@@ -59,7 +59,14 @@ Behaviour.specify("SELECT.staticCombobox", 'staticCombobox', 0, function(e) {
      */
     e.oldonfocus = e.onfocus;
     e.onfocus = function(e){
+        var oldonsubmit = this.form.onsubmit;
         this.oldonfocus(e);
+        if(this.form.oldonsubmit != oldonsubmit){
+            // 一部のバージョンのJenkinsの不具合への対応。
+            // Comboboxでformの元のonsubmitを待避するタイミングが早すぎて、
+            // onsubmitの復元に失敗する。
+            this.form.oldonsubmit = oldonsubmit;
+        }
         this.comboBox.valueChanged();
     }
 });
