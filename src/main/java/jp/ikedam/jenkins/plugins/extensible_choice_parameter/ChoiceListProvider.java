@@ -15,12 +15,12 @@ import hudson.model.AbstractDescribableImpl;
  * 2. 派生クラス内でDescriptorを定義する
  * 3. Descriptorに@Extensionをつける
  */
-public abstract class ChoiceListProvider extends AbstractDescribableImpl<ChoiceListProvider> implements ExtensionPoint
+abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceListProvider> implements ExtensionPoint
 {
     /**
      * 選択肢の配列を返す。
      */
-    abstract List<String> getChoiceList();
+    abstract public List<String> getChoiceList();
     
     /**
      * 定義されているChoiceListProviderリストを返す。
