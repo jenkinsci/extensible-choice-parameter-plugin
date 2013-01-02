@@ -31,7 +31,7 @@
         xmlns:m="jelly:hudson.util.jelly.MorphTagLibrary"
         ATTRIBUTES="${attrs}"
         EXCEPT="name field items clazz editable value"
-        class="settings-input ${attrs.clazz} ${attrs.checkUrl!=null?'validated':''} ${attrs.editable?'staticCombobox':''}"
+        class="setting-input ${attrs.clazz} ${attrs.checkUrl!=null?'validated':''} ${attrs.editable?'staticCombobox':''}"
         autocomplete="off"
         name="${attrs.name ?: '_.'+attrs.field}">
         <j:forEach var="value" items="${attrs.items}">
