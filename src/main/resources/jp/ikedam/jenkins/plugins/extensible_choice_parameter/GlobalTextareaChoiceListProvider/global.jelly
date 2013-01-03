@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <!--
-        システム設定で表示される設定ビュー。
-        実際にはループ処理のみ行い、具体的な入力処理はGlobalTextChoiceListEntryのビューで行う。
+        The view shown in the System Configuration.
+        Input fields are located in config.jelly of GlobalTextChoiceListEntry.
     -->
     <f:section title="${%Global Choice Parameter}">
         <f:block>

@@ -8,22 +8,28 @@ import hudson.model.Descriptor;
 import hudson.model.AbstractDescribableImpl;
 
 /**
- * 選択肢を提供するモジュールの基底クラス。
- * 新規に選択を提供するモジュールを定義する場合、以下の手順で行う。
- * 1. ChoiceListProvider の派生クラスを定義する
- *     getChoiceList() の定義(オーバーライド)が必要
- * 2. 派生クラス内でDescriptorを定義する
- * 3. Descriptorに@Extensionをつける
+ * The abstract base class of modules provides choices.
+ * 
+ * Create a new choice provider in following stes:
+ * <ol>
+ *    <li>Define a new class derived from ChoiceListProvider</li>
+ *    <li>Override getChoiceList(), which returns the choices.</li>
+ *    <li>Define the internal public static class named DescriptorImpl, derived from Descriptor&lt;ChoiceListProvider&gt;</li>
+ *    <li>annotate the DescriptorImpl with Extension</li>
+ * </ol>
  */
 abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceListProvider> implements ExtensionPoint
 {
     /**
-     * 選択肢の配列を返す。
+     * Returns the choices.
+     * 
+     * @return the choices list.
      */
     abstract public List<String> getChoiceList();
     
     /**
-     * 定義されているChoiceListProviderリストを返す。
+     * Returns all the ChoiceListProvider subclass whose DescriptorImpl is annotated with Extension.
+     * @return DescriptorExtensionList of ChoiceListProvider subclasses.
      */
     static public DescriptorExtensionList<ChoiceListProvider,Descriptor<ChoiceListProvider>> all()
     {

@@ -11,26 +11,32 @@ import hudson.model.Descriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * テキストエリアに書いて選択肢を定義する。
- * Jenkins組み込みの選択パラメータと一緒。
+ * A choice provider whose choices are defined as a text, like the build-in choice parameter.
  */
 public class TextareaChoiceListProvider extends ChoiceListProvider implements Serializable
 {
     private static final long serialVersionUID = 1L;
     
     /**
-     * ビルドパラメータの定義の際などに使用するビューの情報
-     * resource フォルダ以下のクラス名に対応するフォルダから以下のファイルが使用される
-     *    config.jelly
-     *        ジョブ設定で、このProviderが選択された場合に表示する追加の設定項目
-     *    global.jelly
-     *        システム設定で表示する設定項目。
+     * The internal class to work with views.
+     * 
+     * The following files are used (put in main/resource directory in the source tree).
+     * <dl>
+     *     <dt>config.jelly</dt>
+     *         <dd>
+     *             Shown as a part of a job configuration page when this provider is selected.
+     *             Provides additional configuration fields of a Extensible Choice.
+     *         </dd>
+     * </dl>
      */
     @Extension
     public static class DescriptorImpl extends Descriptor<ChoiceListProvider>
     {
         /**
-         * ビルドパラメータの追加時に表示される項目名
+         * the display name shown in the dropdown to select a choice provider.
+         * 
+         * @return display name
+         * @see hudson.model.Descriptor#getDisplayName()
          */
         @Override
         public String getDisplayName()
@@ -39,26 +45,44 @@ public class TextareaChoiceListProvider extends ChoiceListProvider implements Se
         }
     }
     
-    /**
-     * 設定された選択肢のリスト
-     */
     private List<String> choiceList = null;
     
+    /**
+     * Returns the list of choices the user specified in the job configuration page.
+     * 
+     * @return the list of choices.
+     * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.ChoiceListProvider#getChoiceList()
+     */
     @Override
-    public List<String> getChoiceList(){
+    public List<String> getChoiceList()
+    {
         return choiceList;
     }
     
-    public String getChoiceListText(){
+    /**
+     * The list of choices, joined into a string.
+     * 
+     * Used for filling a field when the configuration page is shown.
+     * 
+     * @return Joined choices.
+     */
+    public String getChoiceListText()
+    {
         return StringUtils.join(choiceList, "\n");
     }
     
     /**
-     * Jenkinsが画面入力からこのオブジェクトを作成するときに使用するコンストラクタ。
-     * (設定から復元される時にはコンストラクタを使わずオブジェクトが直接復元される)
+     * Constructor instantiating with parameters in the configuration page.
+     * 
+     * When instantiating from the saved configuration,
+     * the object is directly serialized with XStream,
+     * and no constructor is used.
+     * 
+     * @param choiceListText the text where choices are written in each line.
      */
     @DataBoundConstructor
-    public TextareaChoiceListProvider(String choiceListText) {
+    public TextareaChoiceListProvider(String choiceListText)
+    {
         this.choiceList = Arrays.asList(choiceListText.split("\\r?\\n"));
     }
 }

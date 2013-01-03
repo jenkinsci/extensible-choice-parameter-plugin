@@ -14,56 +14,77 @@ import org.kohsuke.stapler.StaplerRequest;
 import net.sf.json.JSONObject;
 
 /**
- * システム設定で選択肢をプロジェクト共通に定義できる選択パラメータ
+ * A choice provider whose choices are defined
+ * in the System Configuration page, and can be refereed from all jobs.
  */
 public class GlobalTextareaChoiceListProvider extends ChoiceListProvider implements Serializable
 {
     private static final long serialVersionUID = 1L;
     
     /**
-     * ビルドパラメータの定義の際などに使用するビューの情報
-     * resource フォルダ以下のクラス名に対応するフォルダから以下のファイルが使用される
-     *    config.jelly
-     *        ジョブ設定で、このProviderが選択された場合に表示する追加の設定項目
-     *    global.jelly
-     *        システム設定で表示する設定項目。ただし繰り返し処理のみ行い、
-     *        具体的な処理はGlobalTextareaChoiceListEntryで行う。
+     * The internal class to work with views.
+     * Also manage the global configuration.
+     * 
+     * The following files are used (put in main/resource directory in the source tree).
+     * <dl>
+     *     <dt>config.jelly</dt>
+     *         <dd>
+     *             Shown as a part of a job configuration page when this provider is selected.
+     *             Provides additional configuration fields of a Extensible Choice.
+     *         </dd>
+     *     <dt>global.jelly</dt>
+     *         <dd>
+     *              Shown as a part of the System Configuration page.
+     *              Call config.jelly of GlobalTextareaChoiceListEntry,
+     *              for each set of choices.
+     *         </dd>
+     *     </dt>
+     * </dl>
      */
     @Extension
     public static class DescriptorImpl extends Descriptor<ChoiceListProvider>
     {
         /**
-         * 設定ファイルから復元する。
+         * Restore from the global configuration
          */
-        public DescriptorImpl(){
+        public DescriptorImpl()
+        {
             load();
         }
         
-        /**
-         * 使用可能な選択肢セットのリスト
-         */
         private List<GlobalTextareaChoiceListEntry> choiceListEntryList;
         
+        /**
+         * The list of available sets of choices.
+         * 
+         * @return the list of GlobalTextareaChoiceListEntry
+         */
         public List<GlobalTextareaChoiceListEntry> getChoiceListEntryList()
         {
             return choiceListEntryList;
         }
         
         /**
-         * 設定保存時にconfigureから呼び出す。
+         * Set a list of available sets of choices.
+         * 
+         * @param choiceListEntryList a list of GlobalTextareaChoiceListEntry
          */
         public void setChoiceListEntryList(List<GlobalTextareaChoiceListEntry> choiceListEntryList){
             this.choiceListEntryList = choiceListEntryList;
         }
         
         /**
-         * ジョブ設定で使用する選択肢セットを表示するために、
-         * 定義されている選択肢セットを一覧を作成する
+         * Returns a list of the names of the available choice set.
+         * 
+         * Used in dropdown field of a job configuration page.
+         * 
+         * @return a list of the names of the available choice set
          */
         public ListBoxModel doFillNameItems()
         {
             ListBoxModel m = new ListBoxModel();
-            if(getChoiceListEntryList() != null){
+            if(getChoiceListEntryList() != null)
+            {
                 for(GlobalTextareaChoiceListEntry e: getChoiceListEntryList())
                 {
                     m.add(e.getName());
@@ -73,7 +94,9 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
         }
         
         /**
-         * 選択肢の名前から選択肢の設定を取得する
+         * Retrieve the set of choices entry by the name.
+         * @param name
+         * @return the set of choices.
          */
         public GlobalTextareaChoiceListEntry getChoiceListEntry(String name)
         {
@@ -88,7 +111,9 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
          }
         
         /**
-         * 名前から選択肢のリストを取得する
+         * Retrieve the set of choices entry by the name.
+         * @param name
+         * @return the list of choices.
          */
         public List<String> getChoiceList(String name)
         {
@@ -97,7 +122,10 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
         }
         
         /**
-         * ビルドパラメータの追加時に表示される項目名
+         * the display name shown in the dropdown to select a choice provider.
+         * 
+         * @return display name
+         * @see hudson.model.Descriptor#getDisplayName()
          */
         @Override
         public String getDisplayName()
@@ -106,36 +134,55 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
         }
         
         /**
-         * システム設定で渡された設定を保存する。
+         * Store the parameters specified in the System Configuration page.
+         * 
+         * @param req
+         * @param formData
+         * @return whether succeeded to store. 
+         * @throws FormException
+         * @see hudson.model.Descriptor#configure(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
          */
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             setChoiceListEntryList(req.bindJSONToList(GlobalTextareaChoiceListEntry.class, formData.get("choiceListEntryList")));
             
-            // TODO: ここでパラメータチェックを行う
+            // TODO: Form Validation.
             save();
             
             return super.configure(req,formData);
         }
     }
     
-    /**
-     * 指定された選択肢名
-     */
     private String name = null;
     
+    /**
+     * Returns the name of the set of choice, specified by a user.
+     * 
+     * @return the name of the set of choice
+     */
     public String getName(){
         return name;
     }
     
+    /**
+     * Returns the choices available as a parameter value. 
+     * 
+     * @return choices
+     * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.ChoiceListProvider#getChoiceList()
+     */
     @Override
     public List<String> getChoiceList(){
         return ((DescriptorImpl)getDescriptor()).getChoiceList(getName());
     }
     
     /**
-     * Jenkinsが画面入力からこのオブジェクトを作成するときに使用するコンストラクタ。
-     * (設定から復元される時にはコンストラクタを使わずオブジェクトが直接復元される)
+     * Constructor instantiating with parameters in the configuration page.
+     * 
+     * When instantiating from the saved configuration,
+     * the object is directly serialized with XStream,
+     * and no constructor is used.
+     * 
+     * @param name the name of the set of choices.
      */
     @DataBoundConstructor
     public GlobalTextareaChoiceListProvider(String name) {

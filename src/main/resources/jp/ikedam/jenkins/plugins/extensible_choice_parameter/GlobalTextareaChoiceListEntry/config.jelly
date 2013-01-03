@@ -1,9 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 <!--
-    GlobalTextareaChoiceListProvider のglobal.jellyから
-    repetablePropertyによって呼び出される。
-    
-    その前提のため、通常のフォームとはちょっと異なる形になる。
+    Called from global.jelly in GlobalTextareaChoiceListProvider,
+    using /lib/form/repetableProperty tag.
 -->
     <f:entry title="${%Name}" field="name">
         <f:textbox />
@@ -11,6 +9,7 @@
     <f:entry title="${%Choices}" field="choiceListText" help="/help/parameter/choice-choices.html">
         <f:textarea />
     </f:entry>
+    <!-- Button to delete this entry. -->
     <f:entry title="">
         <div align="right">
             <f:repeatableDeleteButton value="${%Delete}"/>

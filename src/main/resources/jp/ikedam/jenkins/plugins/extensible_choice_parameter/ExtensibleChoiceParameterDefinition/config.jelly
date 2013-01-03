@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <!--
-        ジョブ設定時にビルドパラメータを設定する際に使用されるビュー。
+        A view used in the job configuration page, to define a parameter for a build.
     -->
     <f:entry title="${%Name}" field="name" help="/help/parameter/name.html">
         <f:textbox />
@@ -24,10 +24,13 @@
                 selected="${choiceListProvider != null}"
                 staplerClass="${curDescriptor.clazz.name}"
             ><j:scope>
-                <!-- 各ChoiceProviderが選択されている場合にのみ表示される。 -->
+                <!-- Shown only when corresponding ChoiceProvider is selected. -->
                 <j:set var="descriptor" value="${curDescriptor}" />
                 <j:set var="instance" value="${choiceListProvider}" />
-                <!-- 各ChoiceProviderが提供しているconfig.jellyを描画する。ない場合は何もしない -->
+                <!--
+                    Call config.jelly of the ChoiceProvider subclass.
+                    Do nothing if config.jelly is not provided.
+                -->
                 <st:include page="config.jelly" class="${curDescriptor.clazz}" optional="${true}" />
             </j:scope></f:dropdownListBlock>
             </j:scope>

@@ -12,26 +12,38 @@ import hudson.model.AbstractDescribableImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * グローバル選択 で使用する、各ドロップダウンのエントリ(名前、選択の中身のセット)に対応するモデル
- * TODO: パラメータチェック
+ * A set of choices that can be used in Global Choice Parameter.
+ * 
+ * Holds a name and a list of choices.
+ * Added in the System Configuration page.
  */
 public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<GlobalTextareaChoiceListEntry> implements Serializable
 {
     private static final long serialVersionUID = 1L;
     
     /**
-     * クラスに対するDescriptorをJenkinsに登録するためにExtensionを指定する。
-     * また、resourcesフォルダ以下の、このクラスに対応するフォルダ内で以下のビューが使用される。
-     *     config.jelly
-     *         Jenkinsのシステム設定でこのモジュールのパラメータの指定のために使用される。
-     *         複数定義されるので、複数呼び出し(定義されているエントリの数だけ)が行われる。
-     *         GlobalTextareaChoiceListProvider のglobal.jellyが呼び出し元になる。
+     * The internal class to work with views.
+     * 
+     * The following files are used (put in main/resource directory in the source tree).
+     * <dl>
+     *     <dt>config.jelly</dt>
+     *         <dd>
+     *         shown as a part of the system configuration page.
+     *         Called from global.jelly of GlobalTextareaChoiceListProvider.
+     *         </dd>
+     *     </dt>
+     * </dl>
      */
     @Extension
     public static class DescriptorImpl extends Descriptor<GlobalTextareaChoiceListEntry>
     {
+        // TODO: Form validation
+        
         /**
-         * ユーザには表示されないのでなんでもよい。
+         * Don't care for this is not shown in any page.
+         * 
+         * @return the display name of this object.
+         * @see hudson.model.Descriptor#getDisplayName()
          */
         @Override
         public String getDisplayName()
@@ -40,28 +52,36 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
         }
     }
     
-    /**
-     * この選択セットの名称
-     */
     private String name = null;
     
+    /**
+     * the name of this set of choices.
+     * 
+     * @return the name the user specified.
+     */
     public String getName()
     {
         return name;
     }
     
-    /**
-     * 設定された選択肢のリスト
-     */
     private List<String> choiceList = null;
     
+    /**
+     * The list of choices.
+     * 
+     * @return the list of choices the user specified.
+     */
     public List<String> getChoiceList()
     {
         return choiceList;
     }
     
     /**
-     * ビューの再表示時に使用される。
+     * The list of choices, joined into a string.
+     * 
+     * Used for filling a field when the configuration page is shown.
+     * 
+     * @return Joined choices.
      */
     public String getChoiceListText()
     {
@@ -69,8 +89,14 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
     }
     
     /**
-     * Jenkinsが画面入力からこのオブジェクトを作成するときに使用するコンストラクタ。
-     * (設定から復元される時にはコンストラクタを使わずオブジェクトが直接復元される)
+     * Constructor instantiating with parameters in the configuration page.
+     * 
+     * When instantiating from the saved configuration,
+     * the object is directly serialized with XStream,
+     * and no constructor is used.
+     * 
+     * @param name the name of this set of choices.
+     * @param choiceListText the text where choices are written in each line.
      */
     @DataBoundConstructor
     public GlobalTextareaChoiceListEntry(String name, String choiceListText)

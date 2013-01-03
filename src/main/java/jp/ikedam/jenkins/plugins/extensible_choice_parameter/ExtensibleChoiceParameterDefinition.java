@@ -14,24 +14,35 @@ import org.kohsuke.stapler.StaplerRequest;
 import net.sf.json.JSONObject;
 
 /**
- * 選択肢の提供方法をExtension Pointsで定義可能な選択ビルドパラメータ
+ * Provides a choice parameter whose choices can be extended using Extension Points.
+ *
  */
 public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefinition
 {
     private static final long serialVersionUID = 1L;
     
     /**
-     * ビューでの接続に使用される情報の定義。
-     * resource 以下の、クラス名に対応するパスの以下のファイルを使用する。
-     *   config.jelly...ジョブの設定時に使用する
-     *   index.jelly...ビルド時のパラメータの指定時に使用する。
-     * TODO: パラメータチェックを行う。
+     * The internal class to work with views.
+     * 
+     * The following files are used (put in main/resource directory in the source tree).
+     * <dl>
+     *     <dt>config.jelly</dt>
+     *         <dd>shown as a part of a job configuration page.</dd>
+     *     <dt>index.jelly</dt>
+     *         <dd>shown when a user launches a build, and specifies parameters of the build.</dd>
+     *     </dt>
+     * </dl>
      */
     @Extension
     public static class DescriptorImpl extends ParameterDescriptor
     {
+        // TODO: Form validation.
+        
         /**
-         * ジョブ設定でビルドパラメータの追加時に表示される項目名
+         * Returns the string to be shown in a job configuration page, in the dropdown of &quot;Add Parameter&quot;.
+         * 
+         * @return a name of this parameter type.
+         * @see hudson.model.ParameterDefinition.ParameterDescriptor#getDisplayName()
          */
         @Override
         public String getDisplayName()
@@ -40,7 +51,11 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         }
         
         /**
-         * 利用可能なChoiceListProviderの一覧を返す
+         * Returns all the available methods to provide choices.
+         * 
+         * Used for showing dropdown for users to select a choice provider.
+         * 
+         * @return DescriptorExtensionList of ChoiceListProvider subclasses.
          */
         public DescriptorExtensionList<ChoiceListProvider,Descriptor<ChoiceListProvider>> getChoiceListProviderList()
         {
@@ -48,28 +63,34 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         }
     }
     
-    /**
-     * この項目を編集可能にするか？
-     */
     private boolean editable = false;
     
+    /**
+     * Is this parameter value can be set to a value not in the choices?
+     * 
+     * @return whether this parameter is editable.
+     */
     public boolean isEditable()
     {
         return editable;
     }
     
-    /**
-     * 選択肢の提供方法を決定するモジュール
-     */
     private ChoiceListProvider choiceListProvider = null;
     
+    /**
+     * The choice provider the user specified.
+     * 
+     * @return choice provider.
+     */
     public ChoiceListProvider getChoiceListProvider()
     {
         return choiceListProvider;
     }
     
     /**
-     * 選択肢のリストを返す。
+     * Return choices available for this parameter.
+     * 
+     * @return list of choices
      */
     public List<String> getChoiceList()
     {
@@ -77,8 +98,16 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     }
     
     /**
-     * Jenkinsが画面入力からこのオブジェクトを作成するときに使用するコンストラクタ。
-     * (設定から復元される時にはコンストラクタを使わずオブジェクトが直接復元される)
+     * Constructor instantiating with parameters in the configuration page.
+     * 
+     * When instantiating from the saved configuration,
+     * the object is directly serialized with XStream,
+     * and no constructor is used.
+     * 
+     * @param name the name of this parameter (used as a variable name).
+     * @param choiceListProvider the choice provider
+     * @param editable whether this parameter can be a value not in choices.
+     * @param description the description of this parameter. Used only for the convenience of users.
      */
     @DataBoundConstructor
     public ExtensibleChoiceParameterDefinition(String name, ChoiceListProvider choiceListProvider, boolean editable, String description)
@@ -90,7 +119,12 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     }
     
     /**
-     * ビルド時に使用するパラメータをユーザの入力から決定する。
+     * Decide a value of this parameter from the user input.
+     * 
+     * @param request
+     * @param jo the user input
+     * @return the value of this parameter.
+     * @see hudson.model.ParameterDefinition#createValue(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
      */
     @Override
     public ParameterValue createValue(StaplerRequest request, JSONObject jo)
@@ -99,29 +133,36 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         value.setDescription(getDescription());
         if(!isEditable() && !getChoiceList().contains(value.value))
         {
-            // 編集可能じゃないのに選択肢にない値が指定された！おかしい！
+            // Something strange!: Not editable and specified a value not in the choices.
             throw new IllegalArgumentException("Illegal choice: " + value.value);
         }
         return value;
     }
     
     /**
-     * ビルド時に使用するパラメータをユーザの入力から決定する。
+     * Decide a value of this parameter from the user input.
+     * 
+     * @param value the user input
+     * @return the value of this parameter.
+     * @see hudson.model.SimpleParameterDefinition#createValue(java.lang.String)
      */
     @Override
     public ParameterValue createValue(String value)
     {
         if(!isEditable() && !getChoiceList().contains(value))
         {
-            // 編集可能じゃないのに選択肢にない値が指定された！おかしい！
+            // Something strange!: Not editable and specified a value not in the choices.
             throw new IllegalArgumentException("Illegal choice: " + value);
         }
         return new StringParameterValue(getName(), value, getDescription());
     }
     
     /**
-     * デフォルトのパラメータを返す。
-     * 最初の選択肢をデフォルトの選択肢とする。
+     * Returns the default value of this parameter.
+     * 
+     * The first value in the choice is used.
+     * @return the default value of this parameter.
+     * @see hudson.model.ParameterDefinition#getDefaultParameterValue()
      */
     @Override
     public ParameterValue getDefaultParameterValue()
