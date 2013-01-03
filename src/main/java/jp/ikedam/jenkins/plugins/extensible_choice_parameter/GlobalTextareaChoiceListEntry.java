@@ -2,14 +2,17 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import java.util.List;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 import java.io.Serializable;
 import org.apache.commons.lang.StringUtils;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
 import hudson.model.AbstractDescribableImpl;
+import hudson.util.FormValidation;
 
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 /**
  * A set of choices that can be used in Global Choice Parameter.
@@ -20,6 +23,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<GlobalTextareaChoiceListEntry> implements Serializable
 {
     private static final long serialVersionUID = 1L;
+    
+    private static final Pattern namePattern = Pattern.compile("[A-Za-z_][A-Za-z_0-9]*");
+    
+    /**
+     * @return A regular expression pattern for the acceptable names.
+     */
+    public static Pattern getNamePattern()
+    {
+        return namePattern;
+    }
     
     /**
      * The internal class to work with views.
@@ -37,8 +50,6 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
     @Extension
     public static class DescriptorImpl extends Descriptor<GlobalTextareaChoiceListEntry>
     {
-        // TODO: Form validation
-        
         /**
          * Don't care for this is not shown in any page.
          * 
@@ -49,6 +60,29 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
         public String getDisplayName()
         {
             return "GlobalTextareaChoiceListEntry";
+        }
+        
+        /**
+         * Check the input name is acceptable.
+         * <ul>
+         *      <li>Must not be empty.</li>
+         * </ul>
+         * 
+         * @param name
+         * @return FormValidation object.
+         */
+        public FormValidation doCheckName(@QueryParameter String name)
+        {
+            if(StringUtils.isBlank(name))
+            {
+                return FormValidation.error(Messages.GlobalTextareaChoiceListEntry_Name_empty());
+            }
+            
+            if(!getNamePattern().matcher(name.trim()).matches()){
+                return FormValidation.error(Messages.GlobalTextareaChoiceListEntry_Name_invalid());
+            }
+            
+            return FormValidation.ok();
         }
     }
     
@@ -101,7 +135,29 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
     @DataBoundConstructor
     public GlobalTextareaChoiceListEntry(String name, String choiceListText)
     {
-        this.name = name;
+        this.name = name.trim();
         this.choiceList = Arrays.asList(choiceListText.split("\\r?\\n"));
+    }
+    
+    /**
+     * Returns whether this object is configured correctly.
+     * 
+     * Jenkins framework seems to accept the values that doCheckXXX alerts an error.
+     * Throwing a exception from the constructor annotated with DataBoundConstructor
+     * results in an exception page, so I decided to omit bad objects with this method. 
+     * 
+     * @return whether this object is configured correctly.
+     */
+    public boolean isValid()
+    {
+        DescriptorImpl descriptor = ((DescriptorImpl)getDescriptor());
+        {
+            FormValidation v = descriptor.doCheckName(name);
+            if(v.kind == FormValidation.Kind.ERROR)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }

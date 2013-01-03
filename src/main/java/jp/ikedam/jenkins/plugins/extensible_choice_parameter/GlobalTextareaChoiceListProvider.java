@@ -8,6 +8,8 @@ import hudson.Extension;
 import hudson.model.Descriptor;
 import hudson.util.ListBoxModel;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -69,8 +71,24 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
          * 
          * @param choiceListEntryList a list of GlobalTextareaChoiceListEntry
          */
+        @SuppressWarnings("unchecked") // for the cast to List<GlobalTextareaChoiceListEntry>
         public void setChoiceListEntryList(List<GlobalTextareaChoiceListEntry> choiceListEntryList){
-            this.choiceListEntryList = choiceListEntryList;
+            // Invalid values may be submitted.
+            // (Jenkins framework seems not to forbid the submission,
+            // even if form validations alert errors...)
+            // retrieve only valid (correctly configured) entries
+            this.choiceListEntryList = 
+                (List<GlobalTextareaChoiceListEntry>)CollectionUtils.select(
+                        choiceListEntryList,
+                        new Predicate()
+                        {
+                            @Override
+                            public boolean evaluate(Object entry)
+                            {
+                                return ((GlobalTextareaChoiceListEntry)entry).isValid();
+                            }
+                        }
+                );
         }
         
         /**
@@ -143,10 +161,10 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
          * @see hudson.model.Descriptor#configure(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
          */
         @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException
+        {
             setChoiceListEntryList(req.bindJSONToList(GlobalTextareaChoiceListEntry.class, formData.get("choiceListEntryList")));
             
-            // TODO: Form Validation.
             save();
             
             return super.configure(req,formData);
@@ -160,7 +178,8 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
      * 
      * @return the name of the set of choice
      */
-    public String getName(){
+    public String getName()
+    {
         return name;
     }
     
@@ -171,7 +190,8 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
      * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.ChoiceListProvider#getChoiceList()
      */
     @Override
-    public List<String> getChoiceList(){
+    public List<String> getChoiceList()
+    {
         return ((DescriptorImpl)getDescriptor()).getChoiceList(getName());
     }
     
@@ -185,7 +205,9 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
      * @param name the name of the set of choices.
      */
     @DataBoundConstructor
-    public GlobalTextareaChoiceListProvider(String name) {
+    public GlobalTextareaChoiceListProvider(String name)
+    {
+        // No validation is performed, for the name is selected from the dropdown.
         this.name = name;
     }
 }

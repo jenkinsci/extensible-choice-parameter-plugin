@@ -1,6 +1,7 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import hudson.Extension;
 import hudson.DescriptorExtensionList;
@@ -8,8 +9,11 @@ import hudson.model.Descriptor;
 import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
 import hudson.model.SimpleParameterDefinition;
+import hudson.util.FormValidation;
 
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import net.sf.json.JSONObject;
 
@@ -20,6 +24,21 @@ import net.sf.json.JSONObject;
 public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefinition
 {
     private static final long serialVersionUID = 1L;
+    
+    private static final Pattern namePattern = Pattern.compile("[A-Za-z_][A-Za-z_0-9]*");
+    
+    /**
+     * Returns a regular expression pattern for the acceptable parameter names.
+     * 
+     * Strangely, Jenkins has no limitation for the name of parameters.
+     * But in many cases, it is good to be limited to the symbol name in C.
+     * 
+     * @return A regular expression pattern for the acceptable variable names.
+     */
+    public static Pattern getNamePattern()
+    {
+        return namePattern;
+    }
     
     /**
      * The internal class to work with views.
@@ -36,8 +55,6 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @Extension
     public static class DescriptorImpl extends ParameterDescriptor
     {
-        // TODO: Form validation.
-        
         /**
          * Returns the string to be shown in a job configuration page, in the dropdown of &quot;Add Parameter&quot;.
          * 
@@ -60,6 +77,19 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         public DescriptorExtensionList<ChoiceListProvider,Descriptor<ChoiceListProvider>> getChoiceListProviderList()
         {
             return ChoiceListProvider.all();
+        }
+        
+        public FormValidation doCheckName(@QueryParameter String name){
+            if(StringUtils.isBlank(name))
+            {
+                return FormValidation.error(Messages.ExtensibleChoiceParameterDefinition_Name_empty());
+            }
+            
+            if(!getNamePattern().matcher(name.trim()).matches()){
+                return FormValidation.error(Messages.ExtensibleChoiceParameterDefinition_Name_invalid());
+            }
+            
+            return FormValidation.ok();
         }
     }
     
@@ -112,6 +142,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @DataBoundConstructor
     public ExtensibleChoiceParameterDefinition(String name, ChoiceListProvider choiceListProvider, boolean editable, String description)
     {
+        // There seems no way to forbid invalid values to be submitted.
         super(name, description);
         
         this.choiceListProvider = choiceListProvider;
