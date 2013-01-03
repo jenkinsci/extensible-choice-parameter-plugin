@@ -1,5 +1,6 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 import java.util.regex.Pattern;
@@ -114,12 +115,19 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
      * The list of choices, joined into a string.
      * 
      * Used for filling a field when the configuration page is shown.
+     * The newline code is appended also after the last element.
      * 
      * @return Joined choices.
      */
     public String getChoiceListText()
     {
-        return StringUtils.join(choiceList, "\n");
+        StringBuffer sb = new StringBuffer();
+        for(String s: getChoiceList())
+        {
+            sb.append(s);
+            sb.append('\n');
+        }
+        return sb.toString();
     }
     
     /**
@@ -135,8 +143,15 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
     @DataBoundConstructor
     public GlobalTextareaChoiceListEntry(String name, String choiceListText)
     {
-        this.name = name.trim();
-        this.choiceList = Arrays.asList(choiceListText.split("\\r?\\n"));
+        this.name = (name != null)?name.trim():"";
+        this.choiceList = (choiceListText != null)?Arrays.asList(choiceListText.split("\\r?\\n", -1)):new ArrayList<String>(0);
+        if(!this.choiceList.isEmpty() && this.choiceList.get(this.choiceList.size() - 1).isEmpty())
+        {
+            // The last empty line will be ignored.
+            // The list object returned from asList() does not support remove,
+            // so copy the list and remove the last element.
+            this.choiceList = this.choiceList.subList(0, this.choiceList.size() - 1);
+        }
     }
     
     /**
