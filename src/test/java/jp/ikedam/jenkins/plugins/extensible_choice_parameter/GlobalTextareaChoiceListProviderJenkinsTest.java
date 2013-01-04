@@ -120,7 +120,6 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
             List choiceListEntry = new ArrayList(nameList);
             CollectionUtils.transform(
                     choiceListEntry,
-                    
                     new Transformer(){
                         @Override
                         public Object transform(Object input)

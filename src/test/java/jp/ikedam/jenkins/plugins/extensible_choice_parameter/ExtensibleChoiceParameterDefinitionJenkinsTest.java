@@ -14,7 +14,6 @@ import hudson.model.ParametersDefinitionProperty;
 import hudson.util.FormValidation;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.ExtensibleChoiceParameterDefinition.DescriptorImpl;
 
-import org.junit.Ignore;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 
