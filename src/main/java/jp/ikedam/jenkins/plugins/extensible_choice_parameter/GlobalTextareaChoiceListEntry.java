@@ -1,10 +1,11 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.io.Serializable;
+
+import jp.ikedam.jenkins.plugins.extensible_choice_parameter.utility.TextareaStringListUtility;
+
 import org.apache.commons.lang.StringUtils;
 
 import hudson.Extension;
@@ -121,13 +122,7 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
      */
     public String getChoiceListText()
     {
-        StringBuffer sb = new StringBuffer();
-        for(String s: getChoiceList())
-        {
-            sb.append(s);
-            sb.append('\n');
-        }
-        return sb.toString();
+        return TextareaStringListUtility.textareaFromStringList(getChoiceList());
     }
     
     /**
@@ -144,14 +139,7 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
     public GlobalTextareaChoiceListEntry(String name, String choiceListText)
     {
         this.name = (name != null)?name.trim():"";
-        this.choiceList = (choiceListText != null)?Arrays.asList(choiceListText.split("\\r?\\n", -1)):new ArrayList<String>(0);
-        if(!this.choiceList.isEmpty() && this.choiceList.get(this.choiceList.size() - 1).isEmpty())
-        {
-            // The last empty line will be ignored.
-            // The list object returned from asList() does not support remove,
-            // so copy the list and remove the last element.
-            this.choiceList = this.choiceList.subList(0, this.choiceList.size() - 1);
-        }
+        this.choiceList = TextareaStringListUtility.stringListFromTextarea(choiceListText);
     }
     
     /**

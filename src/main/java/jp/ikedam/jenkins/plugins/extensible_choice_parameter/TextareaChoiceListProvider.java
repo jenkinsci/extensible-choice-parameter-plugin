@@ -2,8 +2,8 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Arrays;
-import org.apache.commons.lang.StringUtils;
+
+import jp.ikedam.jenkins.plugins.extensible_choice_parameter.utility.TextareaStringListUtility;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
@@ -68,7 +68,7 @@ public class TextareaChoiceListProvider extends ChoiceListProvider implements Se
      */
     public String getChoiceListText()
     {
-        return StringUtils.join(choiceList, "\n");
+        return TextareaStringListUtility.textareaFromStringList(getChoiceList());
     }
     
     /**
@@ -83,6 +83,6 @@ public class TextareaChoiceListProvider extends ChoiceListProvider implements Se
     @DataBoundConstructor
     public TextareaChoiceListProvider(String choiceListText)
     {
-        this.choiceList = Arrays.asList(choiceListText.split("\\r?\\n"));
+        this.choiceList = TextareaStringListUtility.stringListFromTextarea(choiceListText);
     }
 }
