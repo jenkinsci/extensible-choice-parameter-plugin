@@ -1,5 +1,6 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -120,11 +121,13 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     /**
      * Return choices available for this parameter.
      * 
-     * @return list of choices
+     * @return list of choices. never null.
      */
     public List<String> getChoiceList()
     {
-        return getChoiceListProvider().getChoiceList();
+        ChoiceListProvider provider = getChoiceListProvider();
+        List<String> choiceList = (provider !=  null)?provider.getChoiceList():null;
+        return (choiceList !=  null)?choiceList:new ArrayList<String>(0);
     }
     
     /**
@@ -143,7 +146,8 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     public ExtensibleChoiceParameterDefinition(String name, ChoiceListProvider choiceListProvider, boolean editable, String description)
     {
         // There seems no way to forbid invalid values to be submitted.
-        super(name, description);
+        // SimpleParameterDefinition seems not to trim name parameter, so trim here.
+        super(StringUtils.trim(name), description);
         
         this.choiceListProvider = choiceListProvider;
         this.editable = editable;
@@ -175,10 +179,11 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
      * 
      * @param value the user input
      * @return the value of this parameter.
+     * @throws IllegalArgumentException The value is not in choices even the field is not editable.
      * @see hudson.model.SimpleParameterDefinition#createValue(java.lang.String)
      */
     @Override
-    public ParameterValue createValue(String value)
+    public ParameterValue createValue(String value) throws IllegalArgumentException
     {
         if(!isEditable() && !getChoiceList().contains(value))
         {
@@ -192,16 +197,20 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
      * Returns the default value of this parameter.
      * 
      * The first value in the choice is used.
+     * returns null if no choice list is defined.
+     * 
      * @return the default value of this parameter.
      * @see hudson.model.ParameterDefinition#getDefaultParameterValue()
      */
     @Override
     public ParameterValue getDefaultParameterValue()
     {
-        return new StringParameterValue(
-            getName(),
-            (getChoiceList().size() > 0)?getChoiceList().get(0):null,
-            getDescription()
-        );
+        List<String> choiceList = getChoiceList();
+        return (choiceList.size() <= 0)?null:
+            new StringParameterValue(
+                    getName(),
+                    choiceList.get(0),
+                    getDescription()
+            );
     }
 }
