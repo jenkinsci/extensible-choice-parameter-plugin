@@ -163,4 +163,50 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
         }
         return true;
     }
+    
+    /**
+     * @param o
+     * @return
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object o){
+        if(!(o instanceof GlobalTextareaChoiceListEntry))
+        {
+            return false;
+        }
+        
+        GlobalTextareaChoiceListEntry entry = (GlobalTextareaChoiceListEntry)o;
+        
+        if(name == null){
+            if(entry.name != null)
+            {
+                return false;
+            }
+        }else if(!name.equals(entry.name))
+        {
+            return false;
+        }
+        
+        if(choiceList == null){
+            if(entry.choiceList != null)
+            {
+                return false;
+            }
+        }else if(!choiceList.equals(entry.choiceList)){
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * @return
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return String.format("[%s: name=%s, choiceList=%s]", getClass().getName(), getName(), StringUtils.join(getChoiceList(), ","));
+    }
 }
