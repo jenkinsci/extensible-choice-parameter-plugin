@@ -1,4 +1,4 @@
-Behaviour.specify("SELECT.staticCombobox", 'staticCombobox', 0, function(e) {
+Behaviour.register({"SELECT.staticCombobox": function(e) {
     var items = [];
     /*
      * Changes from the original 1:
@@ -72,4 +72,4 @@ Behaviour.specify("SELECT.staticCombobox", 'staticCombobox', 0, function(e) {
         }
         this.comboBox.valueChanged();
     }
-});
+}});
