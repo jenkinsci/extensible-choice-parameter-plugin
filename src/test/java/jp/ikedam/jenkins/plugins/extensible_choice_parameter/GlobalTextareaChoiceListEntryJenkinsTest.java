@@ -21,7 +21,7 @@ public class GlobalTextareaChoiceListEntryJenkinsTest extends HudsonTestCase
     /**
      * Good inputs for name.
      */
-    public void testDoCheckNameOk()
+    public void testDescriptorDoCheckNameOk()
     {
         GlobalTextareaChoiceListEntry.DescriptorImpl descriptor = getDescriptor();
         
@@ -50,7 +50,7 @@ public class GlobalTextareaChoiceListEntryJenkinsTest extends HudsonTestCase
     /**
      * Bad inputs for name.
      */
-    public void testDoCheckNameError()
+    public void testDescriptorDoCheckNameError()
     {
         GlobalTextareaChoiceListEntry.DescriptorImpl descriptor = getDescriptor();
         
