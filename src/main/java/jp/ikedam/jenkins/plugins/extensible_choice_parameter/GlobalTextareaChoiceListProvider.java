@@ -77,7 +77,7 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
             // (Jenkins framework seems not to forbid the submission,
             // even if form validations alert errors...)
             // retrieve only valid (correctly configured) entries
-            this.choiceListEntryList = 
+            this.choiceListEntryList = (choiceListEntryList == null)?new ArrayList<GlobalTextareaChoiceListEntry>(0):
                 (List<GlobalTextareaChoiceListEntry>)CollectionUtils.select(
                         choiceListEntryList,
                         new Predicate()
@@ -113,6 +113,9 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
         
         /**
          * Retrieve the set of choices entry by the name.
+         * 
+         * If multiple candidates exists, returns the first one. 
+         * 
          * @param name
          * @return the set of choices.
          */
@@ -130,8 +133,11 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
         
         /**
          * Retrieve the set of choices entry by the name.
+         * 
+         * if no entry matches, return empty list.
+         * 
          * @param name
-         * @return the list of choices.
+         * @return the list of choices. never null.
          */
         public List<String> getChoiceList(String name)
         {
