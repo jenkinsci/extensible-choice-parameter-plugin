@@ -82,10 +82,12 @@ public class TextareaStringListUtility
     public static String textareaFromStringList(List<String> stringList)
     {
         StringBuffer sb = new StringBuffer();
-        for(String s: stringList)
-        {
-            sb.append(s);
-            sb.append('\n');
+        if(stringList != null){
+            for(String s: stringList)
+            {
+                sb.append(s);
+                sb.append('\n');
+            }
         }
         return sb.toString();
     }
