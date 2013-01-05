@@ -3,7 +3,7 @@ Extension Choice Parameter plugin
 
 Japanese version of this document is README_ja.md
 
-Jenkins plugin to define choice build parameters whose choices can be provided in many ways.
+Jenkins plugin to define choice build parameters where the way to provide choices can be extended.
 
 What's this?
 ------------
