@@ -30,7 +30,5 @@ abstract public List<String> ChoiceListProvider::getChoiceList()
 TODO
 ----
 
-* Write tests.
-* Write comments in English (that is, Englishize)
 * [Releasing a Plugin and Hosting a Plugin on jenkins-ci.org] (https://wiki.jenkins-ci.org/display/JENKINS/Hosting+Plugins)
 

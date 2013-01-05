@@ -28,7 +28,5 @@ abstract public List<String> ChoiceListProvider::getChoiceList()
 TODO
 ----
 
-* テストを書く
-* コメントを英語化する
 * [jenkins-ci.orgでプラグインを公開する] (https://wiki.jenkins-ci.org/display/JENKINS/Hosting+Plugins)
 
