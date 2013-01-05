@@ -33,7 +33,7 @@ import hudson.model.AbstractDescribableImpl;
 /**
  * The abstract base class of modules provides choices.
  * 
- * Create a new choice provider in following stes:
+ * Create a new choice provider in following steps:
  * <ol>
  *    <li>Define a new class derived from ChoiceListProvider</li>
  *    <li>Override getChoiceList(), which returns the choices.</li>
