@@ -8,23 +8,17 @@
   
   <groupId>jp.ikedam.jenkins.plugins</groupId>
   <artifactId>extensible-choice-parameter</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>Extensible Choice Parameter plugin</name>
   <description>Jenkins plugin to define choice build parameters where the way to provide choices can be extended.</description>
   
-  <url>http://dev.ikedam.jp/jenkins/extensible-choice-parameter/</url>
-  <!-- TODO: replace with the URL in wiki.jenkins-ci.org
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Extensible+Choice+Parameter+Plugin</url>
-  -->
+  <url>https://wiki.jenkins-ci.org/display/JENKINS/Extensible+Choice+Parameter+plugin</url>
   
-  <!--  TODO: activate here after the git repository is created.
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
+    <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
   </scm>
-  -->
   
   <developers>
     <developer>
@@ -53,6 +47,17 @@
       <version>[1.0,]</version>
     </dependency>
   </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <goals>deploy</goals>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
