@@ -34,7 +34,7 @@ public class GlobalTextareaChoiceListProviderSimpleTest extends TestCase
     public void testGlobalTextareaChoiceListProvider()
     {
         String name = "abc";
-        GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name);
+        GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, null);
         assertEquals("Basic test of passing name to GlobalTextareaChoiceListProvider()", name, target.getName());
     }
 }

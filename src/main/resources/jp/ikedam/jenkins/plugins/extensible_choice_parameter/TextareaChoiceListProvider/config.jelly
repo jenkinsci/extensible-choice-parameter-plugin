@@ -25,4 +25,7 @@ THE SOFTWARE.
     <f:entry title="${%Choices}" field="choiceListText" help="/help/parameter/choice-choices.html">
         <f:textarea />
     </f:entry>
+    <f:entry title="${%Default Choice}">
+        <f:select field="defaultChoice" />
+    </f:entry>
 </j:jelly>

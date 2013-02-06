@@ -34,6 +34,7 @@ import hudson.util.ListBoxModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import net.sf.json.JSONObject;
@@ -44,7 +45,8 @@ import net.sf.json.JSONObject;
  */
 public class GlobalTextareaChoiceListProvider extends ChoiceListProvider implements Serializable
 {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
+    private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
     
     /**
      * The internal class to work with views.
@@ -134,6 +136,20 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
             return m;
         }
         
+        public ListBoxModel doFillDefaultChoiceItems(@QueryParameter String name)
+        {
+            ListBoxModel ret = new ListBoxModel();
+            ret.add(Messages.ExtensibleChoiceParameterDefinition_NoDefaultChoice(), NoDefaultChoice);
+            
+            List<String> choices = getChoiceList(name);
+            
+            for(String choice: choices)
+            {
+                ret.add(choice);
+            }
+            return ret;
+        }
+        
         /**
          * Retrieve the set of choices entry by the name.
          * 
@@ -212,6 +228,20 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
         return name;
     }
     
+    private String defaultChoice = null;
+    
+    /**
+     * Returns the default choice.
+     * 
+     * @return the default choice
+     * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.ChoiceListProvider#getDefaultChoice()
+     */
+    @Override
+    public String getDefaultChoice()
+    {
+        return defaultChoice;
+    }
+    
     /**
      * Returns the choices available as a parameter value. 
      * 
@@ -232,11 +262,13 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
      * and no constructor is used.
      * 
      * @param name the name of the set of choices.
+     * @param defaultChoice the initial selected value.
      */
     @DataBoundConstructor
-    public GlobalTextareaChoiceListProvider(String name)
+    public GlobalTextareaChoiceListProvider(String name, String defaultChoice)
     {
         // No validation is performed, for the name is selected from the dropdown.
         this.name = name;
+        this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
     }
 }

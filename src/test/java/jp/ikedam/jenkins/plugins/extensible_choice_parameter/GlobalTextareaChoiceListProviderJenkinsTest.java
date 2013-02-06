@@ -43,7 +43,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
 {
     private GlobalTextareaChoiceListProvider.DescriptorImpl getDescriptor()
     {
-        return (GlobalTextareaChoiceListProvider.DescriptorImpl)(new GlobalTextareaChoiceListProvider("test")).getDescriptor();
+        return (GlobalTextareaChoiceListProvider.DescriptorImpl)(new GlobalTextareaChoiceListProvider("test", null)).getDescriptor();
         //return new GlobalTextareaChoiceListProvider.DescriptorImpl();
     }
     

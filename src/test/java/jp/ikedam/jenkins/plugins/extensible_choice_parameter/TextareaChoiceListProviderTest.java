@@ -36,7 +36,7 @@ public class TextareaChoiceListProviderTest extends TestCase
     {
         // complete tests are done in TextareaStringListUtilityTest.
         String choiceListText = "a\nb\nc\n";
-        TextareaChoiceListProvider target = new TextareaChoiceListProvider(choiceListText);
+        TextareaChoiceListProvider target = new TextareaChoiceListProvider(choiceListText, null);
         assertEquals(
                 "Basic test of choiceListText in TextareaChoiceListProvider()",
                 Arrays.asList("a", "b", "c"),

@@ -219,7 +219,8 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     /**
      * Returns the default value of this parameter.
      * 
-     * The first value in the choice is used.
+     * If not specified by the provider, 
+     * the first value in the choice is used.
      * returns null if no choice list is defined.
      * 
      * @return the default value of this parameter.
@@ -228,6 +229,12 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @Override
     public ParameterValue getDefaultParameterValue()
     {
+        String defaultChoice = getChoiceListProvider().getDefaultChoice();
+        if(defaultChoice != null)
+        {
+            return createValue(defaultChoice);
+        }
+        
         List<String> choiceList = getChoiceList();
         return (choiceList.size() <= 0)?null:
             new StringParameterValue(

@@ -51,6 +51,18 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
     abstract public List<String> getChoiceList();
     
     /**
+     * Returns the default choice value.
+     * 
+     * null indicates the first one is the default value.
+     * 
+     * @return the default choice value.
+     */
+    public String getDefaultChoice()
+    {
+        return null;
+    }
+    
+    /**
      * Returns all the ChoiceListProvider subclass whose DescriptorImpl is annotated with Extension.
      * @return DescriptorExtensionList of ChoiceListProvider subclasses.
      */

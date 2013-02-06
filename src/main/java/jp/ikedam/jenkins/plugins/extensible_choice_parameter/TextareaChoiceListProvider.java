@@ -30,15 +30,18 @@ import jp.ikedam.jenkins.plugins.extensible_choice_parameter.utility.TextareaStr
 
 import hudson.Extension;
 import hudson.model.Descriptor;
+import hudson.util.ListBoxModel;
 
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 /**
  * A choice provider whose choices are defined as a text, like the build-in choice parameter.
  */
 public class TextareaChoiceListProvider extends ChoiceListProvider implements Serializable
 {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
+    private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
     
     /**
      * The internal class to work with views.
@@ -65,6 +68,25 @@ public class TextareaChoiceListProvider extends ChoiceListProvider implements Se
         public String getDisplayName()
         {
             return Messages._TextareaChoiceListProvider_DisplayName().toString();
+        }
+        
+        /**
+         * Returns the selection of a default choice.
+         * 
+         * @param choiceListText
+         * @return the selection of a default choice
+         */
+        public ListBoxModel doFillDefaultChoiceItems(@QueryParameter String choiceListText)
+        {
+            ListBoxModel ret = new ListBoxModel();
+            ret.add(Messages.ExtensibleChoiceParameterDefinition_NoDefaultChoice(), NoDefaultChoice);
+            
+            List<String> choices = TextareaStringListUtility.stringListFromTextarea(choiceListText);
+            for(String choice: choices)
+            {
+                ret.add(choice);
+            }
+            return ret;
         }
     }
     
@@ -94,6 +116,20 @@ public class TextareaChoiceListProvider extends ChoiceListProvider implements Se
         return TextareaStringListUtility.textareaFromStringList(getChoiceList());
     }
     
+    private String defaultChoice = null;
+    
+    /**
+     * Returns the default choice.
+     * 
+     * @return the default choice
+     * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.ChoiceListProvider#getDefaultChoice()
+     */
+    @Override
+    public String getDefaultChoice()
+    {
+        return defaultChoice;
+    }
+    
     /**
      * Constructor instantiating with parameters in the configuration page.
      * 
@@ -104,8 +140,9 @@ public class TextareaChoiceListProvider extends ChoiceListProvider implements Se
      * @param choiceListText the text where choices are written in each line.
      */
     @DataBoundConstructor
-    public TextareaChoiceListProvider(String choiceListText)
+    public TextareaChoiceListProvider(String choiceListText, String defaultChoice)
     {
         this.choiceList = TextareaStringListUtility.stringListFromTextarea(choiceListText);
+        this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
     }
 }
