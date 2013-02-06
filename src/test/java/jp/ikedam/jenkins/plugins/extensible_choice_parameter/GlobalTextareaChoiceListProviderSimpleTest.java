@@ -31,10 +31,43 @@ import junit.framework.TestCase;
  */
 public class GlobalTextareaChoiceListProviderSimpleTest extends TestCase
 {
-    public void testGlobalTextareaChoiceListProvider()
+    public void testGlobalTextareaChoiceListProvider_name()
     {
         String name = "abc";
         GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, null);
         assertEquals("Basic test of passing name to GlobalTextareaChoiceListProvider()", name, target.getName());
+    }
+    
+    public void testGlobalTextareaChoiceListProvider_defaultChoice()
+    {
+        String name = "abc";
+        
+        // a value
+        {
+            String defaultChoice = "some value";
+            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice);
+            assertEquals("a value", defaultChoice, target.getDefaultChoice());
+        }
+        
+        // null
+        {
+            String defaultChoice = null;
+            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice);
+            assertEquals("null", defaultChoice, target.getDefaultChoice());
+        }
+        
+        // empty
+        {
+            String defaultChoice = "";
+            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice);
+            assertEquals("empty", defaultChoice, target.getDefaultChoice());
+        }
+        
+        // blank
+        {
+            String defaultChoice = "  ";
+            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice);
+            assertEquals("blank", defaultChoice, target.getDefaultChoice());
+        }
     }
 }

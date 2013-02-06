@@ -229,7 +229,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @Override
     public ParameterValue getDefaultParameterValue()
     {
-        String defaultChoice = getChoiceListProvider().getDefaultChoice();
+        String defaultChoice = (getChoiceListProvider() != null)?getChoiceListProvider().getDefaultChoice():null;
         if(defaultChoice != null)
         {
             return createValue(defaultChoice);

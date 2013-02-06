@@ -43,4 +43,47 @@ public class TextareaChoiceListProviderTest extends TestCase
                 target.getChoiceList()
         );
     }
+    
+    public void testTextareaChoiceListProvider_defaultChoice()
+    {
+        // a value
+        {
+            String defaultChoice = "b";
+            TextareaChoiceListProvider target = new TextareaChoiceListProvider(
+                    "a\nb\nc",
+                    defaultChoice
+            );
+            assertEquals("a value", defaultChoice, target.getDefaultChoice());
+        }
+        
+        // null
+        {
+            String defaultChoice = null;
+            TextareaChoiceListProvider target = new TextareaChoiceListProvider(
+                    "a\nb\nc",
+                    defaultChoice
+            );
+            assertEquals("null", defaultChoice, target.getDefaultChoice());
+        }
+        
+        // empty
+        {
+            String defaultChoice = "";
+            TextareaChoiceListProvider target = new TextareaChoiceListProvider(
+                    "a\nb\nc",
+                    defaultChoice
+            );
+            assertEquals("empty", defaultChoice, target.getDefaultChoice());
+        }
+        
+        // blank
+        {
+            String defaultChoice = "   ";
+            TextareaChoiceListProvider target = new TextareaChoiceListProvider(
+                    "a\nb\nc",
+                    defaultChoice
+            );
+            assertEquals("blank", defaultChoice, target.getDefaultChoice());
+        }
+    }
 }

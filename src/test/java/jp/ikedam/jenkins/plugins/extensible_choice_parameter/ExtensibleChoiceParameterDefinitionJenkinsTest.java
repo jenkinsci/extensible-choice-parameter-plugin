@@ -23,11 +23,15 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import hudson.EnvVars;
+import hudson.model.FreeStyleBuild;
+import hudson.model.Result;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParametersDefinitionProperty;
@@ -114,8 +118,10 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
     private static class MockChoiceListProvider extends ChoiceListProvider
     {
         private List<String> choiceList = null;
-        public MockChoiceListProvider(List<String> choiceList){
+        private String defaultChoice = null;
+        public MockChoiceListProvider(List<String> choiceList, String defaultChoice){
             this.choiceList = choiceList;
+            this.defaultChoice = defaultChoice;
         }
         @Override
         public List<String> getChoiceList()
@@ -123,6 +129,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
             return choiceList;
         }
         
+        @Override
+        public String getDefaultChoice()
+        {
+            return defaultChoice;
+        }
     }
     
     /**
@@ -208,7 +219,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
     {
         String name = "PARAM1";
         String description = "Some Text";
-        ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"));
+        ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), null);
         
         // select with editable
         {
@@ -298,7 +309,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(
                             name,
-                            new MockChoiceListProvider(new ArrayList<String>(0)),
+                            new MockChoiceListProvider(new ArrayList<String>(0), null),
                             true,
                             description
                     ),
@@ -314,7 +325,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
                 EnvVars envVars = runBuildWithSelectParameter(
                         new ExtensibleChoiceParameterDefinition(
                                 name,
-                                new MockChoiceListProvider(new ArrayList<String>(0)),
+                                new MockChoiceListProvider(new ArrayList<String>(0), null),
                                 false,
                                 description
                         ),
@@ -390,7 +401,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(
                             name,
-                            new MockChoiceListProvider(null),
+                            new MockChoiceListProvider(null, null),
                             true,
                             description
                     ),
@@ -406,7 +417,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
                 EnvVars envVars = runBuildWithSelectParameter(
                         new ExtensibleChoiceParameterDefinition(
                                 name,
-                                new MockChoiceListProvider(null),
+                                new MockChoiceListProvider(null, null),
                                 false,
                                 description
                         ),
@@ -418,6 +429,107 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
             catch(Exception e)
             {
                 assertIllegalChoice("provider returns null non-editable", e);
+            }
+        }
+    }
+    
+    public void testGetDefaultParameterValue() throws IOException, InterruptedException, ExecutionException
+    {
+        // editable, in choice
+        {
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value2");
+            ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+                    "test",
+                    provider,
+                    true,
+                    "description"
+                    );
+            FreeStyleProject job = createFreeStyleProject();
+            job.addProperty(new ParametersDefinitionProperty(def));
+            CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
+            job.getBuildersList().add(ceb);
+            job.save();
+            
+            FreeStyleBuild b = job.scheduleBuild2(job.getQuietPeriod()).get();
+            while(b.isBuilding())
+            {
+                Thread.sleep(100);
+            }
+            assertEquals("editable, in choice", Result.SUCCESS, b.getResult());
+            assertEquals("editable, in choice", "value2", ceb.getEnvVars().get("test"));
+        }
+        
+        
+        // non-editable, in choice
+        {
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value2");
+            ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+                    "test",
+                    provider,
+                    false,
+                    "description"
+                    );
+            FreeStyleProject job = createFreeStyleProject();
+            job.addProperty(new ParametersDefinitionProperty(def));
+            CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
+            job.getBuildersList().add(ceb);
+            job.save();
+            
+            FreeStyleBuild b = job.scheduleBuild2(job.getQuietPeriod()).get();
+            while(b.isBuilding())
+            {
+                Thread.sleep(100);
+            }
+            assertEquals("non-editable, in choice", Result.SUCCESS, b.getResult());
+            assertEquals("non-editable, in choice", "value2", ceb.getEnvVars().get("test"));
+        }
+        
+        // editable, not in choice
+        {
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value4");
+            ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+                    "test",
+                    provider,
+                    true,
+                    "description"
+                    );
+            FreeStyleProject job = createFreeStyleProject();
+            job.addProperty(new ParametersDefinitionProperty(def));
+            CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
+            job.getBuildersList().add(ceb);
+            job.save();
+            
+            FreeStyleBuild b = job.scheduleBuild2(job.getQuietPeriod()).get();
+            while(b.isBuilding())
+            {
+                Thread.sleep(100);
+            }
+            assertEquals("editable, not in choice", Result.SUCCESS, b.getResult());
+            assertEquals("editable, not in choice", "value4", ceb.getEnvVars().get("test"));
+        }
+        
+        // non-editable, not in choice
+        {
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value4");
+            ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+                    "test",
+                    provider,
+                    false,
+                    "description"
+                    );
+            FreeStyleProject job = createFreeStyleProject();
+            job.addProperty(new ParametersDefinitionProperty(def));
+            CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
+            job.getBuildersList().add(ceb);
+            job.save();
+            
+            try{
+                job.scheduleBuild2(job.getQuietPeriod()).get();
+                assertTrue("not reachable", false);
+            }
+            catch(IllegalArgumentException e)
+            {
+                assertTrue("non-editable, not in choice", true);
             }
         }
     }

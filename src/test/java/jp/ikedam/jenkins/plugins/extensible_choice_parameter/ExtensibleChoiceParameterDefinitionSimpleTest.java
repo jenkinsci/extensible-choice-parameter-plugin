@@ -203,13 +203,21 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
     private static class MockChoiceListProvider extends ChoiceListProvider
     {
         private List<String> choiceList = null;
-        public MockChoiceListProvider(List<String> choiceList){
+        private String defaultChoice = null;
+        public MockChoiceListProvider(List<String> choiceList, String defaultChoice){
             this.choiceList = choiceList;
+            this.defaultChoice = defaultChoice;
         }
         @Override
         public List<String> getChoiceList()
         {
             return choiceList;
+        }
+        
+        @Override
+        public String getDefaultChoice()
+        {
+            return defaultChoice;
         }
         
     }
@@ -219,7 +227,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
     {
         String name = "name";
         String description = "Some text";
-        ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"));
+        ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), null);
         
         // select with editable
         {
@@ -319,7 +327,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name,
-                    new MockChoiceListProvider(new ArrayList<String>(0)),
+                    new MockChoiceListProvider(new ArrayList<String>(0), null),
                     false,
                     description
             );
@@ -336,7 +344,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name,
-                    new MockChoiceListProvider(new ArrayList<String>(0)),
+                    new MockChoiceListProvider(new ArrayList<String>(0), null),
                     true,
                     description
             );
@@ -348,7 +356,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name,
-                    new MockChoiceListProvider(null),
+                    new MockChoiceListProvider(null, null),
                     false,
                     description
             );
@@ -365,7 +373,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name,
-                    new MockChoiceListProvider(null),
+                    new MockChoiceListProvider(null, null),
                     true,
                     description
             );
@@ -374,11 +382,11 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         }
     }
     
-    public void testGetDefaultParameterValue()
+    public void testGetDefaultParameterValue_NoDefaultChoice()
     {
         String name = "name";
         String description = "Some text";
-        ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"));
+        ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), null);
         String firstValue = "value1";
         
         // Editable
@@ -429,7 +437,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name,
-                    new MockChoiceListProvider(new ArrayList<String>(0)),
+                    new MockChoiceListProvider(new ArrayList<String>(0), null),
                     false,
                     description
             );
@@ -440,7 +448,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name,
-                    new MockChoiceListProvider(new ArrayList<String>(0)),
+                    new MockChoiceListProvider(new ArrayList<String>(0), null),
                     true,
                     description
             );
@@ -451,7 +459,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name,
-                    new MockChoiceListProvider(null),
+                    new MockChoiceListProvider(null, null),
                     false,
                     description
             );
@@ -462,11 +470,151 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name,
-                    new MockChoiceListProvider(null),
+                    new MockChoiceListProvider(null, null),
                     true,
                     description
             );
             assertEquals("provider returns null and editable", null, target.getDefaultParameterValue());
+        }
+    }
+    
+    public void testGetDefaultParameterValue_SpecifiedDefaultChoice()
+    {
+        String name = "name";
+        String description = "Some text";
+        
+        // Editable, in choices
+        {
+            String defaultChoice = "value2";
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), defaultChoice);
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    provider,
+                    true,
+                    description
+            );
+            assertEquals("Editable, in choices", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
+        }
+        
+        // Non-editable, in choices
+        {
+            String defaultChoice = "value2";
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), defaultChoice);
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    provider,
+                    false,
+                    description
+            );
+            assertEquals("Non-Editable, in choices", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
+        }
+        
+        // Editable, in choices, the first
+        {
+            String defaultChoice = "value1";
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), defaultChoice);
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    provider,
+                    true,
+                    description
+            );
+            assertEquals("Editable, in choices, the first", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
+        }
+        
+        // Non-editable, in choices, the first
+        {
+            String defaultChoice = "value1";
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), defaultChoice);
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    provider,
+                    false,
+                    description
+            );
+            assertEquals("Non-Editable, in choices, the first", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
+        }
+        
+        // Editable, in choices, the last
+        {
+            String defaultChoice = "value3";
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), defaultChoice);
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    provider,
+                    true,
+                    description
+            );
+            assertEquals("Editable, in choices, the last", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
+        }
+        
+        // Non-editable, in choices, the last
+        {
+            String defaultChoice = "value3";
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), defaultChoice);
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    provider,
+                    false,
+                    description
+            );
+            assertEquals("Non-Editable, in choices, the last", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
+        }
+        
+        // Editable, not in choices
+        {
+            String defaultChoice = "value4";
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), defaultChoice);
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    provider,
+                    true,
+                    description
+            );
+            assertEquals("Editable, in choices", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
+        }
+        
+        // Non-editable, not in choices
+        {
+            String defaultChoice = "value4";
+            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), defaultChoice);
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    provider,
+                    false,
+                    description
+            );
+            try
+            {
+                assertEquals("Non-Editable, not in choices", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
+                assertTrue("Not reachable", false);
+            }
+            catch(IllegalArgumentException e)
+            {
+                assertTrue("Non-Editable, not in choices", true);
+            }
+        }
+        
+        // no choice is provided and non-editable. returns null.
+        {
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    new MockChoiceListProvider(new ArrayList<String>(0), null),
+                    false,
+                    description
+            );
+            assertEquals("no choice is provided and non-editable", null, target.getDefaultParameterValue());
+        }
+        
+        // no choice is provided and editable. returns null.
+        {
+            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
+                    name,
+                    new MockChoiceListProvider(new ArrayList<String>(0), null),
+                    true,
+                    description
+            );
+            assertEquals("no choice is provided and editable", null, target.getDefaultParameterValue());
         }
     }
 }
