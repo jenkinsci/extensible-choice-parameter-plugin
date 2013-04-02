@@ -121,9 +121,17 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
             new GroovyShell(cl, new Binding(), compilerConfig);
 
         Object out = shell.evaluate(scriptText);
-        
-        // TODO: Check that return type is List<String>!
-        // TODO: Handle script execution errors
+        if  (!(out instanceof List<?>)) {
+        	throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
+        }
+        else {
+        	List<?> strings = (List<?>) out;
+        	for (Object obj : strings) {
+        		if (!(obj instanceof String)) {
+                	throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
+        		}
+        	}
+        }
 
         return (List<String>) out;    	
     }
