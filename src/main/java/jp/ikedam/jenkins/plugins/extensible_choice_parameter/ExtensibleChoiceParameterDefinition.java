@@ -177,6 +177,24 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     }
     
     /**
+     * Test passed ParameterValue and return.
+     * 
+     * Common processing of createValue
+     * 
+     * @param value a value to test.
+     * @return a value tested. same with value.
+     */
+    protected ParameterValue createValueCommon(StringParameterValue value)
+    {
+        if(!isEditable() && !getChoiceList().contains(value.value))
+        {
+            // Something strange!: Not editable and specified a value not in the choices.
+            throw new IllegalArgumentException("Illegal choice: " + value.value);
+        }
+        return value;
+    }
+    
+    /**
      * Decide a value of this parameter from the user input.
      * 
      * @param request
@@ -189,12 +207,8 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     {
         StringParameterValue value = request.bindJSON(StringParameterValue.class, jo);
         value.setDescription(getDescription());
-        if(!isEditable() && !getChoiceList().contains(value.value))
-        {
-            // Something strange!: Not editable and specified a value not in the choices.
-            throw new IllegalArgumentException("Illegal choice: " + value.value);
-        }
-        return value;
+        
+        return createValueCommon(value);
     }
     
     /**
@@ -208,12 +222,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @Override
     public ParameterValue createValue(String value) throws IllegalArgumentException
     {
-        if(!isEditable() && !getChoiceList().contains(value))
-        {
-            // Something strange!: Not editable and specified a value not in the choices.
-            throw new IllegalArgumentException("Illegal choice: " + value);
-        }
-        return new StringParameterValue(getName(), value, getDescription());
+        return createValueCommon(new StringParameterValue(getName(), value, getDescription()));
     }
     
     /**
