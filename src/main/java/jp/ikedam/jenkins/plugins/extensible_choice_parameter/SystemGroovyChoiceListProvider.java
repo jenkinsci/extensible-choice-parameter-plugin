@@ -102,7 +102,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
     @Override
     public List<String> getChoiceList()
     {
-    	output = runScript(scriptText);
+        output = runScript(scriptText);
         
         return output;
     }
@@ -122,18 +122,18 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
 
         Object out = shell.evaluate(scriptText);
         if  (!(out instanceof List<?>)) {
-        	throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
+            throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
         }
         else {
-        	List<?> strings = (List<?>) out;
-        	for (Object obj : strings) {
-        		if (!(obj instanceof String)) {
-                	throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
-        		}
-        	}
+            List<?> strings = (List<?>) out;
+            for (Object obj : strings) {
+                if (!(obj instanceof String)) {
+                    throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
+                }
+            }
         }
 
-        return (List<String>) out;    	
+        return (List<String>) out;
     }
     private String scriptText;
 
