@@ -27,11 +27,12 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.Extension;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
 import hudson.util.ListBoxModel;
 
 import java.io.Serializable;
 import java.util.List;
+
+import jenkins.model.Jenkins;
 
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -44,7 +45,6 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
 {
     private static final long serialVersionUID = 2L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
-    private transient List<String> output;
     
     /**
      * The internal class to work with views.
@@ -102,16 +102,15 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
     @Override
     public List<String> getChoiceList()
     {
-        output = runScript(scriptText);
-        
-        return output;
+        return runScript(getScriptText());
     }
 
+    @SuppressWarnings("unchecked")
     private static List<String> runScript(String scriptText) {
         CompilerConfiguration compilerConfig = new CompilerConfiguration();
 
         // see RemotingDiagnostics.Script
-        ClassLoader cl = Hudson.getInstance().getPluginManager().uberClassLoader;
+        ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
 
         if (cl == null) {
             cl = Thread.currentThread().getContextClassLoader();
