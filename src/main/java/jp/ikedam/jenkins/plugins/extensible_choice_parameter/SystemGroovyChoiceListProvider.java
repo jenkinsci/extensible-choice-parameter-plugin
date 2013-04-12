@@ -30,7 +30,10 @@ import hudson.model.Descriptor;
 import hudson.util.ListBoxModel;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
 
@@ -39,12 +42,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 /**
- * A choice provider whose choices are determined by a Groovy scipt.
+ * A choice provider whose choices are determined by a Groovy script.
  */
 public class SystemGroovyChoiceListProvider extends ChoiceListProvider implements Serializable
 {
     private static final long serialVersionUID = 2L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
+    private static final Logger LOGGER = Logger.getLogger(SystemGroovyChoiceListProvider.class.getName());
     
     /**
      * The internal class to work with views.
@@ -84,11 +88,24 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
             ListBoxModel ret = new ListBoxModel();
             ret.add(Messages.ExtensibleChoiceParameterDefinition_NoDefaultChoice(), NoDefaultChoice);
             
-            List<String> choices = runScript(scriptText);
-            for(String choice: choices)
+            List<String> choices = null;
+            try
             {
-                ret.add(choice);
+                choices = runScript(scriptText);
             }
+            catch(Exception e)
+            {
+                LOGGER.log(Level.WARNING, "Failed to execute script", e);
+            }
+            
+            if(choices != null)
+            {
+                for(String choice: choices)
+                {
+                    ret.add(choice);
+                }
+            }
+            
             return ret;
         }
     }
@@ -102,7 +119,16 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
     @Override
     public List<String> getChoiceList()
     {
-        return runScript(getScriptText());
+        List<String> ret = null;
+        try
+        {
+            ret = runScript(getScriptText());
+        }
+        catch(Exception e)
+        {
+            LOGGER.log(Level.WARNING, "Failed to execute script", e);
+        }
+        return (ret != null)?ret:new ArrayList<String>(0);
     }
 
     @SuppressWarnings("unchecked")
@@ -120,6 +146,11 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
             new GroovyShell(cl, new Binding(), compilerConfig);
 
         Object out = shell.evaluate(scriptText);
+        if(out == null)
+        {
+            return null;
+        }
+        
         if  (!(out instanceof List<?>)) {
             throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
         }
