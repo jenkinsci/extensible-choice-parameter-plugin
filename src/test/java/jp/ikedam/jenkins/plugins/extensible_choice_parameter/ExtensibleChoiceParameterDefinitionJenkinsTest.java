@@ -203,14 +203,6 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
         return ceb.getEnvVars();
     }
     
-    private static void assertIllegalChoice(String message, Exception e) throws Exception
-    {
-        assertTrue(message, e instanceof FailingHttpStatusCodeException);
-        if(!e.getMessage().startsWith("500 Illegal choice: ")){
-            throw e;
-        }
-    }
-    
     /**
      * test for createValue(StaplerRequest request, JSONObject jo)
      * @throws Exception 
@@ -282,9 +274,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
                 assertEquals("input with non-editable", value, envVars.get(name));
                 assertTrue("This code would not be reached.", false);
             }
-            catch(Exception e)
+            catch(FailingHttpStatusCodeException e)
             {
-                assertIllegalChoice("input with non-editable", e);
+                assertEquals("Failed with unexpected status code", 500, e.getStatusCode());
             }
         }
         
@@ -334,9 +326,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
                 assertEquals("no choice is provided and non-editable", value, envVars.get(name));
                 assertTrue("This code would not be reached.", false);
             }
-            catch(Exception e)
+            catch(FailingHttpStatusCodeException e)
             {
-                assertIllegalChoice("no choice is provided and non-editable", e);
+                assertEquals("Failed with unexpected status code", 500, e.getStatusCode());
             }
         }
     }
@@ -388,9 +380,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
                 assertEquals("provider is null and non-editable", value, envVars.get(name));
                 assertTrue("This code would not be reached.", false);
             }
-            catch(Exception e)
+            catch(FailingHttpStatusCodeException e)
             {
-                assertIllegalChoice("provider is null and non-editable", e);
+                assertEquals("Failed with unexpected status code", 500, e.getStatusCode());
             }
         }
         
@@ -426,9 +418,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
                 assertEquals("provider returns null non-editable", value, envVars.get(name));
                 assertTrue("This code would not be reached.", false);
             }
-            catch(Exception e)
+            catch(FailingHttpStatusCodeException e)
             {
-                assertIllegalChoice("provider returns null non-editable", e);
+                assertEquals("Failed with unexpected status code", 500, e.getStatusCode());
             }
         }
     }
