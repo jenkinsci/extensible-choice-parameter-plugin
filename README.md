@@ -28,8 +28,3 @@ A new way to provide choices can be added with extending `ChoiceListProvider`, o
 abstract public List<String> ChoiceListProvider::getChoiceList()
 ```
 
-TODO
-----
-
-* [Releasing a Plugin and Hosting a Plugin on jenkins-ci.org] (https://wiki.jenkins-ci.org/display/JENKINS/Hosting+Plugins)
-
