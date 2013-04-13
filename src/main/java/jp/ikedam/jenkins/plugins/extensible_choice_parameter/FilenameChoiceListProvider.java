@@ -45,10 +45,17 @@ import org.kohsuke.stapler.QueryParameter;
 /**
  * Create a choice list from a list of files.
  */
+/**
+ * @author yasuke
+ *
+ */
 public class FilenameChoiceListProvider extends ChoiceListProvider implements Serializable
 {
     private static final long serialVersionUID = 1329937323978223039L;
     
+    /**
+     * A type specifying what type of files to scan to list.
+     */
     public enum ScanType
     {
         File(Messages._FilenameChoiceListProvider_ScanType_File()),
@@ -72,6 +79,11 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
     private String baseDirPath;
     
     /**
+     * Returns a path to a directory to scan for files.
+     * 
+     * If this path is absolute, it is used as specified.
+     * If this path is relative, it is considered relative from JENKINS_HOME.
+     * 
      * @return the baseDirPath
      */
     public String getBaseDirPath()
@@ -79,6 +91,14 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
         return baseDirPath;
     }
     
+    /**
+     * Returns a directory to scan for files from the passed path.
+     * 
+     * Whether the path is relative or absolute, is resolved here.
+     * 
+     * @param baseDirPath a path string to the directory.
+     * @return A file object specifying the proper path of the directory.
+     */
     protected static File getBaseDir(String baseDirPath)
     {
         File rawDir = new File(baseDirPath);
@@ -90,6 +110,11 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
         return new File(Jenkins.getInstance().getRootDir(), baseDirPath);
     }
     
+    /**
+     * Returns a directory to scan for files.
+     * 
+     * @return A file object specifying the proper path to the directory to scan.
+     */
     protected File getBaseDir()
     {
         return getBaseDir(getBaseDirPath());
@@ -98,7 +123,9 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
     private String includePattern;
     
     /**
-     * @return the includePattern
+     * Returns a pattern for files to include.
+     * 
+     * @return the include pattern
      */
     public String getIncludePattern()
     {
@@ -109,7 +136,9 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
     private ScanType scanType;
     
     /**
-     * @return the scanType
+     * Returns what type of files to list.
+     * 
+     * @return what type of files to list
      */
     public ScanType getScanType()
     {
@@ -117,8 +146,12 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
     }
     
     
+    private String excludePattern;
+    
     /**
-     * @return the excludePattern
+     * Returns a pattern for files to exclude.
+     * 
+     * @return the exclude pattern
      */
     public String getExcludePattern()
     {
@@ -126,8 +159,14 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
     }
     
     
-    private String excludePattern;
-    
+    /**
+     * The constructor called when a user posts a form.
+     * 
+     * @param baseDirPath a path to the directory to scan.
+     * @param includePattern a pattern of file names to include to the list.
+     * @param excludePattern a pattern of file names to exclude from the list.
+     * @param scanType a type of files to list.
+     */
     @DataBoundConstructor
     public FilenameChoiceListProvider(String baseDirPath, String includePattern, String excludePattern, ScanType scanType)
     {
@@ -138,6 +177,15 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
     }
     
     
+    /**
+     * List files from passed parameters.
+     * 
+     * @param baseDir
+     * @param includePattern
+     * @param excludePattern
+     * @param scanType
+     * @return
+     */
     protected static List<String> getFileList(
             File baseDir,
             String includePattern,
@@ -178,11 +226,14 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
         case Directory:
             return Arrays.asList(ds.getIncludedDirectories());
         default:
+            // case File:
             return Arrays.asList(ds.getIncludedFiles());
         }
     }
     
     /**
+     * Returns the list of choices to show.
+     * 
      * @return
      * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.ChoiceListProvider#getChoiceList()
      */
