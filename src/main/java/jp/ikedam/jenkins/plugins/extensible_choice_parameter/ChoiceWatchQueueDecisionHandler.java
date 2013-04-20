@@ -66,7 +66,7 @@ public class ChoiceWatchQueueDecisionHandler extends QueueDecisionHandler
      */
     protected void onQueueing(Task p, List<Action> actions)
     {
-        if(p instanceof AbstractProject<?, ?>)
+        if(!(p instanceof AbstractProject<?, ?>))
         {
             return;
         }
