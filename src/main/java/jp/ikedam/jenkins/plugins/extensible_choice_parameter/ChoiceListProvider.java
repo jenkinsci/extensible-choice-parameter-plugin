@@ -27,6 +27,8 @@ import java.util.List;
 import hudson.ExtensionPoint;
 import hudson.DescriptorExtensionList;
 import hudson.model.Hudson;
+import hudson.model.StringParameterValue;
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.AbstractDescribableImpl;
 
@@ -60,6 +62,23 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
     public String getDefaultChoice()
     {
         return null;
+    }
+    
+    /**
+     * Called when a build is triggered
+     * 
+     * Implementations can override this method, and do custom behavior.
+     * Default implementation do nothing at all.
+     * 
+     * @param job the job with which this choice provider is used.
+     * @param value the value specified.
+     */
+    public void onBuildTriggeredWithValue(
+            AbstractProject<?, ?> job,
+            StringParameterValue value
+    )
+    {
+        // Nothing to do.
     }
     
     /**
