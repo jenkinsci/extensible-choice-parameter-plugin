@@ -248,34 +248,92 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
        );
     }
     
+    /**
+     * Class for view.
+     */
     @Extension
     static public class DescriptorImpl extends Descriptor<ChoiceListProvider>
     {
+        /**
+         * Returns the name for displaying.
+         * 
+         * @return the name for displaying
+         */
         @Override
         public String getDisplayName()
         {
             return Messages.FilenameChoiceListProvider_DisplayName();
         }
         
+        /**
+         * Validate a value inputed for baseDirPath
+         * 
+         * Checks followings:
+         * * not blank
+         * * specified path exists
+         * * specified path is a directory.
+         * 
+         * @param baseDirPath
+         * @return FormValidation object
+         */
         public FormValidation doCheckBaseDirPath(@QueryParameter String baseDirPath)
         {
-            // TODO
+            if(StringUtils.isBlank(baseDirPath))
+            {
+                return FormValidation.error(Messages.FilenameChoiceListProvider_BaseDirPath_empty());
+            }
+            
+            File baseDir = getBaseDir(baseDirPath);
+            if(!baseDir.exists() || !baseDir.isDirectory())
+            {
+                return FormValidation.warning(Messages.FilenameChoiceListProvider_BaseDirPath_empty());
+            }
+            
             return FormValidation.ok();
         }
         
+        /**
+         * Validate a value inputed for includePattern
+         * 
+         * Checks followings:
+         * * not blank
+         * 
+         * @param includePattern
+         * @return FormValidation object
+         */
         public FormValidation doCheckIncludePattern(@QueryParameter String includePattern)
         {
-            // TODO
+            if(StringUtils.isBlank(includePattern))
+            {
+                return FormValidation.error(Messages.FilenameChoiceListProvider_IncludePattern_empty());
+            }
+            
             return FormValidation.ok();
         }
         
         
+        /**
+         * Validate a value inputed for excludePattern
+         * 
+         * always ok.
+         * 
+         * @param excludePattern
+         * @return FormValidation object
+         */
         public FormValidation doCheckExcludePattern(@QueryParameter String excludePattern)
         {
-            // TODO
             return FormValidation.ok();
         }
         
+        /**
+         * Test what files will be listed.
+         * 
+         * @param baseDirPath
+         * @param includePattern
+         * @param excludePattern
+         * @param scanType
+         * @return
+         */
         public FormValidation doTest(
                 @QueryParameter String baseDirPath,
                 @QueryParameter String includePattern,
