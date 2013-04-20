@@ -193,17 +193,25 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
             ScanType scanType
     )
     {
+        if(baseDir == null || !baseDir.exists() || !baseDir.isDirectory())
+        {
+            return new ArrayList<String>(0);
+        }
         if(StringUtils.isBlank(includePattern))
         {
             return new ArrayList<String>(0);
         }
+        if(scanType == null)
+        {
+            scanType = ScanType.File;
+        }
         
         DirectoryScanner ds = new DirectoryScanner();
         ds.setBasedir(baseDir);
-        ds.setIncludes(StringUtils.split(includePattern, ','));
+        ds.setIncludes(includePattern.split("\\s*,(?:\\s*,)*\\s*"));
         if(!StringUtils.isBlank(excludePattern))
         {
-            ds.setExcludes(StringUtils.split(excludePattern, ','));
+            ds.setExcludes(excludePattern.split("\\s*,(?:\\s*,)*\\s*"));
         }
         ds.scan();
         
