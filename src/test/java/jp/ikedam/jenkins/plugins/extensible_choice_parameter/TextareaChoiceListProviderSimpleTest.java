@@ -36,7 +36,7 @@ public class TextareaChoiceListProviderSimpleTest extends TestCase
     {
         // complete tests are done in TextareaStringListUtilityTest.
         String choiceListText = "a\nb\nc\n";
-        TextareaChoiceListProvider target = new TextareaChoiceListProvider(choiceListText, null);
+        TextareaChoiceListProvider target = new TextareaChoiceListProvider(choiceListText, null, false, null);
         assertEquals(
                 "Basic test of choiceListText in TextareaChoiceListProvider()",
                 Arrays.asList("a", "b", "c"),
@@ -51,7 +51,9 @@ public class TextareaChoiceListProviderSimpleTest extends TestCase
             String defaultChoice = "b";
             TextareaChoiceListProvider target = new TextareaChoiceListProvider(
                     "a\nb\nc",
-                    defaultChoice
+                    defaultChoice,
+                    false,
+                    null
             );
             assertEquals("a value", defaultChoice, target.getDefaultChoice());
         }
@@ -61,7 +63,9 @@ public class TextareaChoiceListProviderSimpleTest extends TestCase
             String defaultChoice = null;
             TextareaChoiceListProvider target = new TextareaChoiceListProvider(
                     "a\nb\nc",
-                    defaultChoice
+                    defaultChoice,
+                    false,
+                    null
             );
             assertEquals("null", defaultChoice, target.getDefaultChoice());
         }
@@ -71,7 +75,9 @@ public class TextareaChoiceListProviderSimpleTest extends TestCase
             String defaultChoice = "";
             TextareaChoiceListProvider target = new TextareaChoiceListProvider(
                     "a\nb\nc",
-                    defaultChoice
+                    defaultChoice,
+                    false,
+                    null
             );
             assertEquals("empty", defaultChoice, target.getDefaultChoice());
         }
@@ -81,7 +87,9 @@ public class TextareaChoiceListProviderSimpleTest extends TestCase
             String defaultChoice = "   ";
             TextareaChoiceListProvider target = new TextareaChoiceListProvider(
                     "a\nb\nc",
-                    defaultChoice
+                    defaultChoice,
+                    false,
+                    null
             );
             assertEquals("blank", defaultChoice, target.getDefaultChoice());
         }

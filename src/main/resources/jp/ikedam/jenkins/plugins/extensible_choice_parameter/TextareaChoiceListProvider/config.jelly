@@ -28,4 +28,9 @@ THE SOFTWARE.
     <f:entry title="${%Default Choice}">
         <f:select field="defaultChoice" />
     </f:entry>
+    <f:optionalBlock field="addEditedValue" inline="true" title="${%Add Edited Value}">
+        <f:entry title="${%When to Add}" field="whenToAdd">
+            <f:enum>${it}</f:enum>
+        </f:entry>
+    </f:optionalBlock>
 </j:jelly>

@@ -23,12 +23,17 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.utility.TextareaStringListUtility;
 
 import hudson.Extension;
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.util.ListBoxModel;
 
@@ -38,10 +43,11 @@ import org.kohsuke.stapler.QueryParameter;
 /**
  * A choice provider whose choices are defined as a text, like the build-in choice parameter.
  */
-public class TextareaChoiceListProvider extends ChoiceListProvider implements Serializable
+public class TextareaChoiceListProvider extends AddEditedChoiceListProvider implements Serializable
 {
     private static final long serialVersionUID = 2L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
+    private static final Logger LOGGER = Logger.getLogger(TextareaChoiceListProvider.class.getName());
     
     /**
      * The internal class to work with views.
@@ -105,6 +111,14 @@ public class TextareaChoiceListProvider extends ChoiceListProvider implements Se
     }
     
     /**
+     * @param choiceList the choiceList to set
+     */
+    protected void setChoiceList(List<String> choiceList)
+    {
+        this.choiceList = choiceList;
+    }
+    
+    /**
      * The list of choices, joined into a string.
      * 
      * Used for filling a field when the configuration page is shown.
@@ -138,11 +152,36 @@ public class TextareaChoiceListProvider extends ChoiceListProvider implements Se
      * and no constructor is used.
      * 
      * @param choiceListText the text where choices are written in each line.
+     * @param defaultChoice
+     * @param addEditedValue
+     * @param whenToAdd
      */
     @DataBoundConstructor
-    public TextareaChoiceListProvider(String choiceListText, String defaultChoice)
+    public TextareaChoiceListProvider(String choiceListText, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd)
     {
-        this.choiceList = TextareaStringListUtility.stringListFromTextarea(choiceListText);
+        super(addEditedValue, whenToAdd);
+        setChoiceList(TextareaStringListUtility.stringListFromTextarea(choiceListText));
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
+    }
+    
+    @Override
+    protected void addEditedValue(
+            AbstractProject<?, ?> project,
+            ExtensibleChoiceParameterDefinition def,
+            String value
+    )
+    {
+        LOGGER.info(String.format("Add new value %s to parameter %s in project %s", value, def.getName(), project.getName()));
+        List<String> newChoiceList = new ArrayList<String>(getChoiceList());
+        newChoiceList.add(value);
+        setChoiceList(newChoiceList);
+        try
+        {
+            project.save();
+        }
+        catch(IOException e)
+        {
+            LOGGER.log(Level.WARNING, "Failed to add choice value", e);
+        }
     }
 }
