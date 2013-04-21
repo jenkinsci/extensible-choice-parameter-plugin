@@ -125,6 +125,16 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         }
     }
     
+    static private void assertListBoxEquals(String message, List<ListBoxModel.Option> expected, List<ListBoxModel.Option> test)
+    {
+        assertEquals(message, expected.size(), test.size());
+        for(int i = 0; i < test.size(); ++i)
+        {
+            assertEquals(String.format("%s: %d-th name", message, i), expected.get(i).name, test.get(i).name);
+            assertEquals(String.format("%s: %d-th value", message, i), expected.get(i).value, test.get(i).value);
+        }
+    }
+    
     @SuppressWarnings("unchecked")  // CollectionUtils.transformedCollection is not generic.
     public void testDescriptorDoFillNameItems()
     {
@@ -167,7 +177,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
             );
             ListBoxModel expected = new ListBoxModel(optionList);
             
-            assertEquals("Easy case", fillList, expected);
+            assertListBoxEquals("Easy case", expected, fillList);
         }
         
         // Empty
@@ -178,7 +188,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
             
             ListBoxModel expected = new ListBoxModel();
             
-            assertEquals("Empty", expected, fillList);
+            assertListBoxEquals("Empty", expected, fillList);
         }
         
         // null
@@ -189,7 +199,93 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
             
             ListBoxModel expected = new ListBoxModel();
             
-            assertEquals("null", expected, fillList);
+            assertListBoxEquals("null", expected, fillList);
+        }
+    }
+    
+    public void testDoFillDefaultChoiceItems()
+    {
+        GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
+        
+        // Easy case
+        {
+            List<GlobalTextareaChoiceListEntry> choiceListEntry = Arrays.asList(
+                    new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2"),
+                    new GlobalTextareaChoiceListEntry("entry2", "value3\nvalue4")
+            );
+            descriptor.setChoiceListEntryList(choiceListEntry);
+            
+            ListBoxModel fillList = descriptor.doFillDefaultChoiceItems("entry2");
+            
+            ListBoxModel expected = new ListBoxModel();
+            expected.add(new ListBoxModel.Option("value3", "value3"));
+            expected.add(new ListBoxModel.Option("value4", "value4"));
+            
+            assertListBoxEquals("Easy case", expected, fillList.subList(1, fillList.size()));
+        }
+        
+        // No match
+        {
+            List<GlobalTextareaChoiceListEntry> choiceListEntry = Arrays.asList(
+                    new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2"),
+                    new GlobalTextareaChoiceListEntry("entry2", "value3\nvalue4")
+            );
+            descriptor.setChoiceListEntryList(choiceListEntry);
+            
+            ListBoxModel fillList = descriptor.doFillDefaultChoiceItems("entry3");
+            
+            ListBoxModel expected = new ListBoxModel();
+            
+            assertListBoxEquals("No match", expected, fillList.subList(1, fillList.size()));
+        }
+        
+        // Empty
+        {
+            List<GlobalTextareaChoiceListEntry> choiceListEntry = new ArrayList<GlobalTextareaChoiceListEntry>(0);
+            descriptor.setChoiceListEntryList(choiceListEntry);
+            
+            ListBoxModel fillList = descriptor.doFillDefaultChoiceItems("entry2");
+            
+            ListBoxModel expected = new ListBoxModel();
+            
+            assertListBoxEquals("Empty", expected, fillList.subList(1, fillList.size()));
+        }
+        
+        // null
+        {
+            descriptor.setChoiceListEntryList(null);
+            
+            ListBoxModel fillList = descriptor.doFillDefaultChoiceItems("entry2");
+            
+            ListBoxModel expected = new ListBoxModel();
+            
+            assertListBoxEquals("null", expected, fillList.subList(1, fillList.size()));
+        }
+        
+        // null is selected
+        {
+            List<GlobalTextareaChoiceListEntry> choiceListEntry = Arrays.asList(
+                    new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2"),
+                    new GlobalTextareaChoiceListEntry("entry2", "value3\nvalue4")
+            );
+            descriptor.setChoiceListEntryList(choiceListEntry);
+            
+            ListBoxModel fillList = descriptor.doFillDefaultChoiceItems(null);
+            
+            ListBoxModel expected = new ListBoxModel();
+            
+            assertListBoxEquals("null is selected", expected, fillList.subList(1, fillList.size()));
+        }
+        
+        // in case not initialized
+        {
+            GlobalTextareaChoiceListProvider.DescriptorImpl nonInitializedDescriptor
+                    = new GlobalTextareaChoiceListProvider.DescriptorImpl();
+            ListBoxModel fillList = nonInitializedDescriptor.doFillDefaultChoiceItems("entry2");
+            
+            ListBoxModel expected = new ListBoxModel();
+            
+            assertListBoxEquals("not initialized", expected, fillList.subList(1, fillList.size()));
         }
     }
     
