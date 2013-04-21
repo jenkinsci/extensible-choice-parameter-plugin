@@ -25,8 +25,6 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import hudson.util.ListBoxModel;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import jenkins.model.Jenkins;

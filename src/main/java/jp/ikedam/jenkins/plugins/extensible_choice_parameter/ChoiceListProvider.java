@@ -27,7 +27,6 @@ import java.util.List;
 import hudson.ExtensionPoint;
 import hudson.DescriptorExtensionList;
 import hudson.model.Hudson;
-import hudson.model.StringParameterValue;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
@@ -72,11 +71,13 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
      * Default implementation do nothing at all.
      * 
      * @param job the job with which this choice provider is used.
+     * @param def the parameter definition the value specified
      * @param value the value specified.
      */
     public void onBuildTriggeredWithValue(
             AbstractProject<?, ?> job,
-            StringParameterValue value
+            ExtensibleChoiceParameterDefinition def,
+            String value
     )
     {
         // Nothing to do.
@@ -89,12 +90,13 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
      * Default implementation do nothing at all.
      * 
      * @param build the build with which this choice provider is used.
-     * @param result the result of the build.
+     * @param def the parameter definition the value specified
      * @param value the value specified.
      */
     public void onBuildCompletedWithValue(
             AbstractBuild<?, ?> build,
-            StringParameterValue value
+            ExtensibleChoiceParameterDefinition def,
+            String value
     )
     {
         // Nothing to do.
