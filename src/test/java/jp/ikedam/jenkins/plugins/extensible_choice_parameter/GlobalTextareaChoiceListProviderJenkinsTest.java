@@ -103,28 +103,6 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         }
     }
     
-    public void assertEquals(String message, ListBoxModel expected, ListBoxModel actual)
-    {
-        assertEquals(String.format("%s: size", message), expected.size(), actual.size());
-        for(int i = 0; i < expected.size(); ++i){
-            ListBoxModel.Option expectedOption = expected.get(i);
-            ListBoxModel.Option actualOption = actual.get(i);
-            
-            assertEquals(String.format("%s: %d-th name", message, i),
-                    expectedOption.name,
-                    actualOption.name
-            );
-            assertEquals(String.format("%s: %d-th value", message, i),
-                    expectedOption.value,
-                    actualOption.value
-            );
-            assertEquals(String.format("%s: %d-th selected", message, i),
-                    expectedOption.selected,
-                    actualOption.selected
-            );
-        }
-    }
-    
     static private void assertListBoxEquals(String message, List<ListBoxModel.Option> expected, List<ListBoxModel.Option> test)
     {
         assertEquals(message, expected.size(), test.size());

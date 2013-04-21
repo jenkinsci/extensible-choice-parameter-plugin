@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 /**
  * Tests for TextareaChoiceListProvider, not corresponding to Jenkins.
  */
-public class TextareaChoiceListProviderTest extends TestCase
+public class TextareaChoiceListProviderSimpleTest extends TestCase
 {
     public void testTextareaChoiceListProvider_choiceListText()
     {
