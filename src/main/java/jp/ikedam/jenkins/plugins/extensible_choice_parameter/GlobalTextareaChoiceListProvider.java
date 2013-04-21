@@ -160,6 +160,12 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
          */
         public GlobalTextareaChoiceListEntry getChoiceListEntry(String name)
         {
+            if(getChoiceListEntryList() == null)
+            {
+                // in case GlobalTextareaChoiceListEntry is never configured.
+                return null;
+            }
+            
             for(GlobalTextareaChoiceListEntry e: getChoiceListEntryList())
             {
                 if(e.getName().equals(name))
