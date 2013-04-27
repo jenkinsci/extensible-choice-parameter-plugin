@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -->
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:m="/jp/ikedam/jenkins/plugins/extensible_choice_parameter/taglib">
     <!--
         Shown in a job configuration page, 
         as the additional parameters of Exntensible Choice,
@@ -33,4 +33,5 @@ THE SOFTWARE.
     <f:entry title="${%Default Choice}">
         <f:select field="defaultChoice" />
     </f:entry>
+    <m:addEditedValue />
 </j:jelly>

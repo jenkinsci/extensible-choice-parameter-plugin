@@ -23,6 +23,7 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.io.Serializable;
@@ -149,6 +150,16 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
     }
     
     /**
+     * Set choiceList
+     * 
+     * @param choiceList the choiceList to set
+     */
+    protected void setChoiceList(List<String> choiceList)
+    {
+        this.choiceList = choiceList;
+    }
+    
+    /**
      * Constructor instantiating with parameters in the configuration page.
      * 
      * When instantiating from the saved configuration,
@@ -185,6 +196,17 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
             }
         }
         return true;
+    }
+    
+    
+    /**
+     * @param value
+     */
+    public void addEditedValue(String value)
+    {
+        List<String> newChoiceList = new ArrayList<String>(getChoiceList());
+        newChoiceList.add(value);
+        setChoiceList(newChoiceList);
     }
     
     /**

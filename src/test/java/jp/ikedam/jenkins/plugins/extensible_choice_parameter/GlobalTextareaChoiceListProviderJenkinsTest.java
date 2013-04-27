@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import jenkins.model.Jenkins;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.jvnet.hudson.test.HudsonTestCase;
@@ -43,7 +45,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
 {
     private GlobalTextareaChoiceListProvider.DescriptorImpl getDescriptor()
     {
-        return (GlobalTextareaChoiceListProvider.DescriptorImpl)(new GlobalTextareaChoiceListProvider("test", null)).getDescriptor();
+        return (GlobalTextareaChoiceListProvider.DescriptorImpl)Jenkins.getInstance().getDescriptor(GlobalTextareaChoiceListProvider.class);
         //return new GlobalTextareaChoiceListProvider.DescriptorImpl();
     }
     

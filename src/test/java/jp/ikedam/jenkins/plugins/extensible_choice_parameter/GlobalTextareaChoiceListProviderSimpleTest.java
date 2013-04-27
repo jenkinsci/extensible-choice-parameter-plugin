@@ -34,7 +34,7 @@ public class GlobalTextareaChoiceListProviderSimpleTest extends TestCase
     public void testGlobalTextareaChoiceListProvider_name()
     {
         String name = "abc";
-        GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, null);
+        GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, null, false, null);
         assertEquals("Basic test of passing name to GlobalTextareaChoiceListProvider()", name, target.getName());
     }
     
@@ -45,28 +45,28 @@ public class GlobalTextareaChoiceListProviderSimpleTest extends TestCase
         // a value
         {
             String defaultChoice = "some value";
-            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice);
+            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice, false, null);
             assertEquals("a value", defaultChoice, target.getDefaultChoice());
         }
         
         // null
         {
             String defaultChoice = null;
-            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice);
+            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice, false, null);
             assertEquals("null", defaultChoice, target.getDefaultChoice());
         }
         
         // empty
         {
             String defaultChoice = "";
-            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice);
+            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice, false, null);
             assertEquals("empty", defaultChoice, target.getDefaultChoice());
         }
         
         // blank
         {
             String defaultChoice = "  ";
-            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice);
+            GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, defaultChoice, false, null);
             assertEquals("blank", defaultChoice, target.getDefaultChoice());
         }
     }

@@ -26,8 +26,11 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import hudson.Extension;
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.util.ListBoxModel;
 
@@ -43,10 +46,11 @@ import net.sf.json.JSONObject;
  * A choice provider whose choices are defined
  * in the System Configuration page, and can be refereed from all jobs.
  */
-public class GlobalTextareaChoiceListProvider extends ChoiceListProvider implements Serializable
+public class GlobalTextareaChoiceListProvider extends AddEditedChoiceListProvider implements Serializable
 {
     private static final long serialVersionUID = 2L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
+    private static final Logger LOGGER = Logger.getLogger(GlobalTextareaChoiceListProvider.class.getName());
     
     /**
      * The internal class to work with views.
@@ -269,12 +273,49 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
      * 
      * @param name the name of the set of choices.
      * @param defaultChoice the initial selected value.
+     * @param addEditedValue
+     * @param whenToAdd
      */
     @DataBoundConstructor
-    public GlobalTextareaChoiceListProvider(String name, String defaultChoice)
+    public GlobalTextareaChoiceListProvider(String name, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd)
     {
+        super(addEditedValue, whenToAdd);
         // No validation is performed, for the name is selected from the dropdown.
         this.name = name;
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
+    }
+    
+    /**
+     * Called to add a edited value to the choice list.
+     * 
+     * @param project
+     * @param def
+     * @param value
+     * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.AddEditedChoiceListProvider#addEditedValue(hudson.model.AbstractProject, jp.ikedam.jenkins.plugins.extensible_choice_parameter.ExtensibleChoiceParameterDefinition, java.lang.String)
+     */
+    @Override
+    protected void addEditedValue(
+            AbstractProject<?, ?> project,
+            ExtensibleChoiceParameterDefinition def,
+            String value
+    )
+    {
+        DescriptorImpl descriptor = (DescriptorImpl)getDescriptor();
+        GlobalTextareaChoiceListEntry entry = descriptor.getChoiceListEntry(getName());
+        
+        if(entry != null)
+        {
+            LOGGER.info(String.format("Add new value %s to parameter %s(%s) in project %s", value, def.getName(), getName(), project.getName()));
+            entry.addEditedValue(value);
+            
+            try
+            {
+                descriptor.save();
+            }
+            catch(Exception e)
+            {
+                LOGGER.log(Level.WARNING, "Failed to add choice value", e);
+            }
+        }
     }
 }
