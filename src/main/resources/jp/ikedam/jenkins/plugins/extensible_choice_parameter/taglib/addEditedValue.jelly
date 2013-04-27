@@ -1,7 +1,7 @@
 <!--
 The MIT License
 
-Copyright (c) 2012-2013 IKEDA Yasuyuki
+Copyright (c) 2013 IKEDA Yasuyuki
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -->
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:m="/jp/ikedam/jenkins/plugins/extensible_choice_parameter/taglib">
-    <f:entry title="${%Choices}" field="choiceListText" help="/help/parameter/choice-choices.html">
-        <f:textarea />
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<st:documentation>
+    generates an input field for addEditedValue
+</st:documentation>
+<f:optionalBlock field="addEditedValue" inline="true" title="${%Add Edited Value}" help="/plugin/extensible-choice-parameter/help/addEditedValue.html">
+    <f:entry title="${%When to Add}" field="whenToAdd" help="/plugin/extensible-choice-parameter/help/whenToAdd.html">
+        <f:enum>${it}</f:enum>
     </f:entry>
-    <f:entry title="${%Default Choice}" field="defaultChoice">
-        <f:select />
-    </f:entry>
-    <m:addEditedValue />
+</f:optionalBlock>
 </j:jelly>
