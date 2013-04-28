@@ -159,6 +159,18 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
         this.choiceList = choiceList;
     }
     
+    private boolean allowAddEditedValue;
+    
+    /**
+     * Return whether users can add a new value by building a job using this choice list.
+     * 
+     * @return the allowAddEditedValue
+     */
+    public boolean isAllowAddEditedValue()
+    {
+        return allowAddEditedValue;
+    }
+
     /**
      * Constructor instantiating with parameters in the configuration page.
      * 
@@ -168,12 +180,14 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
      * 
      * @param name the name of this set of choices.
      * @param choiceListText the text where choices are written in each line.
+     * @param allowAddEditedValue whether users can add a new value by building a job using this choice list.
      */
     @DataBoundConstructor
-    public GlobalTextareaChoiceListEntry(String name, String choiceListText)
+    public GlobalTextareaChoiceListEntry(String name, String choiceListText, boolean allowAddEditedValue)
     {
         this.name = (name != null)?name.trim():"";
         this.choiceList = TextareaStringListUtility.stringListFromTextarea(choiceListText);
+        this.allowAddEditedValue = allowAddEditedValue;
     }
     
     /**

@@ -39,28 +39,28 @@ public class GlobalTextareaChoiceListEntrySimpleTest extends TestCase
         // Easy case.
         {
             String name = "abc";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals("abc", entry.getName());
         }
         
         // padded in the beginning.
         {
             String name = "  abc";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals("abc", entry.getName());
         }
         
         // padded in the end.
         {
             String name = "abc  ";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals("abc", entry.getName());
         }
         
         // padded in the beginning and end.
         {
             String name = "   abc  ";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals("abc", entry.getName());
         }
     }
@@ -79,56 +79,56 @@ public class GlobalTextareaChoiceListEntrySimpleTest extends TestCase
         // null.
         {
             String name = null;
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals("", entry.getName());
         }
         
         // empty.
         {
             String name = "";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals(name, entry.getName());
         }
         
         // blank.
         {
             String name = "   ";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals("", entry.getName());
         }
         
         // value containing blank.
         {
             String name = "a b";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals(name, entry.getName());
         }
         
         // value starts with a numeric letter.
         {
             String name = "1ab";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals(name, entry.getName());
         }
         
         // value contains a letter, not alphabet, number, nor underscore.
         {
             String name = "a-b-c";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals(name, entry.getName());
         }
         
         // value starts with a letter, not alphabet, number, nor underscore.
         {
             String name = "!ab";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals(name, entry.getName());
         }
         
         // value contains a multibyte letter.
         {
             String name = "ａb";
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null);
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(name, null, false);
             assertEquals(name, entry.getName());
         }
     }
@@ -137,7 +137,7 @@ public class GlobalTextareaChoiceListEntrySimpleTest extends TestCase
     {
         // complete tests are done in TextareaStringListUtilityTest.
         String choiceListText = "a\nb\nc\n";
-        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry("test", choiceListText);
+        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry("test", choiceListText, false);
         assertEquals(
                 "Basic test of choiceListText in GlobalTextareaChoiceListEntry()",
                 Arrays.asList("a", "b", "c"),

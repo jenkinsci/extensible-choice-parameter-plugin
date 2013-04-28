@@ -303,19 +303,28 @@ public class GlobalTextareaChoiceListProvider extends AddEditedChoiceListProvide
         DescriptorImpl descriptor = (DescriptorImpl)getDescriptor();
         GlobalTextareaChoiceListEntry entry = descriptor.getChoiceListEntry(getName());
         
-        if(entry != null)
+        if(entry == null)
         {
-            LOGGER.info(String.format("Add new value %s to parameter %s(%s) in project %s", value, def.getName(), getName(), project.getName()));
-            entry.addEditedValue(value);
-            
-            try
-            {
-                descriptor.save();
-            }
-            catch(Exception e)
-            {
-                LOGGER.log(Level.WARNING, "Failed to add choice value", e);
-            }
+            LOGGER.warning(String.format("Requested to add a new value %s to parameter %s(%s) in project %s, but the choice list does not exist.", value, def.getName(), getName(), project.getName()));
+            return;
+        }
+        
+        if(!entry.isAllowAddEditedValue())
+        {
+            LOGGER.warning(String.format("Requested to add a new value %s to parameter %s(%s) in project %s, but the choice list is not configured to allow that.", value, def.getName(), getName(), project.getName()));
+            return;
+        }
+        
+        LOGGER.info(String.format("Add a new value %s to parameter %s(%s) in project %s", value, def.getName(), getName(), project.getName()));
+        entry.addEditedValue(value);
+        
+        try
+        {
+            descriptor.save();
+        }
+        catch(Exception e)
+        {
+            LOGGER.log(Level.WARNING, "Failed to add choice value", e);
         }
     }
 }

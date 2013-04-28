@@ -74,12 +74,12 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
     public void testDescriptorSetChoiceListEntryList()
     {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        GlobalTextareaChoiceListEntry validEntry1 = new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry validEntry2 = new GlobalTextareaChoiceListEntry("entry2", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry validEntry3 = new GlobalTextareaChoiceListEntry("entry3", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry invalidEntry1 = new GlobalTextareaChoiceListEntry("!invalid1", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry invalidEntry2 = new GlobalTextareaChoiceListEntry("in valid2", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry invalidEntry3 = new GlobalTextareaChoiceListEntry("3invalid", "value1\nvalue2\n");
+        GlobalTextareaChoiceListEntry validEntry1 = new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry validEntry2 = new GlobalTextareaChoiceListEntry("entry2", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry validEntry3 = new GlobalTextareaChoiceListEntry("entry3", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry invalidEntry1 = new GlobalTextareaChoiceListEntry("!invalid1", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry invalidEntry2 = new GlobalTextareaChoiceListEntry("in valid2", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry invalidEntry3 = new GlobalTextareaChoiceListEntry("3invalid", "value1\nvalue2\n", false);
         
         // all entries are valid
         {
@@ -156,7 +156,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
                         @Override
                         public Object transform(Object input)
                         {
-                            return new GlobalTextareaChoiceListEntry((String)input, "value1\nvalue2\n");
+                            return new GlobalTextareaChoiceListEntry((String)input, "value1\nvalue2\n", false);
                         }
                     }
             );
@@ -212,8 +212,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         // Easy case
         {
             List<GlobalTextareaChoiceListEntry> choiceListEntry = Arrays.asList(
-                    new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2"),
-                    new GlobalTextareaChoiceListEntry("entry2", "value3\nvalue4")
+                    new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2", false),
+                    new GlobalTextareaChoiceListEntry("entry2", "value3\nvalue4", false)
             );
             descriptor.setChoiceListEntryList(choiceListEntry);
             
@@ -229,8 +229,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         // No match
         {
             List<GlobalTextareaChoiceListEntry> choiceListEntry = Arrays.asList(
-                    new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2"),
-                    new GlobalTextareaChoiceListEntry("entry2", "value3\nvalue4")
+                    new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2", false),
+                    new GlobalTextareaChoiceListEntry("entry2", "value3\nvalue4", false)
             );
             descriptor.setChoiceListEntryList(choiceListEntry);
             
@@ -267,8 +267,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         // null is selected
         {
             List<GlobalTextareaChoiceListEntry> choiceListEntry = Arrays.asList(
-                    new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2"),
-                    new GlobalTextareaChoiceListEntry("entry2", "value3\nvalue4")
+                    new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2", false),
+                    new GlobalTextareaChoiceListEntry("entry2", "value3\nvalue4", false)
             );
             descriptor.setChoiceListEntryList(choiceListEntry);
             
@@ -294,10 +294,10 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
     public void testDescriptorGetChoiceListEntry()
     {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        GlobalTextareaChoiceListEntry entry1 = new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry entry2 = new GlobalTextareaChoiceListEntry("entry2", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry entry3 = new GlobalTextareaChoiceListEntry("entry3", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry sameEntry3 = new GlobalTextareaChoiceListEntry("entry3", "value1\nvalue2\n");
+        GlobalTextareaChoiceListEntry entry1 = new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry entry2 = new GlobalTextareaChoiceListEntry("entry2", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry entry3 = new GlobalTextareaChoiceListEntry("entry3", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry sameEntry3 = new GlobalTextareaChoiceListEntry("entry3", "value1\nvalue2\n", false);
         
         // Easy case
         {
@@ -351,10 +351,10 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
     {
         WebClient wc = new WebClient();
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        GlobalTextareaChoiceListEntry validEntry1 = new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry validEntry2 = new GlobalTextareaChoiceListEntry("entry2", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry validEntry3 = new GlobalTextareaChoiceListEntry("entry3", "value1\nvalue2\n");
-        GlobalTextareaChoiceListEntry invalidEntry1 = new GlobalTextareaChoiceListEntry("!invalid1", "value1\nvalue2\n");
+        GlobalTextareaChoiceListEntry validEntry1 = new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry validEntry2 = new GlobalTextareaChoiceListEntry("entry2", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry validEntry3 = new GlobalTextareaChoiceListEntry("entry3", "value1\nvalue2\n", false);
+        GlobalTextareaChoiceListEntry invalidEntry1 = new GlobalTextareaChoiceListEntry("!invalid1", "value1\nvalue2\n", false);
         
         // Simple submission
         {
@@ -611,13 +611,13 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         return choiceList.contains(value);
     }
     
-    public void testAddEditedValue_Disabled() throws Exception
+    public void testAddEditedValue_Disabled1() throws Exception
     {
         String varname = "test";
         String entryname = "test";
         
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2");
+        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
         descriptor.setChoiceListEntryList(Arrays.asList(entry));
         descriptor.save();
         
@@ -665,13 +665,121 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         }
     }
     
+    public void testAddEditedValue_Disabled2() throws Exception
+    {
+        String varname = "test";
+        String entryname = "test";
+        
+        GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
+        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", false);
+        descriptor.setChoiceListEntryList(Arrays.asList(entry));
+        descriptor.save();
+        
+        GlobalTextareaChoiceListProvider provider = new GlobalTextareaChoiceListProvider(
+                entryname,
+                null,
+                true,
+                WhenToAdd.Triggered
+        );
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+                varname,
+                provider,
+                true,
+                "description"
+                );
+        FreeStyleProject job = createFreeStyleProject();
+        job.addProperty(new ParametersDefinitionProperty(def));
+        job.save();
+        
+        String jobname = job.getName();
+        
+        
+        // Triggered
+        {
+            String value = "Triggered";
+            assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, null, entryname, varname, value));
+        }
+        
+        // Success
+        {
+            String value = "Success";
+            assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, Result.SUCCESS, entryname, varname, value));
+        }
+        
+        // Unstable
+        {
+            String value = "Unstable";
+            assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, Result.UNSTABLE, entryname, varname, value));
+        }
+        
+        // Failure
+        {
+            String value = "Failure";
+            assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, Result.FAILURE, entryname, varname, value));
+        }
+    }
+    
+    public void testAddEditedValue_Disabled3() throws Exception
+    {
+        String varname = "test";
+        String entryname = "test";
+        
+        GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
+        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
+        descriptor.setChoiceListEntryList(Arrays.asList(entry));
+        descriptor.save();
+        
+        GlobalTextareaChoiceListProvider provider = new GlobalTextareaChoiceListProvider(
+                entryname,
+                null,
+                true,
+                null
+        );
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+                varname,
+                provider,
+                true,
+                "description"
+                );
+        FreeStyleProject job = createFreeStyleProject();
+        job.addProperty(new ParametersDefinitionProperty(def));
+        job.save();
+        
+        String jobname = job.getName();
+        
+        
+        // Triggered
+        {
+            String value = "Triggered";
+            assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, null, entryname, varname, value));
+        }
+        
+        // Success
+        {
+            String value = "Success";
+            assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, Result.SUCCESS, entryname, varname, value));
+        }
+        
+        // Unstable
+        {
+            String value = "Unstable";
+            assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, Result.UNSTABLE, entryname, varname, value));
+        }
+        
+        // Failure
+        {
+            String value = "Failure";
+            assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, Result.FAILURE, entryname, varname, value));
+        }
+    }
+    
     public void testAddEditedValue_Trigger() throws Exception
     {
         String varname = "test";
         String entryname = "test";
         
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2");
+        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
         descriptor.setChoiceListEntryList(Arrays.asList(entry));
         descriptor.save();
         
@@ -729,7 +837,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         String entryname = "test";
         
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2");
+        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
         descriptor.setChoiceListEntryList(Arrays.asList(entry));
         descriptor.save();
         
@@ -787,7 +895,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         String entryname = "test";
         
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2");
+        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
         descriptor.setChoiceListEntryList(Arrays.asList(entry));
         descriptor.save();
         
@@ -845,7 +953,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
         String entryname = "test";
         
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2");
+        GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
         descriptor.setChoiceListEntryList(Arrays.asList(entry));
         descriptor.save();
         

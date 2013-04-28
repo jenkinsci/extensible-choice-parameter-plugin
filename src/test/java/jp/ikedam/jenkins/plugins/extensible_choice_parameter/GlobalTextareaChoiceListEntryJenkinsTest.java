@@ -23,6 +23,7 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import jenkins.model.Jenkins;
 import hudson.util.FormValidation;
 
 import org.jvnet.hudson.test.HudsonTestCase;
@@ -35,7 +36,7 @@ public class GlobalTextareaChoiceListEntryJenkinsTest extends HudsonTestCase
 {
     private GlobalTextareaChoiceListEntry.DescriptorImpl getDescriptor()
     {
-        return (GlobalTextareaChoiceListEntry.DescriptorImpl) (new GlobalTextareaChoiceListEntry(null, null)).getDescriptor();
+        return (GlobalTextareaChoiceListEntry.DescriptorImpl)Jenkins.getInstance().getDescriptor(GlobalTextareaChoiceListEntry.class);
     }
     
     /**
@@ -104,13 +105,13 @@ public class GlobalTextareaChoiceListEntryJenkinsTest extends HudsonTestCase
     {
         // OK
         {
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry("  _abc_123  ", "");
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry("  _abc_123  ", "", false);
             assertTrue("Valid entry", entry.isValid());
         }
         
         // NG
         {
-            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry("a b c", "");
+            GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry("a b c", "", false);
             assertFalse("Invalid entry", entry.isValid());
         }
     }

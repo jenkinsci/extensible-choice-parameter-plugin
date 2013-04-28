@@ -32,6 +32,9 @@ THE SOFTWARE.
     <f:entry title="${%Choices}" field="choiceListText" help="/help/parameter/choice-choices.html">
         <f:textarea />
     </f:entry>
+    <f:entry title="${%Allow Add Edited Value}" field="allowAddEditedValue">
+        <f:checkbox />
+    </f:entry>
     <!-- Button to delete this entry. -->
     <f:entry title="">
         <div align="right">
