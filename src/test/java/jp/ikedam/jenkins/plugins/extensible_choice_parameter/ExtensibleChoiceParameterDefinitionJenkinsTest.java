@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import hudson.EnvVars;
 import hudson.model.FreeStyleBuild;
@@ -36,7 +38,6 @@ import hudson.model.FreeStyleProject;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.util.FormValidation;
-import jp.ikedam.jenkins.plugins.extensible_choice_parameter.ExtensibleChoiceParameterDefinition.DescriptorImpl;
 
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
@@ -57,7 +58,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
 {
     private ExtensibleChoiceParameterDefinition.DescriptorImpl getDescriptor()
     {
-        return (DescriptorImpl)(new ExtensibleChoiceParameterDefinition("name", null, false, "")).getDescriptor();
+        return (ExtensibleChoiceParameterDefinition.DescriptorImpl)(new ExtensibleChoiceParameterDefinition("name", null, false, "")).getDescriptor();
     }
     
     public void testDescriptorDoCheckNameOk()
@@ -155,14 +156,25 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
         // comment out here if an unexpected behavior occurs.
         wc.setPrintContentOnFailingStatusCode(false);
         
-        // Accessing build page causes 405 Method not allowed (I'm not sure why...), 
-        // but the contents are correctly returned.
+        // Accessing build page without parameters causes 405 Method not allowed.
         // So suppress the exception.
         wc.setThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = wc.getPage(job, "build?delay=0sec");
         wc.setThrowExceptionOnFailingStatusCode(true);
         
-        HtmlForm form = page.getFormByName("parameters");
+        HtmlForm form = null;
+        
+        try
+        {
+            form = page.getFormByName("parameters");
+        }
+        catch(ElementNotFoundException e)
+        {
+            Logger logger = Logger.getLogger(this.getClass().getName());
+            logger.log(Level.SEVERE, "Failed to retrieve parameter form", e);
+            logger.severe(page.asXml());
+            throw e;
+        }
         
         try
         {
