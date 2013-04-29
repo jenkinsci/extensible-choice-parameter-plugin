@@ -30,12 +30,12 @@ import java.util.List;
 
 import jenkins.model.Jenkins;
 
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
 
 /**
  * Tests for SystemGroovyChoiceListProvider, corresponding to Jenkins.
  */
-public class SystemGroovyChoiceListProviderJenkinsTest extends HudsonTestCase
+public class SystemGroovyChoiceListProviderJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
 {
     static private String properScript = "[\"a\", \"b\", \"c\"]";
     static private List<String> properScriptReturn = Arrays.asList("a", "b", "c");

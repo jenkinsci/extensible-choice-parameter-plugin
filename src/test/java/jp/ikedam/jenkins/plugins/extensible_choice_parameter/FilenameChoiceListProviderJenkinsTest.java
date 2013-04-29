@@ -32,12 +32,12 @@ import jenkins.model.Jenkins;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
 
 /**
  * Tests for FilenameChoiceListProvider, concerned with Jenkins.
  */
-public class FilenameChoiceListProviderJenkinsTest extends HudsonTestCase
+public class FilenameChoiceListProviderJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
 {
     public void testGetBaseDir()
     {

@@ -49,7 +49,7 @@ import jp.ikedam.jenkins.plugins.extensible_choice_parameter.AddEditedChoiceList
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -63,7 +63,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
  * Tests for GlobalTextareaChoiceListProvider, corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListProviderJenkinsTest extends HudsonTestCase
+public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
 {
     private GlobalTextareaChoiceListProvider.DescriptorImpl getDescriptor()
     {

@@ -26,13 +26,13 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 import jenkins.model.Jenkins;
 import hudson.util.FormValidation;
 
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
 
 /**
  * Tests for GlobalTextareaChoiceListEntry, corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListEntryJenkinsTest extends HudsonTestCase
+public class GlobalTextareaChoiceListEntryJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
 {
     private GlobalTextareaChoiceListEntry.DescriptorImpl getDescriptor()
     {

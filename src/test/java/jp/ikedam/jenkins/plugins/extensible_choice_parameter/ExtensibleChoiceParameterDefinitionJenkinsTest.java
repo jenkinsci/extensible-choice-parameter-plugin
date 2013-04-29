@@ -39,7 +39,7 @@ import hudson.model.ParameterDefinition;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.util.FormValidation;
 
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
@@ -54,7 +54,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 /**
  * Tests for ExtensibleChoiceParameterDefinition, corresponding to Jenkins.
  */
-public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCase
+public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
 {
     private ExtensibleChoiceParameterDefinition.DescriptorImpl getDescriptor()
     {

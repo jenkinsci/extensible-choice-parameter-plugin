@@ -46,7 +46,7 @@ import jenkins.model.Jenkins;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.AddEditedChoiceListProvider.WhenToAdd;
 
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -59,7 +59,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 /**
  * Tests for TextareaChoiceListProvider, corresponding to Jenkins.
  */
-public class TextareaChoiceListProviderJenkinsTest extends HudsonTestCase
+public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
 {
     private TextareaChoiceListProvider.DescriptorImpl getDescriptor()
     {
