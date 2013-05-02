@@ -17,7 +17,9 @@ This plugin provides Extensible Choice parameter:
 	* Global Choice Parameter: defines choices in the Configure System page.
 	* System Groovy Script Choice Parameter: runs a System Groovy script to determine the list of choices
 	* File Choice Parameter: lists files in a directory.
-* With Global Choice Parameter, you can deal with the case that the choices is shared by multiple jobs. Updating the choice in the Configure System will immediately affect all the jobs that uses the updated choice.* The parameter can be set to Editable, which allows you to specify any value, even the one not in the choices. This is useful in the case that the build must be run with an irregular parameter.
+* With Global Choice Parameter, you can deal with the case that the choices is shared by multiple jobs. Updating the choice in the Configure System will immediately affect all the jobs that uses the updated choice.
+* The parameter can be set to Editable, which allows you to specify any value, even the one not in the choices. This is useful in the case that the build must be run with an irregular parameter.
+	*  Edited values can be added to the choice used next time automatically.
 * The way to provide choices can be extended by using [the Jenkins extention point featere] (https://wiki.jenkins-ci.org/display/JENKINS/Extension+points).
 
 Extension point
