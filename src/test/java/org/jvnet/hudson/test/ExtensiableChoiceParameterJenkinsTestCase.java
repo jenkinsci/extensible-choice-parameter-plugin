@@ -25,7 +25,6 @@ package org.jvnet.hudson.test;
 
 import hudson.Functions;
 
-import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -59,17 +58,13 @@ public abstract class ExtensiableChoiceParameterJenkinsTestCase extends HudsonTe
         server.setHandler(context);
         context.setMimeTypes(MIME_TYPES);
         if(Functions.isWindows()) {
-            // This is a customized block.
-            // To avoid "requested operation can't be performed on file with user-mapped section open"
-            // in Windows.
-            // No more need to setCopyWebDir.
-            
+            // This causes "requested operation can't be performed on file with user-mapped section open"
+            // For details, SEE JENKINS-17774.
+            /*
             // this is only needed on Windows because of the file
             // locking issue as described in JENKINS-12647
-            //context.setCopyWebDir(true);
-            @SuppressWarnings("unchecked")
-            Map<Object,Object> initParams = context.getInitParams();
-            initParams.put("useFileMappedBuffer", "false");
+            context.setCopyWebDir(true);
+             */
         }
         
         SocketConnector connector = new SocketConnector();
