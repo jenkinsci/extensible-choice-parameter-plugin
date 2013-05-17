@@ -23,20 +23,26 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
+
 import hudson.util.ListBoxModel;
 
 import java.util.Arrays;
 import java.util.List;
 
-import jenkins.model.Jenkins;
+import org.junit.Rule;
+import org.junit.Test;
 
-import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
+import jenkins.model.Jenkins;
 
 /**
  * Tests for SystemGroovyChoiceListProvider, corresponding to Jenkins.
  */
-public class SystemGroovyChoiceListProviderJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
+public class SystemGroovyChoiceListProviderJenkinsTest
 {
+    @Rule
+    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+    
     static private String properScript = "[\"a\", \"b\", \"c\"]";
     static private List<String> properScriptReturn = Arrays.asList("a", "b", "c");
     
@@ -57,6 +63,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest extends ExtensiableChoice
         return (SystemGroovyChoiceListProvider.DescriptorImpl)Jenkins.getInstance().getDescriptorOrDie(SystemGroovyChoiceListProvider.class);
     }
     
+    @Test
     public void testDescriptor_doFillDefaultChoiceItems()
     {
         SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
@@ -114,6 +121,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest extends ExtensiableChoice
         }
     }
     
+    @Test
     public void testGetChoiceList()
     {
         // Proper script

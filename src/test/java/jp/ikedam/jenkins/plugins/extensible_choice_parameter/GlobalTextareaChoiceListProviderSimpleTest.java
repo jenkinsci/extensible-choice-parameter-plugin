@@ -23,14 +23,17 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 /**
  * Tests for GlobalTextareaChoiceListProvider, not corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListProviderSimpleTest extends TestCase
+public class GlobalTextareaChoiceListProviderSimpleTest
 {
+    @Test
     public void testGlobalTextareaChoiceListProvider_name()
     {
         String name = "abc";
@@ -38,6 +41,7 @@ public class GlobalTextareaChoiceListProviderSimpleTest extends TestCase
         assertEquals("Basic test of passing name to GlobalTextareaChoiceListProvider()", name, target.getName());
     }
     
+    @Test
     public void testGlobalTextareaChoiceListProvider_defaultChoice()
     {
         String name = "abc";

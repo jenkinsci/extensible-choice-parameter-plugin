@@ -23,13 +23,16 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 /**
  * Tests for SystemGroovyChoiceListProvider, corresponding to Jenkins.
  */
-public class SystemGroovyChoiceListProviderSimpleTest extends TestCase
+public class SystemGroovyChoiceListProviderSimpleTest
 {
+    @Test
     public void testSystemGroovyChoiceListProvider_scriptText()
     {
         // simple value
@@ -68,6 +71,7 @@ public class SystemGroovyChoiceListProviderSimpleTest extends TestCase
         }
     }
     
+    @Test
     public void testSystemGroovyChoiceListProvider_defaultChoice()
     {
         String scriptText = "abc";

@@ -23,17 +23,23 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
+
+import org.junit.Rule;
+import org.junit.Test;
+
 import jenkins.model.Jenkins;
 import hudson.util.FormValidation;
-
-import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
 
 /**
  * Tests for GlobalTextareaChoiceListEntry, corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListEntryJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
+public class GlobalTextareaChoiceListEntryJenkinsTest
 {
+    @Rule
+    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+    
     private GlobalTextareaChoiceListEntry.DescriptorImpl getDescriptor()
     {
         return (GlobalTextareaChoiceListEntry.DescriptorImpl)Jenkins.getInstance().getDescriptor(GlobalTextareaChoiceListEntry.class);
@@ -42,6 +48,7 @@ public class GlobalTextareaChoiceListEntryJenkinsTest extends ExtensiableChoiceP
     /**
      * Good inputs for name.
      */
+    @Test
     public void testDescriptorDoCheckNameOk()
     {
         GlobalTextareaChoiceListEntry.DescriptorImpl descriptor = getDescriptor();
@@ -71,6 +78,7 @@ public class GlobalTextareaChoiceListEntryJenkinsTest extends ExtensiableChoiceP
     /**
      * Bad inputs for name.
      */
+    @Test
     public void testDescriptorDoCheckNameError()
     {
         GlobalTextareaChoiceListEntry.DescriptorImpl descriptor = getDescriptor();
@@ -100,7 +108,7 @@ public class GlobalTextareaChoiceListEntryJenkinsTest extends ExtensiableChoiceP
         assertEquals(descriptor.doCheckName("ａb").kind, FormValidation.Kind.ERROR);
     }
     
-    
+    @Test
     public void testIsValid()
     {
         // OK

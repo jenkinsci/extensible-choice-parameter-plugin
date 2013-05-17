@@ -3,17 +3,20 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter.utility;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Tests for TextareaStringListUtility
  */
-public class TextareaStringListUtilityTest extends TestCase
+public class TextareaStringListUtilityTest
 {
+    @Test
     public void testStringListFromTextarea()
     {
         // Easy case
@@ -115,6 +118,7 @@ public class TextareaStringListUtilityTest extends TestCase
         }
     }
     
+    @Test
     public void testTextareaFromStringList()
     {
         // Easy case.

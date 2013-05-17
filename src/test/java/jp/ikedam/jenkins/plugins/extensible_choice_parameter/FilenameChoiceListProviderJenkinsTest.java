@@ -23,6 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
+
 import hudson.util.FormValidation;
 
 import java.io.File;
@@ -32,13 +34,18 @@ import jenkins.model.Jenkins;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
+import org.junit.Rule;
+import org.junit.Test;
 
 /**
  * Tests for FilenameChoiceListProvider, concerned with Jenkins.
  */
-public class FilenameChoiceListProviderJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
+public class FilenameChoiceListProviderJenkinsTest
 {
+    @Rule
+    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+    
+    @Test
     public void testGetBaseDir()
     {
         // relative path
@@ -63,11 +70,12 @@ public class FilenameChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         return (FilenameChoiceListProvider.DescriptorImpl)Jenkins.getInstance().getDescriptor(FilenameChoiceListProvider.class);
     }
     
+    @Test
     public void testDescriptor_doCheckBaseDirPath() throws IOException
     {
         FilenameChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         
-        File tempDir = createTmpDir();
+        File tempDir = j.createTmpDir();
         try
         {
             // a proper directory
@@ -132,6 +140,7 @@ public class FilenameChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         }
     }
     
+    @Test
     public void testDescriptor_doCheckIncludePattern() throws IOException
     {
         FilenameChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
@@ -177,7 +186,7 @@ public class FilenameChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         }
     }
     
-    
+    @Test
     public void testDescriptor_doCheckExcludePattern() throws IOException
     {
         FilenameChoiceListProvider.DescriptorImpl descriptor = getDescriptor();

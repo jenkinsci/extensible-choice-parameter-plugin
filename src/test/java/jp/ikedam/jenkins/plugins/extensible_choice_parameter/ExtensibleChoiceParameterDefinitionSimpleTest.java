@@ -23,19 +23,22 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
+
 import hudson.model.StringParameterValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Test for ExtensibleChoiceParameterDefinition, not corresponding to Jenkins.
  */
-public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
+public class ExtensibleChoiceParameterDefinitionSimpleTest
 {
+    @Test
     public void testExtensibleChoiceParameterDefinition_name()
     {
         // Simple value
@@ -60,6 +63,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         }
     }
     
+    @Test
     public void testExtensibleChoiceParameterDefinition_nameWithInvalidValue()
     {
         // null
@@ -94,6 +98,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         }
     }
     
+    @Test
     public void testExtensibleChoiceParameterDefinition_description()
     {
         // Simple value
@@ -146,6 +151,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
     }
     
     
+    @Test
     public void testExtensibleChoiceParameterDefinition_choiceListProvider()
     {
         // Simple value
@@ -173,6 +179,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         }
     }
     
+    @Test
     public void testExtensibleChoiceParameterDefinition_editable()
     {
         // editable
@@ -223,6 +230,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
     }
     
     // Test for createValue(String value)
+    @Test
     public void testCreateValueForCli()
     {
         String name = "name";
@@ -382,6 +390,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         }
     }
     
+    @Test
     public void testGetDefaultParameterValue_NoDefaultChoice()
     {
         String name = "name";
@@ -478,6 +487,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest extends TestCase
         }
     }
     
+    @Test
     public void testGetDefaultParameterValue_SpecifiedDefaultChoice()
     {
         String name = "name";

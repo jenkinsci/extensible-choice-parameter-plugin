@@ -23,15 +23,18 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Tests for TextareaChoiceListProvider, not corresponding to Jenkins.
  */
-public class TextareaChoiceListProviderSimpleTest extends TestCase
+public class TextareaChoiceListProviderSimpleTest
 {
+    @Test
     public void testTextareaChoiceListProvider_choiceListText()
     {
         // complete tests are done in TextareaStringListUtilityTest.
@@ -44,6 +47,7 @@ public class TextareaChoiceListProviderSimpleTest extends TestCase
         );
     }
     
+    @Test
     public void testTextareaChoiceListProvider_defaultChoice()
     {
         // a value

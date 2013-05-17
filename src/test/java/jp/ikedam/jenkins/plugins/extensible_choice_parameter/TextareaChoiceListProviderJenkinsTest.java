@@ -23,6 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
+
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -45,8 +47,10 @@ import java.util.List;
 import jenkins.model.Jenkins;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.AddEditedChoiceListProvider.WhenToAdd;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
-import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -59,8 +63,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 /**
  * Tests for TextareaChoiceListProvider, corresponding to Jenkins.
  */
-public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
+public class TextareaChoiceListProviderJenkinsTest
 {
+    @Rule
+    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+    
     private TextareaChoiceListProvider.DescriptorImpl getDescriptor()
     {
         return (TextareaChoiceListProvider.DescriptorImpl)Jenkins.getInstance().getDescriptor(TextareaChoiceListProvider.class);
@@ -76,6 +83,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         }
     }
     
+    @Test
     public void testDoFillDefaultChoiceItems()
     {
         TextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
@@ -204,7 +212,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         
         job.save();
         
-        WebClient wc = new WebClient();
+        WebClient wc = j.createWebClient();
         
         wc.setPrintContentOnFailingStatusCode(false);
         wc.setThrowExceptionOnFailingStatusCode(false);
@@ -244,7 +252,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
             HtmlTextInput input = (HtmlTextInput)form.getInputByName("value");
             input.setValueAttribute(value);
         }
-        submit(form);
+        j.submit(form);
         
         FreeStyleBuild build = job.getLastBuild();
         
@@ -276,6 +284,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         return choiceList.contains(value);
     }
     
+    @Test
     public void testAddEditedValue_Disabled() throws Exception
     {
         String varname = "test";
@@ -291,7 +300,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -323,6 +332,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         }
     }
     
+    @Test
     public void testAddEditedValue_Trigger() throws Exception
     {
         String varname = "test";
@@ -338,7 +348,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -374,6 +384,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         }
     }
     
+    @Test
     public void testAddEditedValue_Completed() throws Exception
     {
         String varname = "test";
@@ -389,7 +400,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -425,6 +436,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         }
     }
     
+    @Test
     public void testAddEditedValue_CompletedStable() throws Exception
     {
         String varname = "test";
@@ -440,7 +452,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -476,7 +488,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
         }
     }
     
-    
+    @Test
     public void testAddEditedValue_CompletedUnstable() throws Exception
     {
         String varname = "test";
@@ -492,7 +504,7 @@ public class TextareaChoiceListProviderJenkinsTest extends ExtensiableChoicePara
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         

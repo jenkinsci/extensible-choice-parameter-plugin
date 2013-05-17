@@ -23,6 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,14 +32,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.FilenameChoiceListProvider.ScanType;
-import junit.framework.TestCase;
 
 /**
  * Tests for FilenameChoiceListProvider, not concerned with Jenkins.
  */
-public class FilenameChoiceListProviderSimpleTest extends TestCase
+public class FilenameChoiceListProviderSimpleTest
 {
     private File createTempDir() throws IOException
     {
@@ -48,6 +50,7 @@ public class FilenameChoiceListProviderSimpleTest extends TestCase
         return tempFile;
     }
     
+    @Test
     public void testFilenameChoiceListProvider()
     {
         // simple value
@@ -182,6 +185,7 @@ public class FilenameChoiceListProviderSimpleTest extends TestCase
         }
     }
     
+    @Test
     public void testGetFileList() throws IOException
     {
         File tempDir = createTempDir();

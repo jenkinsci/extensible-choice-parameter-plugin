@@ -23,17 +23,19 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Tests for GlobalTextareaChoiceListEntry, not corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListEntrySimpleTest extends TestCase
+public class GlobalTextareaChoiceListEntrySimpleTest
 {
+    @Test
     public void testGlobalTextareaChoiceListEntry_name()
     {
         // Easy case.
@@ -74,6 +76,7 @@ public class GlobalTextareaChoiceListEntrySimpleTest extends TestCase
      * Also, you will have to move this method to GlobalTextareaChoiceListEntryJenkinsTest,
      * for the parameter check must be performed with the descriptor.
      */
+    @Test
     public void testGlobalTextareaChoiceListEntry_nameWithImproperValue()
     {
         // null.
@@ -133,6 +136,7 @@ public class GlobalTextareaChoiceListEntrySimpleTest extends TestCase
         }
     }
     
+    @Test
     public void testGlobalTextareaChoiceListEntry_choiceListText()
     {
         // complete tests are done in TextareaStringListUtilityTest.

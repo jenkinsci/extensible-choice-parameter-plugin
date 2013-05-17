@@ -23,6 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
+
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -48,8 +50,10 @@ import jp.ikedam.jenkins.plugins.extensible_choice_parameter.AddEditedChoiceList
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
-import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -63,14 +67,18 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
  * Tests for GlobalTextareaChoiceListProvider, corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
+public class GlobalTextareaChoiceListProviderJenkinsTest
 {
+    @Rule
+    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+    
     private GlobalTextareaChoiceListProvider.DescriptorImpl getDescriptor()
     {
         return (GlobalTextareaChoiceListProvider.DescriptorImpl)Jenkins.getInstance().getDescriptor(GlobalTextareaChoiceListProvider.class);
         //return new GlobalTextareaChoiceListProvider.DescriptorImpl();
     }
     
+    @Test
     public void testDescriptorSetChoiceListEntryList()
     {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
@@ -138,6 +146,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
     }
     
     @SuppressWarnings("unchecked")  // CollectionUtils.transformedCollection is not generic.
+    @Test
     public void testDescriptorDoFillNameItems()
     {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
@@ -205,6 +214,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         }
     }
     
+    @Test
     public void testDoFillDefaultChoiceItems()
     {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
@@ -291,6 +301,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         }
     }
     
+    @Test
     public void testDescriptorGetChoiceListEntry()
     {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
@@ -347,9 +358,10 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
      * 6. assert if the new created descriptor is in the state of 1.
      * @throws Exception 
      */
+    @Test
     public void testDescriptorConfigure() throws Exception
     {
-        WebClient wc = new WebClient();
+        WebClient wc = j.createWebClient();
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry validEntry1 = new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2\n", false);
         GlobalTextareaChoiceListEntry validEntry2 = new GlobalTextareaChoiceListEntry("entry2", "value1\nvalue2\n", false);
@@ -366,7 +378,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
             // update the descriptor to the another state.
             descriptor.setChoiceListEntryList(null);
             
-            submit(configForm);
+            j.submit(configForm);
             
             assertEquals("Simple submission: descriptor after submission", 
                     Arrays.asList(validEntry1, validEntry2, validEntry3),
@@ -395,7 +407,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
             // update the descriptor to the another state.
             descriptor.setChoiceListEntryList(null);
             
-            submit(configForm);
+            j.submit(configForm);
             
             assertEquals("Submission with invalid entry: descriptor after submission", 
                     Arrays.asList(validEntry2, validEntry3),
@@ -424,7 +436,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
             // update the descriptor to the another state.
             descriptor.setChoiceListEntryList(Arrays.asList(validEntry1, validEntry2));
             
-            submit(configForm);
+            j.submit(configForm);
             
             assertEquals("Empty submission: descriptor after submission", 
                     new ArrayList<GlobalTextareaChoiceListEntry>(0),
@@ -538,7 +550,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         
         job.save();
         
-        WebClient wc = new WebClient();
+        WebClient wc = j.createWebClient();
         
         wc.setPrintContentOnFailingStatusCode(false);
         wc.setThrowExceptionOnFailingStatusCode(false);
@@ -578,7 +590,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
             HtmlTextInput input = (HtmlTextInput)form.getInputByName("value");
             input.setValueAttribute(value);
         }
-        submit(form);
+        j.submit(form);
         
         FreeStyleBuild build = job.getLastBuild();
         
@@ -611,6 +623,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         return choiceList.contains(value);
     }
     
+    @Test
     public void testAddEditedValue_Disabled1() throws Exception
     {
         String varname = "test";
@@ -633,7 +646,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -665,6 +678,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         }
     }
     
+    @Test
     public void testAddEditedValue_Disabled2() throws Exception
     {
         String varname = "test";
@@ -687,7 +701,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -719,6 +733,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         }
     }
     
+    @Test
     public void testAddEditedValue_Disabled3() throws Exception
     {
         String varname = "test";
@@ -741,7 +756,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -773,6 +788,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         }
     }
     
+    @Test
     public void testAddEditedValue_Trigger() throws Exception
     {
         String varname = "test";
@@ -795,7 +811,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -831,6 +847,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         }
     }
     
+    @Test
     public void testAddEditedValue_Completed() throws Exception
     {
         String varname = "test";
@@ -853,7 +870,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -889,6 +906,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         }
     }
     
+    @Test
     public void testAddEditedValue_CompletedStable() throws Exception
     {
         String varname = "test";
@@ -911,7 +929,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         
@@ -947,6 +965,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
         }
     }
     
+    @Test
     public void testAddEditedValue_CompletedUnstable() throws Exception
     {
         String varname = "test";
@@ -969,7 +988,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest extends ExtensiableChoi
                 true,
                 "description"
                 );
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         job.save();
         

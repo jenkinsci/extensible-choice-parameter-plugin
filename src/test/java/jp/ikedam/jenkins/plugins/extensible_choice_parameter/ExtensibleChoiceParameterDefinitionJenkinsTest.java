@@ -23,6 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +41,9 @@ import hudson.model.ParameterDefinition;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.util.FormValidation;
 
-import org.jvnet.hudson.test.ExtensiableChoiceParameterJenkinsTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
@@ -54,13 +58,17 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 /**
  * Tests for ExtensibleChoiceParameterDefinition, corresponding to Jenkins.
  */
-public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableChoiceParameterJenkinsTestCase
+public class ExtensibleChoiceParameterDefinitionJenkinsTest
 {
+    @Rule
+    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+    
     private ExtensibleChoiceParameterDefinition.DescriptorImpl getDescriptor()
     {
         return (ExtensibleChoiceParameterDefinition.DescriptorImpl)(new ExtensibleChoiceParameterDefinition("name", null, false, "")).getDescriptor();
     }
     
+    @Test
     public void testDescriptorDoCheckNameOk()
     {
         ExtensibleChoiceParameterDefinition.DescriptorImpl descriptor = getDescriptor();
@@ -87,6 +95,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
         assertEquals(descriptor.doCheckName("  _abc_1_2_3   ").kind, FormValidation.Kind.OK);
     }
     
+    @Test
     public void testDescriptorDoCheckNameError()
     {
         ExtensibleChoiceParameterDefinition.DescriptorImpl descriptor = getDescriptor();
@@ -145,12 +154,12 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
      */
     private EnvVars runBuildWithSelectParameter(ParameterDefinition def, String value) throws Exception
     {
-        FreeStyleProject job = createFreeStyleProject();
+        FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
         job.getBuildersList().add(ceb);
         
-        WebClient wc = new WebClient();
+        WebClient wc = j.createWebClient();
         
         // make output quiet.
         // comment out here if an unexpected behavior occurs.
@@ -206,7 +215,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
             HtmlTextInput input = (HtmlTextInput)form.getInputByName("value");
             input.setValueAttribute(value);
         }
-        submit(form);
+        j.submit(form);
         
         while (job.getLastBuild().isBuilding()) Thread.sleep(100);
         
@@ -219,6 +228,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
      * test for createValue(StaplerRequest request, JSONObject jo)
      * @throws Exception 
      */
+    @Test
     public void testCreateValueFromView() throws Exception
     {
         String name = "PARAM1";
@@ -356,6 +366,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
      * 
      * @throws Exception 
      */
+    @Test
     public void testCreateValueFromViewWithInvalidProvider() throws Exception
     {
         String name = "PARAM1";
@@ -437,6 +448,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
         }
     }
     
+    @Test
     public void testGetDefaultParameterValue() throws IOException, InterruptedException, ExecutionException
     {
         // editable, in choice
@@ -448,7 +460,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
                     true,
                     "description"
                     );
-            FreeStyleProject job = createFreeStyleProject();
+            FreeStyleProject job = j.createFreeStyleProject();
             job.addProperty(new ParametersDefinitionProperty(def));
             CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
             job.getBuildersList().add(ceb);
@@ -473,7 +485,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
                     false,
                     "description"
                     );
-            FreeStyleProject job = createFreeStyleProject();
+            FreeStyleProject job = j.createFreeStyleProject();
             job.addProperty(new ParametersDefinitionProperty(def));
             CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
             job.getBuildersList().add(ceb);
@@ -497,7 +509,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
                     true,
                     "description"
                     );
-            FreeStyleProject job = createFreeStyleProject();
+            FreeStyleProject job = j.createFreeStyleProject();
             job.addProperty(new ParametersDefinitionProperty(def));
             CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
             job.getBuildersList().add(ceb);
@@ -521,7 +533,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends ExtensiableC
                     false,
                     "description"
                     );
-            FreeStyleProject job = createFreeStyleProject();
+            FreeStyleProject job = j.createFreeStyleProject();
             job.addProperty(new ParametersDefinitionProperty(def));
             CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
             job.getBuildersList().add(ceb);
