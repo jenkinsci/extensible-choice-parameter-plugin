@@ -25,6 +25,7 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import static org.junit.Assert.*;
 
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
 import java.util.Arrays;
@@ -45,6 +46,11 @@ public class SystemGroovyChoiceListProviderJenkinsTest
     
     static private String properScript = "[\"a\", \"b\", \"c\"]";
     static private List<String> properScriptReturn = Arrays.asList("a", "b", "c");
+    
+    static private String nonstringScript = "[1, 2, 3]";
+    static private List<String> nonstringScriptReturn = Arrays.asList("1", "2", "3");
+    
+    static private String nonlistScript = "return \"abc\"";
     
     static private String emptyListScript = "def ret = []";
     
@@ -76,6 +82,22 @@ public class SystemGroovyChoiceListProviderJenkinsTest
             {
                 assertEquals("Script returned an unexpected list", properScriptReturn.get(i), ret.get(i + 1).value);
             }
+        }
+        
+        // Non-string list script
+        {
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(nonstringScript);
+            assertEquals("Script returned an unexpected list", nonstringScriptReturn.size() + 1, ret.size());
+            for(int i = 0; i < nonstringScriptReturn.size(); ++i)
+            {
+                assertEquals("Script returned an unexpected list", nonstringScriptReturn.get(i), ret.get(i + 1).value);
+            }
+        }
+        
+        // non-list script
+        {
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(nonlistScript);
+            assertEquals("Script returning non-list must return an empty list", 1, ret.size());
         }
         
         // Empty list script
@@ -122,6 +144,42 @@ public class SystemGroovyChoiceListProviderJenkinsTest
     }
     
     @Test
+    public void testDescriptor_doTest()
+    {
+        SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
+        
+        // Proper script
+        {
+            FormValidation formValidation = descriptor.doTest(properScript);
+            assertEquals("Test for proper script must succeed", FormValidation.Kind.OK, formValidation.kind);
+        }
+        
+        // Syntax broken script
+        {
+            FormValidation formValidation = descriptor.doTest(syntaxBrokenScript);
+            assertEquals("Test for broken script must fail", FormValidation.Kind.ERROR, formValidation.kind);
+        }
+        
+        // Script raising an exception
+        {
+            FormValidation formValidation = descriptor.doTest(exceptionScript);
+            assertEquals("Test for script raising an exception must fail", FormValidation.Kind.ERROR, formValidation.kind);
+        }
+        
+        // Script returning non-list
+        {
+            FormValidation formValidation = descriptor.doTest(nonlistScript);
+            assertEquals("Test for script returning non-list must fail", FormValidation.Kind.ERROR, formValidation.kind);
+        }
+        
+        // Script returning null
+        {
+            FormValidation formValidation = descriptor.doTest(nullScript);
+            assertEquals("Test for script retuning null must fail", FormValidation.Kind.ERROR, formValidation.kind);
+        }
+    }
+    
+    @Test
     public void testGetChoiceList()
     {
         // Proper script
@@ -136,6 +194,30 @@ public class SystemGroovyChoiceListProviderJenkinsTest
             {
                 assertEquals("Script returned an unexpected list", properScriptReturn.get(i), ret.get(i));
             }
+        }
+        
+        // non-string list script
+        {
+            SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(
+                    nonstringScript,
+                    null
+            );
+            List<String> ret = target.getChoiceList();
+            assertEquals("Script returned an unexpected list", nonstringScriptReturn.size(), ret.size());
+            for(int i = 0; i < nonstringScriptReturn.size(); ++i)
+            {
+                assertEquals("Script returned an unexpected list", nonstringScriptReturn.get(i), ret.get(i));
+            }
+        }
+        
+        // non-list script
+        {
+            SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(
+                    nonlistScript,
+                    null
+            );
+            List<String> ret = target.getChoiceList();
+            assertEquals("Script retuning non-list must be fixed to an empty list", 0, ret.size());
         }
         
         // Empty list script
