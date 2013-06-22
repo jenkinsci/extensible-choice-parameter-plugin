@@ -131,7 +131,6 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
         return (ret != null)?ret:new ArrayList<String>(0);
     }
 
-    @SuppressWarnings("unchecked")
     private static List<String> runScript(String scriptText) {
         CompilerConfiguration compilerConfig = new CompilerConfiguration();
 
@@ -154,16 +153,14 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
         if  (!(out instanceof List<?>)) {
             throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
         }
-        else {
-            List<?> strings = (List<?>) out;
-            for (Object obj : strings) {
-                if (!(obj instanceof String)) {
-                    throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
-                }
+        
+        List<String> ret = new ArrayList<String>();
+        for (Object obj : (List<?>) out) {
+            if(obj != null) {
+                ret.add(obj.toString());
             }
         }
-
-        return (List<String>) out;
+        return ret;
     }
     private String scriptText;
 
