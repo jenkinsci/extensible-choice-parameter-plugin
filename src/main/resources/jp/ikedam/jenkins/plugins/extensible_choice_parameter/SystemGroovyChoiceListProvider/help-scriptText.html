@@ -1,3 +1,24 @@
 <div>
-The Groovy system script to execute for determining the choices.
+<p>The Groovy system script to execute for determining the choices.
+The list returned from the script is treated as choices. It is treated as followings:</p>
+<ul>
+    <li>A non-string value contained in the list will be converted to a string using toString()</li>
+    <li>Null is ignored (not appeared in choices).</li>
+    <li>When exception occurred or returned a non-list value, choices will be empty.</li>
+</ul>
+<br>
+<p>Here is an example:</p>
+<code style="white-space: pre-wrap;">
+Example1-----------------------------------------------------------------------------
+// a simple example returning fixed choices.
+return ["choice1", "choice2", "choice3"];
+
+Example2-----------------------------------------------------------------------------
+// choices 1,2,3,...,10.
+return 1..10;
+
+Example3-----------------------------------------------------------------------------
+// today and last 6 days
+return (6..0).collect{new Date().plus(-it).format("yyyy-MM-dd")};
+</code>
 </div>
