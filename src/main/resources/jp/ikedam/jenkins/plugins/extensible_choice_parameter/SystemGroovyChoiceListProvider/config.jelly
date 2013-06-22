@@ -25,6 +25,12 @@ THE SOFTWARE.
     <f:entry title="${%Groovy System Script}" field="scriptText">
         <f:expandableTextbox />
     </f:entry>
+    <f:validateButton
+        method="test"
+        title="${%Run the Script Now}"
+        progress="${%Running...}"
+        with="scriptText"
+    />
     <f:entry title="${%Default Choice}" field="defaultChoice" help="/plugin/extensible-choice-parameter/help/defaultChoice.html">
         <f:select />
     </f:entry>

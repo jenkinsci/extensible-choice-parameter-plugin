@@ -27,6 +27,7 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.Extension;
 import hudson.model.Descriptor;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
 import java.io.Serializable;
@@ -37,6 +38,7 @@ import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -107,6 +109,26 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
             }
             
             return ret;
+        }
+        
+        public FormValidation doTest(@QueryParameter String scriptText)
+        {
+            List<String> choices = null;
+            try
+            {
+                choices = runScript(scriptText);
+            }
+            catch(Exception e)
+            {
+                return FormValidation.error(e, "Failed to execute script");
+            }
+            
+            if(choices == null)
+            {
+                return FormValidation.error("Script returned null.");
+            }
+            
+            return FormValidation.ok(StringUtils.join(choices, '\n'));
         }
     }
     
