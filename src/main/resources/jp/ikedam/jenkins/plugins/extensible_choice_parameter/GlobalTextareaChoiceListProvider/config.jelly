@@ -30,8 +30,8 @@ THE SOFTWARE.
     <f:entry title="${%Name}" field="name">
         <f:select />
     </f:entry>
-    <f:entry title="${%Default Choice}">
-        <f:select field="defaultChoice" />
+    <f:entry title="${%Default Choice}" field="defaultChoice" help="/plugin/extensible-choice-parameter/help/defaultChoice.html">
+        <f:select />
     </f:entry>
     <m:addEditedValue />
 </j:jelly>
