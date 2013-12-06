@@ -26,6 +26,7 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.Extension;
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -42,6 +43,7 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.Stapler;
 
 /**
  * A choice provider whose choices are determined by a Groovy script.
@@ -163,8 +165,15 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
             cl = Thread.currentThread().getContextClassLoader();
         }
 
+        Binding binding = new Binding();
+        binding.setVariable("jenkins", Jenkins.getInstance());
+        if (Stapler.getCurrentRequest() != null) {
+            binding.setVariable("project", Stapler.getCurrentRequest().findAncestorObject(AbstractProject.class));
+        } else {
+            binding.setVariable("project", null);
+        }
         GroovyShell shell =
-            new GroovyShell(cl, new Binding(), compilerConfig);
+            new GroovyShell(cl, binding, compilerConfig);
 
         Object out = shell.evaluate(scriptText);
         if(out == null)

@@ -6,6 +6,14 @@ The list returned from the script is treated as choices. It is treated as follow
     <li>Null is ignored (not appeared in choices).</li>
     <li>When exception occurred or returned a non-list value, choices will be empty.</li>
 </ul>
+<p>following variables are pre-defined:</p>
+<dl>
+    <dt>jenkins</dt>
+       <dd>The instance of <a href="http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html">Jenkins</a>. Just a short cut for Jenkins.getInstance().</dd>
+    <dt>project</dt>
+       <dd>The project. An instance of <a href="http://javadoc.jenkins-ci.org/hudson/model/AbstractProject.html">AbstractProject</a>. Available only when a build is triggered from a browser. Otherwise, e.g. when triggered with polling or triggered from CLI, this will be null.</dd>
+</dl>
+<br>
 <br>
 <p>Here is an example:</p>
 <code style="white-space: pre-wrap;">

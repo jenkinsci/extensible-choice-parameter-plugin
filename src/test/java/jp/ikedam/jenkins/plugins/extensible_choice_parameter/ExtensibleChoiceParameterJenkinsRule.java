@@ -29,9 +29,12 @@ import hudson.model.FreeStyleProject;
 
 import java.io.IOException;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestEnvironment;
 import org.jvnet.hudson.test.TestPluginManager;
+
+import com.gargoylesoftware.htmlunit.WebResponse;
 
 /**
  * Utility class for Tests.
@@ -118,5 +121,42 @@ public class ExtensibleChoiceParameterJenkinsRule extends JenkinsRule
             throws IOException
     {
         return super.createFreeStyleProject(name);
+    }
+    
+    /**
+     * Get Web Client that allows 405 Method Not Allowed.
+     * This happens when accessing build page of a project with parameters.
+     * 
+     * @return WebClient
+     */
+    public WebClient createAllow405WebClient()
+    {
+        return new WebClient()
+        {
+            private static final long serialVersionUID = -7231209645303821638L;
+            
+            @Override
+            public void throwFailingHttpStatusCodeExceptionIfNecessary(
+                    WebResponse webResponse)
+            {
+                if(webResponse.getStatusCode() == HttpStatus.SC_METHOD_NOT_ALLOWED)
+                {
+                    // allow 405.
+                    return;
+                }
+                super.throwFailingHttpStatusCodeExceptionIfNecessary(webResponse);
+            }
+            
+            @Override
+            public void printContentIfNecessary(WebResponse webResponse)
+            {
+                if(webResponse.getStatusCode() == HttpStatus.SC_METHOD_NOT_ALLOWED)
+                {
+                    // allow 405.
+                    return;
+                }
+                super.printContentIfNecessary(webResponse);
+            }
+        };
     }
 }

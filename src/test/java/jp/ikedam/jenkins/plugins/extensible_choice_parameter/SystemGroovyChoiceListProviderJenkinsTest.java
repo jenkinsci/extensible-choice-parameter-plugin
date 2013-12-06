@@ -24,7 +24,8 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import static org.junit.Assert.*;
-
+import hudson.model.FreeStyleProject;
+import hudson.model.ParametersDefinitionProperty;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
@@ -33,6 +34,11 @@ import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
+
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 
 import jenkins.model.Jenkins;
 
@@ -289,5 +295,28 @@ public class SystemGroovyChoiceListProviderJenkinsTest
             List<String> ret = target.getChoiceList();
             assertEquals("null must return an empty list", 0, ret.size());
         }
+    }
+    
+    @Test
+    public void testVariables() throws Exception
+    {
+        FreeStyleProject p = j.createFreeStyleProject();
+        p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
+                "test",
+                new SystemGroovyChoiceListProvider("[jenkins.rootDir.absolutePath, project.fullName]", null),
+                false,
+                "test"
+        )));
+        
+        WebClient wc = j.createAllow405WebClient();
+        HtmlPage page = wc.getPage(p, "build");
+        
+        List<HtmlElement> elements = page.getElementsByTagName("select");
+        assertEquals(1, elements.size());
+        assertTrue(elements.get(0) instanceof HtmlSelect);
+        HtmlSelect sel = (HtmlSelect)elements.get(0);
+        assertEquals(2, sel.getOptionSize());
+        assertEquals(j.jenkins.getRootDir().getAbsolutePath(), sel.getOption(0).getValueAttribute());
+        assertEquals(p.getFullName(), sel.getOption(1).getValueAttribute());
     }
 }

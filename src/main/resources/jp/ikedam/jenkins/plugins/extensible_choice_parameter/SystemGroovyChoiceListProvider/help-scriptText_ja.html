@@ -5,6 +5,13 @@
     <li>null要素は無視します(選択肢に表示しません)</li>
     <li>例外が発生したり、配列でない値を返した場合、選択肢は空になります。</li>
 </ul>
+<p>スクリプト内では以下の変数が事前に定義されています。</p>
+<dl>
+    <dt>jenkins</dt>
+       <dd><a href="http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html">Jenkins</a> のインスタンス。 Jenkins.getInstance() のショートカットです。</dd>
+    <dt>project</dt>
+       <dd>対象のプロジェクト。<a href="http://javadoc.jenkins-ci.org/hudson/model/AbstractProject.html">AbstractProject</a> のインスタンス。ブラウザからビルドを行った時のみ有効で、それ以外の場合 (ポーリング時、CLIからの起動時など) は null になります。</dd>
+</dl>
 <br>
 <p>スクリプトの例:</p>
 <code style="white-space: pre-wrap;">
