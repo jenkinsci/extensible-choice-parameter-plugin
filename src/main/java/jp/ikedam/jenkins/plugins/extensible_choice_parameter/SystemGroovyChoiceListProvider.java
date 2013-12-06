@@ -38,12 +38,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
+import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * A choice provider whose choices are determined by a Groovy script.
@@ -70,6 +72,24 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
     public static class DescriptorImpl extends Descriptor<ChoiceListProvider>
     {
         /**
+         * Create a new instance of {@link SystemGroovyChoiceListProvider} from user inputs.
+         * 
+         * @param req
+         * @param formData
+         * @return
+         * @throws hudson.model.Descriptor.FormException
+         * @see hudson.model.Descriptor#newInstance(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
+         */
+        @Override
+        public SystemGroovyChoiceListProvider newInstance(StaplerRequest req, JSONObject formData)
+                throws hudson.model.Descriptor.FormException
+        {
+            SystemGroovyChoiceListProvider provider = (SystemGroovyChoiceListProvider)super.newInstance(req, formData);
+            provider.setProject(req.findAncestorObject(AbstractProject.class));
+            return provider;
+        }
+        
+        /**
          * the display name shown in the dropdown to select a choice provider.
          * 
          * @return display name
@@ -84,10 +104,11 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
         /**
          * Returns the selection of a default choice.
          * 
-         * @param choiceListText
+         * @param req null passed in tests.
+         * @param scriptText
          * @return the selection of a default choice
          */
-        public ListBoxModel doFillDefaultChoiceItems(@QueryParameter String scriptText)
+        public ListBoxModel doFillDefaultChoiceItems(StaplerRequest req, @QueryParameter String scriptText)
         {
             ListBoxModel ret = new ListBoxModel();
             ret.add(Messages.ExtensibleChoiceParameterDefinition_NoDefaultChoice(), NoDefaultChoice);
@@ -95,7 +116,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
             List<String> choices = null;
             try
             {
-                choices = runScript(scriptText);
+                choices = runScript(scriptText, (req != null)?req.findAncestorObject(AbstractProject.class):null);
             }
             catch(Exception e)
             {
@@ -113,12 +134,12 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
             return ret;
         }
         
-        public FormValidation doTest(@QueryParameter String scriptText)
+        public FormValidation doTest(StaplerRequest req, @QueryParameter String scriptText)
         {
             List<String> choices = null;
             try
             {
-                choices = runScript(scriptText);
+                choices = runScript(scriptText, (req != null)?req.findAncestorObject(AbstractProject.class):null);
             }
             catch(Exception e)
             {
@@ -144,9 +165,19 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
     public List<String> getChoiceList()
     {
         List<String> ret = null;
+        AbstractProject<?,?> project = getProject();
+        if(project == null)
+        {
+            // try to retrieve from current request.
+            if(Stapler.getCurrentRequest() != null)
+            {
+                project = Stapler.getCurrentRequest().findAncestorObject(AbstractProject.class);
+            }
+        }
+        
         try
         {
-            ret = runScript(getScriptText());
+            ret = runScript(getScriptText(), project);
         }
         catch(Exception e)
         {
@@ -155,7 +186,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
         return (ret != null)?ret:new ArrayList<String>(0);
     }
 
-    private static List<String> runScript(String scriptText) {
+    private static List<String> runScript(String scriptText, AbstractProject<?,?> project) {
         CompilerConfiguration compilerConfig = new CompilerConfiguration();
 
         // see RemotingDiagnostics.Script
@@ -167,11 +198,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
 
         Binding binding = new Binding();
         binding.setVariable("jenkins", Jenkins.getInstance());
-        if (Stapler.getCurrentRequest() != null) {
-            binding.setVariable("project", Stapler.getCurrentRequest().findAncestorObject(AbstractProject.class));
-        } else {
-            binding.setVariable("project", null);
-        }
+        binding.setVariable("project", project);
         GroovyShell shell =
             new GroovyShell(cl, binding, compilerConfig);
 
@@ -235,5 +262,28 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
     {
         this.scriptText = scriptText;
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
+    }
+    
+    /**
+     * The project of this is configured in.
+     * This will be stored in job configuration XML like
+     * &lt;project class=&quot;project&quot; reference=&quot;../../../../../..&quot; /&gt;
+     */
+    private AbstractProject<?,?> project;
+    
+    /**
+     * @param project
+     */
+    protected void setProject(AbstractProject<?,?> project)
+    {
+        this.project = project;
+    }
+    
+    /**
+     * @return
+     */
+    protected AbstractProject<?,?> getProject()
+    {
+        return project;
     }
 }

@@ -24,6 +24,7 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import static org.junit.Assert.*;
+import hudson.cli.CLI;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.util.FormValidation;
@@ -35,6 +36,7 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -82,7 +84,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         
         // Proper script
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(properScript);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, properScript);
             assertEquals("Script returned an unexpected list", properScriptReturn.size() + 1, ret.size());
             for(int i = 0; i < properScriptReturn.size(); ++i)
             {
@@ -92,7 +94,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         
         // Non-string list script
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(nonstringScript);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, nonstringScript);
             assertEquals("Script returned an unexpected list", nonstringScriptReturn.size() + 1, ret.size());
             for(int i = 0; i < nonstringScriptReturn.size(); ++i)
             {
@@ -102,49 +104,49 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         
         // non-list script
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(nonlistScript);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, nonlistScript);
             assertEquals("Script returning non-list must return an empty list", 1, ret.size());
         }
         
         // Empty list script
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(emptyListScript);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, emptyListScript);
             assertEquals("Script must return an empty list", 1, ret.size());
         }
         
         // Null script
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(nullScript);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, nullScript);
             assertEquals("Script with null must return an empty list", 1, ret.size());
         }
         
         // emptyScript
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(emptyScript);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, emptyScript);
             assertEquals("empty script must return an empty list", 1, ret.size());
         }
         
         // blankScript
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(blankScript);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, blankScript);
             assertEquals("blank script must return an empty list", 1, ret.size());
         }
         
         // Syntax broken script
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(syntaxBrokenScript);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, syntaxBrokenScript);
             assertEquals("Syntax-broken-script must return an empty list", 1, ret.size());
         }
         
         // exceptionScript
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(exceptionScript);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, exceptionScript);
             assertEquals("Script throwing an exception must return an empty list", 1, ret.size());
         }
         
         // null
         {
-            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null);
+            ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, null);
             assertEquals("null must return an empty list", 1, ret.size());
         }
     }
@@ -156,31 +158,31 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         
         // Proper script
         {
-            FormValidation formValidation = descriptor.doTest(properScript);
+            FormValidation formValidation = descriptor.doTest(null, properScript);
             assertEquals("Test for proper script must succeed", FormValidation.Kind.OK, formValidation.kind);
         }
         
         // Syntax broken script
         {
-            FormValidation formValidation = descriptor.doTest(syntaxBrokenScript);
+            FormValidation formValidation = descriptor.doTest(null, syntaxBrokenScript);
             assertEquals("Test for broken script must fail", FormValidation.Kind.ERROR, formValidation.kind);
         }
         
         // Script raising an exception
         {
-            FormValidation formValidation = descriptor.doTest(exceptionScript);
+            FormValidation formValidation = descriptor.doTest(null, exceptionScript);
             assertEquals("Test for script raising an exception must fail", FormValidation.Kind.ERROR, formValidation.kind);
         }
         
         // Script returning non-list
         {
-            FormValidation formValidation = descriptor.doTest(nonlistScript);
+            FormValidation formValidation = descriptor.doTest(null, nonlistScript);
             assertEquals("Test for script returning non-list must fail", FormValidation.Kind.ERROR, formValidation.kind);
         }
         
         // Script returning null
         {
-            FormValidation formValidation = descriptor.doTest(nullScript);
+            FormValidation formValidation = descriptor.doTest(null, nullScript);
             assertEquals("Test for script retuning null must fail", FormValidation.Kind.ERROR, formValidation.kind);
         }
     }
@@ -318,5 +320,44 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         assertEquals(2, sel.getOptionSize());
         assertEquals(j.jenkins.getRootDir().getAbsolutePath(), sel.getOption(0).getValueAttribute());
         assertEquals(p.getFullName(), sel.getOption(1).getValueAttribute());
+    }
+    
+    @Test
+    public void testProjectVariable() throws Exception
+    {
+        FreeStyleProject p = j.createFreeStyleProject();
+        CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
+        p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
+                "test",
+                new SystemGroovyChoiceListProvider("return [(project != null)?project.fullName:\"none\"]", null),
+                false,
+                "test"
+        )));
+        p.getBuildersList().add(ceb);
+        
+        WebClient wc = j.createAllow405WebClient();
+        HtmlPage page = wc.getPage(p, "build");
+        
+        List<HtmlElement> elements = page.getElementsByTagName("select");
+        assertEquals(1, elements.size());
+        assertTrue(elements.get(0) instanceof HtmlSelect);
+        HtmlSelect sel = (HtmlSelect)elements.get(0);
+        assertEquals(1, sel.getOptionSize());
+        assertEquals(p.getFullName(), sel.getOption(0).getValueAttribute());
+        
+        // from CLI, the project does not passed properly.
+        CLI cli = new CLI(j.getURL());
+        assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
+        j.assertBuildStatusSuccess(p.getLastBuild());
+        assertEquals("none", ceb.getEnvVars().get("test"));
+        
+        // once saved in configuration page, the project gets to be passed properly.
+        p.getBuildersList().clear(); // CaptureEnvironmentBuilder does not support configuration pages.
+        j.submit(wc.getPage(p, "configure").getFormByName("config"));
+        p.getBuildersList().add(ceb);
+        
+        assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
+        j.assertBuildStatusSuccess(p.getLastBuild());
+        assertEquals(p.getFullName(), ceb.getEnvVars().get("test"));
     }
 }
