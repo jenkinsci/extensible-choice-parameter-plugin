@@ -25,17 +25,13 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import hudson.EnvVars;
-import hudson.model.FreeStyleBuild;
-import hudson.model.Result;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParametersDefinitionProperty;
@@ -159,17 +155,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
         job.getBuildersList().add(ceb);
         
-        WebClient wc = j.createWebClient();
+        WebClient wc = j.createAllow405WebClient();
         
-        // make output quiet.
-        // comment out here if an unexpected behavior occurs.
-        wc.setPrintContentOnFailingStatusCode(false);
-        
-        // Accessing build page without parameters causes 405 Method not allowed.
-        // So suppress the exception.
-        wc.setThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = wc.getPage(job, "build?delay=0sec");
-        wc.setThrowExceptionOnFailingStatusCode(true);
         
         HtmlForm form = null;
         
@@ -217,7 +205,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         }
         j.submit(form);
         
-        while (job.getLastBuild().isBuilding()) Thread.sleep(100);
+        j.waitUntilNoActivity();
         
         job.delete();
         
@@ -449,7 +437,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
     }
     
     @Test
-    public void testGetDefaultParameterValue() throws IOException, InterruptedException, ExecutionException
+    public void testGetDefaultParameterValue() throws Exception
     {
         // editable, in choice
         {
@@ -466,12 +454,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             job.getBuildersList().add(ceb);
             job.save();
             
-            FreeStyleBuild b = job.scheduleBuild2(job.getQuietPeriod()).get();
-            while(b.isBuilding())
-            {
-                Thread.sleep(100);
-            }
-            assertEquals("editable, in choice", Result.SUCCESS, b.getResult());
+            j.assertBuildStatusSuccess(job.scheduleBuild2(0));
             assertEquals("editable, in choice", "value2", ceb.getEnvVars().get("test"));
         }
         
@@ -491,12 +474,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             job.getBuildersList().add(ceb);
             job.save();
             
-            FreeStyleBuild b = job.scheduleBuild2(job.getQuietPeriod()).get();
-            while(b.isBuilding())
-            {
-                Thread.sleep(100);
-            }
-            assertEquals("non-editable, in choice", Result.SUCCESS, b.getResult());
+            j.assertBuildStatusSuccess(job.scheduleBuild2(0));
             assertEquals("non-editable, in choice", "value2", ceb.getEnvVars().get("test"));
         }
         
@@ -515,12 +493,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             job.getBuildersList().add(ceb);
             job.save();
             
-            FreeStyleBuild b = job.scheduleBuild2(job.getQuietPeriod()).get();
-            while(b.isBuilding())
-            {
-                Thread.sleep(100);
-            }
-            assertEquals("editable, not in choice", Result.SUCCESS, b.getResult());
+            j.assertBuildStatusSuccess(job.scheduleBuild2(0));
             assertEquals("editable, not in choice", "value4", ceb.getEnvVars().get("test"));
         }
         
