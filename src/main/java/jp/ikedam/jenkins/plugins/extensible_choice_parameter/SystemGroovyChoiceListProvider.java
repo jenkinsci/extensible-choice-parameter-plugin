@@ -26,6 +26,7 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.Extension;
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -37,11 +38,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
+import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.Stapler;
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * A choice provider whose choices are determined by a Groovy script.
@@ -68,6 +72,28 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
     public static class DescriptorImpl extends Descriptor<ChoiceListProvider>
     {
         /**
+         * Create a new instance of {@link SystemGroovyChoiceListProvider} from user inputs.
+         * 
+         * @param req
+         * @param formData
+         * @return
+         * @throws hudson.model.Descriptor.FormException
+         * @see hudson.model.Descriptor#newInstance(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
+         */
+        @Override
+        public SystemGroovyChoiceListProvider newInstance(StaplerRequest req, JSONObject formData)
+                throws hudson.model.Descriptor.FormException
+        {
+            SystemGroovyChoiceListProvider provider = (SystemGroovyChoiceListProvider)super.newInstance(req, formData);
+            if(provider.isUsePredefinedVariables())
+            {
+                // set project only when variables is requested.
+                provider.setProject(req.findAncestorObject(AbstractProject.class));
+            }
+            return provider;
+        }
+        
+        /**
          * the display name shown in the dropdown to select a choice provider.
          * 
          * @return display name
@@ -82,18 +108,26 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
         /**
          * Returns the selection of a default choice.
          * 
-         * @param choiceListText
+         * @param req null passed in tests.
+         * @param scriptText
          * @return the selection of a default choice
          */
-        public ListBoxModel doFillDefaultChoiceItems(@QueryParameter String scriptText)
+        public ListBoxModel doFillDefaultChoiceItems(StaplerRequest req, @QueryParameter String scriptText, @QueryParameter boolean usePredefinedVariables)
         {
             ListBoxModel ret = new ListBoxModel();
             ret.add(Messages.ExtensibleChoiceParameterDefinition_NoDefaultChoice(), NoDefaultChoice);
             
             List<String> choices = null;
+            AbstractProject<?,?> project = null;
+            
+            if(usePredefinedVariables && req != null)
+            {
+                project = req.findAncestorObject(AbstractProject.class);
+            }
+            
             try
             {
-                choices = runScript(scriptText);
+                choices = runScript(scriptText, usePredefinedVariables, project);
             }
             catch(Exception e)
             {
@@ -111,12 +145,19 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
             return ret;
         }
         
-        public FormValidation doTest(@QueryParameter String scriptText)
+        public FormValidation doTest(StaplerRequest req, @QueryParameter String scriptText, @QueryParameter boolean usePredefinedVariables)
         {
             List<String> choices = null;
+            AbstractProject<?,?> project = null;
+            
+            if(usePredefinedVariables && req != null)
+            {
+                project = req.findAncestorObject(AbstractProject.class);
+            }
+            
             try
             {
-                choices = runScript(scriptText);
+                choices = runScript(scriptText, usePredefinedVariables, project);
             }
             catch(Exception e)
             {
@@ -142,9 +183,19 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
     public List<String> getChoiceList()
     {
         List<String> ret = null;
+        AbstractProject<?,?> project = getProject();
+        if(isUsePredefinedVariables() && project == null)
+        {
+            // try to retrieve from current request.
+            if(Stapler.getCurrentRequest() != null)
+            {
+                project = Stapler.getCurrentRequest().findAncestorObject(AbstractProject.class);
+            }
+        }
+        
         try
         {
-            ret = runScript(getScriptText());
+            ret = runScript(getScriptText(), isUsePredefinedVariables(), project);
         }
         catch(Exception e)
         {
@@ -153,7 +204,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
         return (ret != null)?ret:new ArrayList<String>(0);
     }
 
-    private static List<String> runScript(String scriptText) {
+    private static List<String> runScript(String scriptText, boolean usePredefinedVariables, AbstractProject<?,?> project) {
         CompilerConfiguration compilerConfig = new CompilerConfiguration();
 
         // see RemotingDiagnostics.Script
@@ -163,8 +214,14 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
             cl = Thread.currentThread().getContextClassLoader();
         }
 
+        Binding binding = new Binding();
+        if(usePredefinedVariables)
+        {
+            binding.setVariable("jenkins", Jenkins.getInstance());
+            binding.setVariable("project", project);
+        }
         GroovyShell shell =
-            new GroovyShell(cl, new Binding(), compilerConfig);
+            new GroovyShell(cl, binding, compilerConfig);
 
         Object out = shell.evaluate(scriptText);
         if(out == null)
@@ -184,7 +241,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
         }
         return ret;
     }
-    private String scriptText;
+    private final String scriptText;
 
     /**
      * The list of choices, joined into a string.
@@ -198,7 +255,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
         return scriptText;
     }
     
-    private String defaultChoice = null;
+    private final String defaultChoice;
     
     /**
      * Returns the default choice.
@@ -220,11 +277,55 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
      * and no constructor is used.
      * 
      * @param scriptText the text where choices are written in each line.
+     * @param defaultChoice
+     * @param usePredefinedVariables
      */
     @DataBoundConstructor
-    public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice)
+    public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice, boolean usePredefinedVariables)
     {
         this.scriptText = scriptText;
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
+        this.usePredefinedVariables = usePredefinedVariables;
+    }
+    
+    public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice)
+    {
+        this(scriptText, defaultChoice, false);
+    }
+    
+    private final boolean usePredefinedVariables;
+    
+    /**
+     * @return whether to use predefined variables
+     */
+    public boolean isUsePredefinedVariables()
+    {
+        return usePredefinedVariables;
+    }
+    
+    /**
+     * The project of this is configured in.
+     * This will be stored in job configuration XML like
+     * &lt;project class=&quot;project&quot; reference=&quot;../../../../../..&quot; /&gt;
+     */
+    private AbstractProject<?,?> project;
+    
+    /**
+     * @param project
+     */
+    protected void setProject(AbstractProject<?,?> project)
+    {
+        this.project = project;
+    }
+    
+    /**
+     * Return the project where this is configured.
+     * This is set only when {@link SystemGroovyChoiceListProvider#isUsePredefinedVariables()} is true.
+     * 
+     * @return project
+     */
+    protected AbstractProject<?,?> getProject()
+    {
+        return project;
     }
 }

@@ -27,9 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import jenkins.model.Jenkins;
 import hudson.Extension;
 import hudson.DescriptorExtensionList;
 import hudson.model.Descriptor;
+import hudson.model.Describable;
 import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
 import hudson.model.SimpleParameterDefinition;
@@ -79,6 +81,73 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @Extension
     public static class DescriptorImpl extends ParameterDescriptor
     {
+        /**
+         * Create a new instance of {@link SystemGroovyChoiceListProvider} from user inputs.
+         * 
+         * @param req
+         * @param formData
+         * @return
+         * @throws hudson.model.Descriptor.FormException
+         * @see hudson.model.Descriptor#newInstance(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
+         */
+        @Override
+        public ExtensibleChoiceParameterDefinition newInstance(StaplerRequest req,
+                JSONObject formData)
+                throws hudson.model.Descriptor.FormException
+        {
+            return new ExtensibleChoiceParameterDefinition(
+                    formData.getString("name"),
+                    bindJSONWithDescriptor(req, formData, "choiceListProvider", ChoiceListProvider.class),
+                    formData.getBoolean("editable"),
+                    formData.getString("description")
+            );
+        }
+        
+        /**
+         * Create a new {@link Describable} object from user inputs.
+         * 
+         * @param req
+         * @param formData
+         * @param fieldName
+         * @param clazz
+         * @return
+         * @throws hudson.model.Descriptor.FormException
+         */
+        private <T extends Describable<?>> T bindJSONWithDescriptor(
+                StaplerRequest req,
+                JSONObject formData,
+                String fieldName,
+                Class<T> clazz
+        ) throws hudson.model.Descriptor.FormException {
+            formData = formData.getJSONObject(fieldName);
+            if (formData == null || formData.isNullObject()) {
+                return null;
+            }
+            if (!formData.has("stapler-class")) {
+                throw new FormException("No stapler-class is specified", fieldName);
+            }
+            String staplerClazzName = formData.getString("stapler-class");
+            if (staplerClazzName == null) {
+                throw new FormException("No stapler-class is specified", fieldName);
+            }
+            try {
+                @SuppressWarnings("unchecked")
+                Class<? extends T> staplerClass = (Class<? extends T>)Jenkins.getInstance().getPluginManager().uberClassLoader.loadClass(staplerClazzName);
+                Descriptor<?> d = Jenkins.getInstance().getDescriptorOrDie(staplerClass);
+                
+                @SuppressWarnings("unchecked")
+                T instance = (T)d.newInstance(req, formData);
+                
+                return instance;
+            } catch(ClassNotFoundException e) {
+                throw new FormException(
+                        String.format("Failed to instantiate %s", staplerClazzName),
+                        e,
+                        fieldName
+                );
+            }
+        }
+        
         /**
          * Returns the string to be shown in a job configuration page, in the dropdown of &quot;Add Parameter&quot;.
          * 
