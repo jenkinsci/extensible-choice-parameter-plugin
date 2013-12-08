@@ -118,13 +118,14 @@ public class TextareaChoiceListProviderJenkinsTest
         }
     }
     
-    public static class SleepBuilder extends Builder
+    public static class CaptureChoiceListBuilder extends Builder
     {
-        private long milliseconds;
+        private final String defname;
+        private List<String> choiceList;
         
-        public SleepBuilder(long milliseconds)
+        public CaptureChoiceListBuilder(String defname)
         {
-            this.milliseconds = milliseconds;
+            this.defname = defname;
         }
         
         @Override
@@ -132,8 +133,15 @@ public class TextareaChoiceListProviderJenkinsTest
                 BuildListener listener) throws InterruptedException,
                 IOException
         {
-            Thread.sleep(milliseconds);
+            ExtensibleChoiceParameterDefinition def = (ExtensibleChoiceParameterDefinition)build.getParent().getRootProject().getProperty(ParametersDefinitionProperty.class).getParameterDefinition(defname);
+            choiceList = new ArrayList<String>(def.getChoiceList());
+            
             return true;
+        }
+        
+        public List<String> getChoiceList()
+        {
+            return choiceList;
         }
     }
 
@@ -158,7 +166,10 @@ public class TextareaChoiceListProviderJenkinsTest
                 BuildListener listener) throws InterruptedException,
                 IOException
         {
-            build.setResult(result);
+            if(result != null)
+            {
+                build.setResult(result);
+            }
             return true;
         }
         
@@ -196,29 +207,21 @@ public class TextareaChoiceListProviderJenkinsTest
         
         job.getBuildersList().clear();
         
+        // Used for capture choiceList after triggered.
+        CaptureChoiceListBuilder ccb = new CaptureChoiceListBuilder(defname);
+        job.getBuildersList().add(ccb);
+        
         CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
         job.getBuildersList().add(ceb);
         
         job.getPublishersList().clear();
-        
-        if(result == null)
-        {
-            job.getBuildersList().add(new SleepBuilder(5000));
-        }
-        else
-        {
-            job.getPublishersList().add(new SetBuildResultPublisher(result));
-        }
+        job.getPublishersList().add(new SetBuildResultPublisher(result));
         
         job.save();
         
-        WebClient wc = j.createWebClient();
+        WebClient wc = j.createAllow405WebClient();
         
-        wc.setPrintContentOnFailingStatusCode(false);
-        wc.setThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = wc.getPage(job, "build?delay=0sec");
-        wc.setThrowExceptionOnFailingStatusCode(true);
-        wc.setPrintContentOnFailingStatusCode(true);
         
         HtmlForm form = page.getFormByName("parameters");
         
@@ -254,21 +257,15 @@ public class TextareaChoiceListProviderJenkinsTest
         }
         j.submit(form);
         
-        FreeStyleBuild build = job.getLastBuild();
-        
         if(result == null)
         {
-            // There's no way to test saved configuration...
-            ExtensibleChoiceParameterDefinition def = (ExtensibleChoiceParameterDefinition)job.getProperty(ParametersDefinitionProperty.class).getParameterDefinition(defname);
-            choiceList = new ArrayList<String>(def.getChoiceList());
-            assertTrue("Build finished too early...", build.isBuilding());
-            
+            choiceList = ccb.getChoiceList();
             result = Result.SUCCESS;
         }
         
-        while (build.isBuilding()) Thread.sleep(100);
+        j.waitUntilNoActivity();
         
-        assertEquals("build result differs from expected state.", result, build.getResult());
+        j.assertBuildStatus(result, job.getLastBuild());
         assertEquals("build launched with unexpected value", value, ceb.getEnvVars().get(defname));
         
         if(choiceList == null)

@@ -72,7 +72,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
     @Rule
     public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
     
-    private GlobalTextareaChoiceListProvider.DescriptorImpl getDescriptor()
+    private static GlobalTextareaChoiceListProvider.DescriptorImpl getDescriptor()
     {
         return (GlobalTextareaChoiceListProvider.DescriptorImpl)Jenkins.getInstance().getDescriptor(GlobalTextareaChoiceListProvider.class);
         //return new GlobalTextareaChoiceListProvider.DescriptorImpl();
@@ -456,13 +456,14 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
         }
     }
     
-    public static class SleepBuilder extends Builder
+    public static class CaptureChoiceListBuilder extends Builder
     {
-        private long milliseconds;
+        private final String entryName;
+        private List<String> choiceList;
         
-        public SleepBuilder(long milliseconds)
+        public CaptureChoiceListBuilder(String entryName)
         {
-            this.milliseconds = milliseconds;
+            this.entryName = entryName;
         }
         
         @Override
@@ -470,8 +471,16 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
                 BuildListener listener) throws InterruptedException,
                 IOException
         {
-            Thread.sleep(milliseconds);
+            GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = GlobalTextareaChoiceListProviderJenkinsTest.getDescriptor();
+            GlobalTextareaChoiceListEntry entry = descriptor.getChoiceListEntry(entryName);
+            choiceList = new ArrayList<String>(entry.getChoiceList());
+            
             return true;
+        }
+        
+        public List<String> getChoiceList()
+        {
+            return choiceList;
         }
     }
 
@@ -496,7 +505,10 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
                 BuildListener listener) throws InterruptedException,
                 IOException
         {
-            build.setResult(result);
+            if(result != null)
+            {
+                build.setResult(result);
+            }
             return true;
         }
         
@@ -534,29 +546,21 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
         
         job.getBuildersList().clear();
         
+        // Used for capture choiceList after triggered.
+        CaptureChoiceListBuilder ccb = new CaptureChoiceListBuilder(entryname);
+        job.getBuildersList().add(ccb);
+        
         CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
         job.getBuildersList().add(ceb);
         
         job.getPublishersList().clear();
-        
-        if(result == null)
-        {
-            job.getBuildersList().add(new SleepBuilder(5000));
-        }
-        else
-        {
-            job.getPublishersList().add(new SetBuildResultPublisher(result));
-        }
+        job.getPublishersList().add(new SetBuildResultPublisher(result));
         
         job.save();
         
-        WebClient wc = j.createWebClient();
+        WebClient wc = j.createAllow405WebClient();
         
-        wc.setPrintContentOnFailingStatusCode(false);
-        wc.setThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = wc.getPage(job, "build?delay=0sec");
-        wc.setThrowExceptionOnFailingStatusCode(true);
-        wc.setPrintContentOnFailingStatusCode(true);
         
         HtmlForm form = page.getFormByName("parameters");
         
@@ -592,22 +596,15 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
         }
         j.submit(form);
         
-        FreeStyleBuild build = job.getLastBuild();
-        
         if(result == null)
         {
-            // There's no way to test saved configuration...
-            GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-            GlobalTextareaChoiceListEntry entry = descriptor.getChoiceListEntry(entryname);
-            choiceList = new ArrayList<String>(entry.getChoiceList());
-            assertTrue("Build finished too early...", build.isBuilding());
-            
+            choiceList = ccb.getChoiceList();
             result = Result.SUCCESS;
         }
         
-        while (build.isBuilding()) Thread.sleep(100);
+        j.waitUntilNoActivity();
         
-        assertEquals("build result differs from expected state.", result, build.getResult());
+        j.assertBuildStatus(result, job.getLastBuild());
         assertEquals("build launched with unexpected value", value, ceb.getEnvVars().get(defname));
         
         if(choiceList == null)
