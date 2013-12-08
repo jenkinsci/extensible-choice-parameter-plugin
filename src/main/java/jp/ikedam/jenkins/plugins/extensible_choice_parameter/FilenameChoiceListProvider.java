@@ -76,7 +76,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
         }
     };
     
-    private String baseDirPath;
+    private final String baseDirPath;
     
     /**
      * Returns a path to a directory to scan for files.
@@ -120,7 +120,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
         return getBaseDir(getBaseDirPath());
     }
     
-    private String includePattern;
+    private final String includePattern;
     
     /**
      * Returns a pattern for files to include.
@@ -133,7 +133,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
     }
     
     
-    private ScanType scanType;
+    private final ScanType scanType;
     
     /**
      * Returns what type of files to list.
@@ -146,7 +146,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
     }
     
     
-    private String excludePattern;
+    private final String excludePattern;
     
     /**
      * Returns a pattern for files to exclude.
@@ -158,6 +158,15 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
         return excludePattern;
     }
     
+    private final boolean reverseOrder;
+    
+    /**
+     * @return
+     */
+    public boolean isReverseOrder()
+    {
+        return reverseOrder;
+    }
     
     /**
      * The constructor called when a user posts a form.
@@ -168,14 +177,28 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
      * @param scanType a type of files to list.
      */
     @DataBoundConstructor
-    public FilenameChoiceListProvider(String baseDirPath, String includePattern, String excludePattern, ScanType scanType)
+    public FilenameChoiceListProvider(String baseDirPath, String includePattern, String excludePattern, ScanType scanType, boolean reverseOrder)
     {
         this.baseDirPath = StringUtils.trim(baseDirPath);
         this.includePattern = StringUtils.trim(includePattern);
         this.excludePattern = StringUtils.trim(excludePattern);
         this.scanType = scanType;
+        this.reverseOrder = reverseOrder;
     }
     
+    /**
+     * For backward compatibility.
+     * @param baseDirPath
+     * @param includePattern
+     * @param excludePattern
+     * @param scanType
+     * @deprecated use {@link FilenameChoiceListProvider#FilenameChoiceListProvider(String, String, String, ScanType, boolean)}
+     */
+    @Deprecated
+    public FilenameChoiceListProvider(String baseDirPath, String includePattern, String excludePattern, ScanType scanType)
+    {
+        this(baseDirPath, includePattern, excludePattern, scanType, false);
+    }
     
     /**
      * List files from passed parameters.
@@ -184,13 +207,15 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
      * @param includePattern
      * @param excludePattern
      * @param scanType
+     * @param reverseOrder
      * @return
      */
     protected static List<String> getFileList(
             File baseDir,
             String includePattern,
             String excludePattern,
-            ScanType scanType
+            ScanType scanType,
+            boolean reverseOrder
     )
     {
         if(baseDir == null || !baseDir.exists() || !baseDir.isDirectory())
@@ -215,11 +240,13 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
         }
         ds.scan();
         
+        List<String> ret = null;
+        
         switch(scanType)
         {
         case FileAndDirectory:
             {
-                List<String> ret = new ArrayList<String>(ds.getIncludedDirsCount() + ds.getIncludedFilesCount());
+                ret = new ArrayList<String>(ds.getIncludedDirsCount() + ds.getIncludedFilesCount());
                 for(String file: ds.getIncludedFiles())
                 {
                     ret.add(file);
@@ -229,14 +256,57 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
                     ret.add(dir);
                 }
                 Collections.sort(ret);
-                return ret;
+                break;
             }
         case Directory:
-            return Arrays.asList(ds.getIncludedDirectories());
+            {
+                ret = Arrays.asList(ds.getIncludedDirectories());
+                break;
+            }
         default:
-            // case File:
-            return Arrays.asList(ds.getIncludedFiles());
+            {
+                // case File:
+                ret = Arrays.asList(ds.getIncludedFiles());
+                break;
+            }
         }
+        
+        if(reverseOrder)
+        {
+            try
+            {
+                Collections.reverse(ret);
+            }
+            catch(UnsupportedOperationException _)
+            {
+                // ret is immutable.
+                ret = new ArrayList<String>(ret);
+                Collections.reverse(ret);
+            }
+        }
+        
+        return ret;
+    }
+    
+    /**
+     * For backward compatibility.
+     * 
+     * @param baseDir
+     * @param includePattern
+     * @param excludePattern
+     * @param scanType
+     * @return
+     * @deprecated use {@link FilenameChoiceListProvider#getFileList(File, String, String, ScanType, boolean)}
+     */
+    @Deprecated
+    protected static List<String> getFileList(
+            File baseDir,
+            String includePattern,
+            String excludePattern,
+            ScanType scanType
+    )
+    {
+        return getFileList(baseDir, includePattern, excludePattern, scanType, false);
     }
     
     /**
@@ -252,7 +322,8 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
                getBaseDir(),
                getIncludePattern(),
                getExcludePattern(),
-               getScanType()
+               getScanType(),
+               isReverseOrder()
        );
     }
     
@@ -346,14 +417,16 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
                 @QueryParameter String baseDirPath,
                 @QueryParameter String includePattern,
                 @QueryParameter String excludePattern,
-                @QueryParameter ScanType scanType
+                @QueryParameter ScanType scanType,
+                @QueryParameter boolean reverseOrder
         )
         {
             List<String> fileList = getFileList(
                     getBaseDir(baseDirPath),
                     includePattern,
                     excludePattern,
-                    scanType
+                    scanType,
+                    reverseOrder
             );
             
             if(fileList.isEmpty())

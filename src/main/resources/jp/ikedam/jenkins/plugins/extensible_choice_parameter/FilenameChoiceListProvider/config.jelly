@@ -34,10 +34,13 @@ THE SOFTWARE.
     <f:entry title="${%Type}" field="scanType">
         <f:enum>${it}</f:enum>
     </f:entry>
+    <f:entry title="${%Reverse Order}" field="reverseOrder">
+        <f:checkbox />
+    </f:entry>
     <f:validateButton
         method="test"
         title="${%List Files Now}"
         progress="${%Checking...}"
-        with="baseDirPath,includePattern,excludePattern,scanType"
+        with="baseDirPath,includePattern,excludePattern,scanType,reverseOrder"
     />
 </j:jelly>

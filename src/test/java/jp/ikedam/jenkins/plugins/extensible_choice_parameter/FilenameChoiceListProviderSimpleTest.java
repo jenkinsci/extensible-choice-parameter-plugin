@@ -59,16 +59,19 @@ public class FilenameChoiceListProviderSimpleTest
             String includePattern = "includePattern";
             String excludePattern = "excludePattern";
             ScanType scanType = ScanType.File;
+            boolean reverseOrder = false;
             FilenameChoiceListProvider target = new FilenameChoiceListProvider(
                     baseDirPath,
                     includePattern,
                     excludePattern,
-                    scanType
+                    scanType,
+                    reverseOrder
             );
             assertEquals("simple value for baseDirPath", baseDirPath, target.getBaseDirPath());
             assertEquals("simple value for includePattern", includePattern, target.getIncludePattern());
             assertEquals("simple value for excludePattern", excludePattern, target.getExcludePattern());
             assertEquals("scanType must be reserved", scanType, target.getScanType());
+            assertEquals(reverseOrder, target.isReverseOrder());
         }
         
         // null
@@ -77,16 +80,19 @@ public class FilenameChoiceListProviderSimpleTest
             String includePattern = null;
             String excludePattern = null;
             ScanType scanType = null;
+            boolean reverseOrder = false;
             FilenameChoiceListProvider target = new FilenameChoiceListProvider(
                     baseDirPath,
                     includePattern,
                     excludePattern,
-                    scanType
+                    scanType,
+                    reverseOrder
             );
             assertEquals("null for baseDirPath", baseDirPath, target.getBaseDirPath());
             assertEquals("null for includePattern", includePattern, target.getIncludePattern());
             assertEquals("null for excludePattern", excludePattern, target.getExcludePattern());
             assertEquals("scanType must be reserved", scanType, target.getScanType());
+            assertEquals(reverseOrder, target.isReverseOrder());
         }
         
         // empty
@@ -95,16 +101,19 @@ public class FilenameChoiceListProviderSimpleTest
             String includePattern = "";
             String excludePattern = "";
             ScanType scanType = ScanType.Directory;
+            boolean reverseOrder = true;
             FilenameChoiceListProvider target = new FilenameChoiceListProvider(
                     baseDirPath,
                     includePattern,
                     excludePattern,
-                    scanType
+                    scanType,
+                    reverseOrder
             );
             assertEquals("empty for baseDirPath", baseDirPath, target.getBaseDirPath());
             assertEquals("empty for includePattern", includePattern, target.getIncludePattern());
             assertEquals("empty for excludePattern", excludePattern, target.getExcludePattern());
             assertEquals("scanType must be reserved", scanType, target.getScanType());
+            assertEquals(reverseOrder, target.isReverseOrder());
         }
         
         // blank
@@ -113,16 +122,19 @@ public class FilenameChoiceListProviderSimpleTest
             String includePattern = "";
             String excludePattern = "";
             ScanType scanType = ScanType.FileAndDirectory;
+            boolean reverseOrder = true;
             FilenameChoiceListProvider target = new FilenameChoiceListProvider(
                     "  " + baseDirPath + "  ",
                     "\t\t" + includePattern + " ",
                     excludePattern + " ",
-                    scanType
+                    scanType,
+                    reverseOrder
             );
             assertEquals("blank for baseDirPath", baseDirPath, target.getBaseDirPath());
             assertEquals("blank for includePattern", includePattern, target.getIncludePattern());
             assertEquals("blank for excludePattern", excludePattern, target.getExcludePattern());
             assertEquals("scanType must be reserved", scanType, target.getScanType());
+            assertEquals(reverseOrder, target.isReverseOrder());
         }
         
         // enclosed with blank
@@ -131,11 +143,13 @@ public class FilenameChoiceListProviderSimpleTest
             String includePattern = "includePattern";
             String excludePattern = "excludePattern";
             ScanType scanType = ScanType.File;
+            boolean reverseOrder = true;
             FilenameChoiceListProvider target = new FilenameChoiceListProvider(
                     "  " + baseDirPath + "  ",
                     "\t\t" + includePattern + " ",
                     excludePattern + " ",
-                    scanType
+                    scanType,
+                    reverseOrder
             );
             assertEquals("baseDirPath must be trimmed", baseDirPath, target.getBaseDirPath());
             assertEquals("includePattern must be trimmed", includePattern, target.getIncludePattern());
@@ -148,19 +162,20 @@ public class FilenameChoiceListProviderSimpleTest
         private static final long serialVersionUID = 5830671030985340194L;
         
         public FilenameChoiceListProviderForTest(String baseDirPath,
-                String includePattern, String excludePattern, ScanType scanType)
+                String includePattern, String excludePattern, ScanType scanType, boolean reverseOrder)
         {
-            super(baseDirPath, includePattern, excludePattern, scanType);
+            super(baseDirPath, includePattern, excludePattern, scanType, reverseOrder);
         }
         
         public static List<String> getFileList(
                 File baseDir,
                 String includePattern,
                 String excludePattern,
-                ScanType scanType
+                ScanType scanType,
+                boolean reverseOrder
         )
         {
-            return FilenameChoiceListProvider.getFileList(baseDir, includePattern, excludePattern, scanType);
+            return FilenameChoiceListProvider.getFileList(baseDir, includePattern, excludePattern, scanType, reverseOrder);
         }
     }
     
@@ -226,7 +241,29 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*",
                         "",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
+                );
+                assertFileListEquals("All files and directories", expected, fileList);
+            }
+            
+            // List all files and directories reversed.
+            {
+                List<String> expected = Arrays.asList(
+                        "dir2/dir3/test4.dat",
+                        "dir2/dir3",
+                        "dir2",
+                        "dir1/test3.txt",
+                        "dir1",
+                        "test2.dat",
+                        "test1.txt"
+                );
+                List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
+                        tempDir,
+                        "**/*",
+                        "",
+                        ScanType.FileAndDirectory,
+                        true
                 );
                 assertFileListEquals("All files and directories", expected, fileList);
             }
@@ -243,7 +280,26 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*",
                         "",
-                        ScanType.File
+                        ScanType.File,
+                        false
+                );
+                assertFileListEquals("All files", expected, fileList);
+            }
+            
+            // List all files reversed.
+            {
+                List<String> expected = Arrays.asList(
+                        "dir2/dir3/test4.dat",
+                        "dir1/test3.txt",
+                        "test2.dat",
+                        "test1.txt"
+                );
+                List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
+                        tempDir,
+                        "**/*",
+                        "",
+                        ScanType.File,
+                        true
                 );
                 assertFileListEquals("All files", expected, fileList);
             }
@@ -259,7 +315,25 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*",
                         "",
-                        ScanType.Directory
+                        ScanType.Directory,
+                        false
+                );
+                assertFileListEquals("All files and directories", expected, fileList);
+            }
+            
+            // List all directories reversed.
+            {
+                List<String> expected = Arrays.asList(
+                        "dir2/dir3",
+                        "dir2",
+                        "dir1"
+                );
+                List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
+                        tempDir,
+                        "**/*",
+                        "",
+                        ScanType.Directory,
+                        true
                 );
                 assertFileListEquals("All files and directories", expected, fileList);
             }
@@ -274,7 +348,8 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*.txt",
                         "",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("*.txt", expected, fileList);
             }
@@ -290,7 +365,8 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*.txt  , ,, **/test4.dat",
                         "",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("*.txt,test4.dat", expected, fileList);
             }
@@ -308,7 +384,8 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*",
                         "**/*.dat",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("exclude *.dat", expected, fileList);
             }
@@ -325,7 +402,8 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*",
                         "**/*.dat,, , **/dir1",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("exclude *.dat, dir1", expected, fileList);
             }
@@ -337,7 +415,8 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*",
                         "**/*",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("excluded all files", expected, fileList);
             }
@@ -349,7 +428,8 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "",
                         "",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("no file included", expected, fileList);
             }
@@ -361,7 +441,8 @@ public class FilenameChoiceListProviderSimpleTest
                         emptyDir,
                         "**/*",
                         "",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("no file", expected, fileList);
             }
@@ -373,7 +454,8 @@ public class FilenameChoiceListProviderSimpleTest
                         new File(emptyDir, "test"),
                         "**/*",
                         "",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("non-exist directory", expected, fileList);
             }
@@ -385,7 +467,8 @@ public class FilenameChoiceListProviderSimpleTest
                         new File(tempDir, "test1.txt"),
                         "**/*",
                         "",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("not directory", expected, fileList);
             }
@@ -397,7 +480,8 @@ public class FilenameChoiceListProviderSimpleTest
                         null,
                         "**/*",
                         "",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("null for directory", expected, fileList);
             }
@@ -409,7 +493,8 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         null,
                         "",
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("null for include pattern", expected, fileList);
             }
@@ -429,7 +514,8 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*",
                         null,
-                        ScanType.FileAndDirectory
+                        ScanType.FileAndDirectory,
+                        false
                 );
                 assertFileListEquals("null for exclude pattern", expected, fileList);
             }
@@ -447,7 +533,8 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*",
                         "",
-                        null
+                        null,
+                        false
                 );
                 assertFileListEquals("null for scanType", expected, fileList);
             }
