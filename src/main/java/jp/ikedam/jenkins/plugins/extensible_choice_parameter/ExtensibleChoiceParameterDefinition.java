@@ -30,12 +30,14 @@ import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import hudson.Extension;
 import hudson.DescriptorExtensionList;
+import hudson.Util;
 import hudson.model.Descriptor;
 import hudson.model.Describable;
 import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
 import hudson.model.SimpleParameterDefinition;
 import hudson.util.FormValidation;
+import hudson.util.VariableResolver;
 
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -54,13 +56,9 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     private static final Pattern namePattern = Pattern.compile("[A-Za-z_][A-Za-z_0-9]*");
     
     /**
-     * Returns a regular expression pattern for the acceptable parameter names.
-     * 
-     * Strangely, Jenkins has no limitation for the name of parameters.
-     * But in many cases, it is good to be limited to the symbol name in C.
-     * 
-     * @return A regular expression pattern for the acceptable variable names.
+     * Deprecated
      */
+    @Deprecated
     public static Pattern getNamePattern()
     {
         return namePattern;
@@ -178,8 +176,26 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
                 return FormValidation.error(Messages.ExtensibleChoiceParameterDefinition_Name_empty());
             }
             
-            if(!getNamePattern().matcher(name.trim()).matches()){
-                return FormValidation.error(Messages.ExtensibleChoiceParameterDefinition_Name_invalid());
+            final String trimmedName = StringUtils.trim(name);
+            final String EXPANDED = "GOOD";
+            String expanded = Util.replaceMacro(
+                String.format("${%s}", trimmedName),
+                new VariableResolver<String>()
+                {
+                    @Override
+                    public String resolve(String name)
+                    {
+                        if(trimmedName.equals(name))
+                        {
+                            return EXPANDED;
+                        }
+                        return null;
+                    }
+                }
+            );
+            
+            if(!EXPANDED.equals(expanded)){
+                return FormValidation.warning(Messages.ExtensibleChoiceParameterDefinition_Name_invalid());
             }
             
             return FormValidation.ok();

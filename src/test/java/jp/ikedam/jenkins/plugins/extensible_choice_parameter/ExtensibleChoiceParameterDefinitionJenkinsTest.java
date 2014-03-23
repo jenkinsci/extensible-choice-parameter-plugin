@@ -64,6 +64,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         return (ExtensibleChoiceParameterDefinition.DescriptorImpl)(new ExtensibleChoiceParameterDefinition("name", null, false, "")).getDescriptor();
     }
     
+    /**
+     * Note:
+     * This behavior depends on Jenkins core.
+     * So when changing target Jenkins version, the behavior may change.
+     */
     @Test
     public void testDescriptorDoCheckNameOk()
     {
@@ -78,6 +83,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         // OK: alphabets and numbers
         assertEquals(descriptor.doCheckName("abc123").kind, FormValidation.Kind.OK);
         
+        // OK: only numbers (amazing!)
+        assertEquals(descriptor.doCheckName("123").kind, FormValidation.Kind.OK);
+        
         // OK: alphabets, numbers, and underscores.
         assertEquals(descriptor.doCheckName("abc_1_2_3").kind, FormValidation.Kind.OK);
         
@@ -91,6 +99,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         assertEquals(descriptor.doCheckName("  _abc_1_2_3   ").kind, FormValidation.Kind.OK);
     }
     
+    /**
+     * Note:
+     * This behavior depends on Jenkins core.
+     * So when changing target Jenkins version, the behavior may change.
+     */
     @Test
     public void testDescriptorDoCheckNameError()
     {
@@ -105,20 +118,20 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         // ERROR: blank
         assertEquals(descriptor.doCheckName(" ").kind, FormValidation.Kind.ERROR);
         
-        // ERROR: value containing blank
-        assertEquals(descriptor.doCheckName("a b").kind, FormValidation.Kind.ERROR);
+        // WARNING: value containing blank
+        assertEquals(descriptor.doCheckName("a b").kind, FormValidation.Kind.WARNING);
         
-        // ERROR: value starts with a numeric letter.
-        assertEquals(descriptor.doCheckName("1ab").kind, FormValidation.Kind.ERROR);
+        // WARNING: value contains a letter, not alphabet, number, nor underscore.
+        assertEquals(descriptor.doCheckName("a-b-c").kind, FormValidation.Kind.WARNING);
         
-        // ERROR: value contains a letter, not alphabet, number, nor underscore.
-        assertEquals(descriptor.doCheckName("a-b-c").kind, FormValidation.Kind.ERROR);
+        // WARNING: value starts with a letter, not alphabet, number, nor underscore.
+        assertEquals(descriptor.doCheckName("!ab").kind, FormValidation.Kind.WARNING);
         
-        // ERROR: value starts with a letter, not alphabet, number, nor underscore.
-        assertEquals(descriptor.doCheckName("!ab").kind, FormValidation.Kind.ERROR);
+        // WARNING: value contains a multibyte letter.
+        assertEquals(descriptor.doCheckName("ａb").kind, FormValidation.Kind.WARNING);
         
-        // ERROR: value contains a multibyte letter.
-        assertEquals(descriptor.doCheckName("ａb").kind, FormValidation.Kind.ERROR);
+        // WARNING: value contains dots (will be accepted since Jenkins 1.526)
+        assertEquals(descriptor.doCheckName("a.b").kind, FormValidation.Kind.WARNING);
     }
     
     private static class MockChoiceListProvider extends ChoiceListProvider
@@ -147,6 +160,12 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
      * @param value
      * @return
      * @throws Exception 
+     */
+    /**
+     * @param def
+     * @param value
+     * @return
+     * @throws Exception
      */
     private EnvVars runBuildWithSelectParameter(ParameterDefinition def, String value) throws Exception
     {
