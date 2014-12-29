@@ -26,6 +26,7 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter.utility;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Utility Class to work with a list of strings in a textarea.
@@ -79,15 +80,15 @@ public class TextareaStringListUtility
      */
     public static List<String> stringListFromTextarea(String choiceListText)
     {
-        List<String> stringList = (choiceListText != null)?Arrays.asList(choiceListText.split("\\r?\\n", -1)):new ArrayList<String>(0);
-        if(!stringList.isEmpty() && stringList.get(stringList.size() - 1).isEmpty())
-        {
-            // The last empty line will be ignored.
-            // The list object returned from asList() does not support remove,
-            // so use subList().
-            stringList = stringList.subList(0, stringList.size() - 1);
+        List<String> stringList = (choiceListText != null) ?
+                new ArrayList<String>(Arrays.asList(choiceListText.split("\\r?\\n", -1)))
+                : new ArrayList<String>(0);
+        ListIterator<String> stringListIterator = stringList.listIterator();
+        while(stringListIterator.hasNext()) {
+            String next = stringListIterator.next();
+            if(next.isEmpty()) stringListIterator.remove();
         }
-        
+
         return stringList;
     }
     
