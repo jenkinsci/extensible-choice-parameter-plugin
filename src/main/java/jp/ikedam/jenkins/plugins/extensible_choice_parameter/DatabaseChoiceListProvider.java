@@ -43,6 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.database.Database;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -57,77 +58,26 @@ public class DatabaseChoiceListProvider extends ChoiceListProvider implements Se
         
     private static final Logger LOGGER = Logger.getLogger(DatabaseChoiceListProvider.class.getName());
     
-    private String jdbcUrl;
-    private String dbName;
-    private String dbTable;
-    private String dbColumn;
-    private String dbUsername;
-    private String dbPassword;
-    private String jdbcDriver;
-    private String fallbackFilePath;
+    private final Database database;
+    private final String dbTable;
+    private final String dbColumn;
+    private final String fallbackFilePath;
     
-	public String getDbUsername() {
-		return dbUsername;
-	}
+    public Database getDatabase()
+    {
+        return database;
+    }
 
-	public void setDbUsername(String dbUsername) {
-		this.dbUsername = dbUsername;
-	}
-
-	public String getDbPassword() {
-		return dbPassword;
-	}
-
-	public void setDbPassword(String dbPassword) {
-		this.dbPassword = dbPassword;
-	}
-
-	public String getJdbcUrl() {
-		return jdbcUrl;
-	}
-
-	public void setJdbcUrl(String jdbcUrl) {
-		this.jdbcUrl = jdbcUrl;
-	}
-	
 	public String getDbColumn() {
 		return dbColumn;
-	}
-
-	public void setDbColumn(String colomndb) {
-		this.dbColumn = colomndb;
-	}
-
-	public String getDbName() {
-		return dbName;
-	}
-
-	public void setDbName(String namedb) {
-		this.dbName = namedb;
 	}
 
 	public String getDbTable() {
 		return dbTable;
 	}
 
-	public void setDbTable(String tabledb) {
-		this.dbTable = tabledb;
-	}
-	
-	public String getJdbcDriver() {
-		return jdbcDriver;
-	}
-
-	public void setJdbcDriver(String driverdb) {
-		this.jdbcDriver = driverdb;
-	}
-
 	public String getFallbackFilePath() {
 		return fallbackFilePath;
-	}
-
-	public void setFallbackFile(String fallbackFilePath) {
-		this.fallbackFilePath = fallbackFilePath;
 	}
 
 	@Override
@@ -138,19 +88,15 @@ public class DatabaseChoiceListProvider extends ChoiceListProvider implements Se
 	}
 	
 	@DataBoundConstructor
-    public DatabaseChoiceListProvider(String userdb, String passworddb, String urldb, String colomndb, String namedb, String tabledb, String driverdb, String fallbackfile)
+    public DatabaseChoiceListProvider(Database database, String dbColumn, String dbTable, String fallbackFilePath)
     {
-        this.dbUsername = StringUtils.trim(userdb);
-        this.dbPassword = StringUtils.trim(passworddb);
-        this.jdbcUrl = StringUtils.trim(urldb);
-        this.dbColumn = StringUtils.trim(colomndb);
-        this.dbName = StringUtils.trim(namedb);
-        this.dbTable = StringUtils.trim(tabledb);
-        this.jdbcDriver = StringUtils.trim(driverdb);
-        this.fallbackFilePath = StringUtils.trim(fallbackfile);
+        this.database = database;
+        this.dbColumn = StringUtils.trim(dbColumn);
+        this.dbTable = StringUtils.trim(dbTable);
+        this.fallbackFilePath = StringUtils.trim(fallbackFilePath);
     }
 	
-	@Extension
+	@Extension(optional=true)  // available only when database-plugin is installed.
     public static class DescriptorImpl extends Descriptor<ChoiceListProvider>
     {
         /**
@@ -162,64 +108,7 @@ public class DatabaseChoiceListProvider extends ChoiceListProvider implements Se
         @Override
         public String getDisplayName()
         {
-            return "Database Choice Parameter";
-        }
-        
-        /**
-         * Validate a value inputed for userdb
-         * 
-         * Checks followings:
-         * * not blank
-         * 
-         * @param userdb
-         * @return FormValidation object
-         */
-        public FormValidation doCheckUserdb(@QueryParameter String userdb)
-        {
-            if(StringUtils.isBlank(userdb))
-            {
-                return FormValidation.error(Messages.DbChoiceListProvider_dbUser_empty());
-            }
-                       
-            return FormValidation.ok();
-        }        
-        
-        /**
-         * Validate a value inputed for passworddb
-         * 
-         * Checks followings:
-         * * not blank
-         * 
-         * @param dbPassword
-         * @return FormValidation object
-         */
-        public FormValidation doCheckPassworddb(@QueryParameter String dbPassword)
-        {
-            if(StringUtils.isBlank(dbPassword))
-            {
-                return FormValidation.error(Messages.DbChoiceListProvider_dbPassword_empty());
-            }
-                       
-            return FormValidation.ok();
-        }
-        
-        /**
-         * Validate a value inputed for urldb
-         * 
-         * Checks followings:
-         * * not blank
-         * 
-         * @param urldb
-         * @return FormValidation object
-         */
-        public FormValidation doCheckUrldb(@QueryParameter String urldb)
-        {
-            if(StringUtils.isBlank(urldb))
-            {
-                return FormValidation.error(Messages.DbChoiceListProvider_jdbcUrl_empty());
-            }
-                       
-            return FormValidation.ok();
+            return Messages.DbChoiceListProvider_DisplayName();
         }
         
         /**
@@ -236,25 +125,6 @@ public class DatabaseChoiceListProvider extends ChoiceListProvider implements Se
             if(StringUtils.isBlank(colomndb))
             {
                 return FormValidation.error(Messages.DbChoiceListProvider_dbColumn_empty());
-            }
-                       
-            return FormValidation.ok();
-        }
-        
-        /**
-         * Validate a value inputed for namedb
-         * 
-         * Checks followings:
-         * * not blank
-         * 
-         * @param namedb
-         * @return FormValidation object
-         */
-        public FormValidation doCheckNamedb(@QueryParameter String namedb)
-        {
-            if(StringUtils.isBlank(namedb))
-            {
-                return FormValidation.error(Messages.DbChoiceListProvider_dbName_empty());
             }
                        
             return FormValidation.ok();
@@ -279,25 +149,6 @@ public class DatabaseChoiceListProvider extends ChoiceListProvider implements Se
             return FormValidation.ok();
         }
         
-        /**
-         * Validate a value inputed for driverdb
-         * 
-         * Checks followings:
-         * * not blank
-         * 
-         * @param driverdb
-         * @return FormValidation object
-         */
-        public FormValidation doCheckDriverdb(@QueryParameter String driverdb)
-        {
-            if(StringUtils.isBlank(driverdb))
-            {
-                return FormValidation.error(Messages.DbChoiceListProvider_jdbcDriver_empty());
-            }
-                       
-            return FormValidation.ok();
-        }
-        
     }
 	
 	
@@ -315,47 +166,20 @@ public class DatabaseChoiceListProvider extends ChoiceListProvider implements Se
 		ResultSet resultat = null;
 		List<String> resultList = new ArrayList<String>();
 		try {
-			String driver = getJdbcDriver();
-			if (driver == null || StringUtils.isEmpty(driver)) {
-				LOGGER.log(Level.WARNING,"Invalid driver");
-			}
-			
-			Class.forName(driver);
-			
-			String user = getDbUsername();
-			if (user == null || StringUtils.isEmpty(user)) {
-				LOGGER.log(Level.WARNING,"Invalid user");
-			}
-
-			String password = getDbPassword();
-			if (password == null || StringUtils.isEmpty(password)) {
-				LOGGER.log(Level.WARNING,"Invalid password");
-			}
-
-			String urlBase = getJdbcUrl();
-			if (urlBase == null || StringUtils.isEmpty(urlBase)) {
-				LOGGER.log(Level.WARNING,"Invalid JDBC URL");				
-			}
-			
 			String colomndb = getDbColumn();
 			if (colomndb == null || StringUtils.isEmpty(colomndb)) {
 				LOGGER.log(Level.WARNING,"Invalid column");
 			}
 			
-			String namedb = getDbName();
-			if (namedb == null || StringUtils.isEmpty(namedb)) {
-				LOGGER.log(Level.WARNING,"Invalid DB name");
-			}
-
 			String tabledb = getDbTable();
 			if (tabledb == null || StringUtils.isEmpty(tabledb)) {
 				LOGGER.log(Level.WARNING,"table database invalid");				
 			}
 			
-			conn = DriverManager.getConnection(urlBase, user, password);
+			conn = getDatabase().getDataSource().getConnection();
 						
 			// By default, a SELECT * is performed
-			String selectQuery = "select " + colomndb + " from " + namedb + "." + tabledb;
+			String selectQuery = "select " + colomndb + " from " + tabledb;
 						
 			// Use plain old JDBC to build and execute the query against the configured db
 			Statement statement = conn.createStatement();
@@ -370,13 +194,7 @@ public class DatabaseChoiceListProvider extends ChoiceListProvider implements Se
 			}
 		}
 		catch (SQLException se) {
-			LOGGER.log(Level.SEVERE,"Unable to access the database: " + dbName + "." + se);			
-		}
-		catch(ClassNotFoundException e) {
-			LOGGER.log(Level.SEVERE, "The driver " + jdbcDriver + " cannot be found in the classpath.");
-		}
-		catch (Exception e) {
-			LOGGER.log(Level.SEVERE,"Unable to access the database: " + dbName + "." +  e);
+			LOGGER.log(Level.SEVERE,String.format("Unable to access the database: %s (%s)", getDatabase().toString(), getDatabase().getDescriptor().getDisplayName()), se);			
 		}
 		finally {
 			try {
@@ -385,7 +203,7 @@ public class DatabaseChoiceListProvider extends ChoiceListProvider implements Se
 				}
 			}
 			catch (SQLException se) {
-				LOGGER.log(Level.SEVERE,"Fermeture de connection impossible, SQLException : " + se);
+				LOGGER.log(Level.SEVERE,"Fermeture de connection impossible, SQLException", se);
 			}
 		}
 		
@@ -402,7 +220,7 @@ public class DatabaseChoiceListProvider extends ChoiceListProvider implements Se
 					}
 				}
 			} catch (FileNotFoundException e) {				
-				LOGGER.log(Level.WARNING,"Unable to read the fallback file: " + e);				
+				LOGGER.log(Level.WARNING,"Unable to read the fallback file: ", e);				
 			}
 			finally {
 				if(scanner != null){

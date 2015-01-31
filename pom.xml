@@ -35,6 +35,21 @@
     </license>
   </licenses>
   
+  <dependencies>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>database</artifactId>
+      <version>1.1</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>database-h2</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
