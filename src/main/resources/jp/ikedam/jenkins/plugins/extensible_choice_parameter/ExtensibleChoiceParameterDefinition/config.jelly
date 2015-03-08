@@ -41,21 +41,52 @@ THE SOFTWARE.
                 var="choiceListProvider"
                 value="${curDescriptor==instance.choiceListProvider.descriptor?instance.choiceListProvider:null}"
             />
-            <f:dropdownListBlock
-                title="${curDescriptor.displayName}"
-                value="${loop.index}"
-                selected="${choiceListProvider != null}"
-                staplerClass="${curDescriptor.clazz.name}"
-            ><j:scope>
-                <!-- Shown only when corresponding ChoiceProvider is selected. -->
-                <j:set var="descriptor" value="${curDescriptor}" />
-                <j:set var="instance" value="${choiceListProvider}" />
-                <!--
-                    Call config.jelly of the ChoiceProvider subclass.
-                    Do nothing if config.jelly is not provided.
-                -->
-                <st:include page="config.jelly" class="${curDescriptor.clazz}" optional="${true}" />
-            </j:scope></f:dropdownListBlock>
+            
+            <j:choose>
+            	<j:when test="${ curDescriptor.displayName == descriptor.systemCommandName  }">
+            		<j:if test="${!descriptor.disallowSystemGroovyScript}">
+            			<f:dropdownListBlock
+		                title="${curDescriptor.displayName}"
+		                value="${loop.index}"
+		                selected="${choiceListProvider != null}"
+		                staplerClass="${curDescriptor.clazz.name}"
+		           		>
+		           		<j:scope>
+			                <!-- Shown only when corresponding ChoiceProvider is selected. -->
+			                <j:set var="descriptor" value="${curDescriptor}" />
+			                <j:set var="instance" value="${choiceListProvider}" />
+			                <!--
+			                    Call config.jelly of the ChoiceProvider subclass.
+			                    Do nothing if config.jelly is not provided.
+			                -->
+			                <st:include page="config.jelly" class="${curDescriptor.clazz}" optional="${true}" />
+		            	</j:scope>
+	            		</f:dropdownListBlock>
+            		</j:if>
+            	</j:when>
+            	<j:otherwise>
+            		<f:dropdownListBlock
+	                title="${curDescriptor.displayName}"
+	                value="${loop.index}"
+	                selected="${choiceListProvider != null}"
+	                staplerClass="${curDescriptor.clazz.name}"
+	           		>
+		           		<j:scope>
+			                <!-- Shown only when corresponding ChoiceProvider is selected. -->
+			                <j:set var="descriptor" value="${curDescriptor}" />
+			                <j:set var="instance" value="${choiceListProvider}" />
+			                <!--
+			                    Call config.jelly of the ChoiceProvider subclass.
+			                    Do nothing if config.jelly is not provided.
+			                -->
+			                <st:include page="config.jelly" class="${curDescriptor.clazz}" optional="${true}" />
+		            	</j:scope>
+	            	</f:dropdownListBlock>
+            	</j:otherwise>
+            </j:choose>
+
+            
+            
             </j:scope>
         </j:forEach>
     </f:dropdownList>

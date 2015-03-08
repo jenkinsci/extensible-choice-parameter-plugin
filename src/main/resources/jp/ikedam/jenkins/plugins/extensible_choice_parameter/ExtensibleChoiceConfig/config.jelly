@@ -1,0 +1,9 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+
+  <f:section title="${%Extensible Choice Parameter}" name="extensibleChoiceParameter">
+      <f:entry title="${%Disallow System Groovy Script}" field="disallowSystemGroovyScript">
+        <f:checkbox/>
+      </f:entry>
+  </f:section>
+
+</j:jelly>
