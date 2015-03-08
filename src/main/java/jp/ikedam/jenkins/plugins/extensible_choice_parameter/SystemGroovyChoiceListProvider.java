@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
@@ -125,14 +126,19 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
                 project = req.findAncestorObject(AbstractProject.class);
             }
             
-            try
-            {
-                choices = runScript(scriptText, usePredefinedVariables, project);
-            }
-            catch(Exception e)
-            {
-                LOGGER.log(Level.WARNING, "Failed to execute script", e);
-            }
+            ExtensibleChoiceConfig config = GlobalConfiguration.all().get(ExtensibleChoiceConfig.class);
+        	boolean disallowSystemGroovyScript = config.getDisallowSystemGroovyScript();
+        	if (!disallowSystemGroovyScript)
+        	{
+	            try
+	            {
+	                choices = runScript(scriptText, usePredefinedVariables, project);
+	            }
+	            catch(Exception e)
+	            {
+	                LOGGER.log(Level.WARNING, "Failed to execute script", e);
+	            }
+        	}
             
             if(choices != null)
             {
@@ -147,29 +153,39 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
         
         public FormValidation doTest(StaplerRequest req, @QueryParameter String scriptText, @QueryParameter boolean usePredefinedVariables)
         {
-            List<String> choices = null;
-            AbstractProject<?,?> project = null;
-            
-            if(usePredefinedVariables && req != null)
-            {
-                project = req.findAncestorObject(AbstractProject.class);
-            }
-            
-            try
-            {
-                choices = runScript(scriptText, usePredefinedVariables, project);
-            }
-            catch(Exception e)
-            {
-                return FormValidation.error(e, "Failed to execute script");
-            }
-            
-            if(choices == null)
-            {
-                return FormValidation.error("Script returned null.");
-            }
-            
-            return FormValidation.ok(StringUtils.join(choices, '\n'));
+        	ExtensibleChoiceConfig config = GlobalConfiguration.all().get(ExtensibleChoiceConfig.class);
+        	boolean disallowSystemGroovyScript = config.getDisallowSystemGroovyScript();
+
+        	if(!disallowSystemGroovyScript)
+        	{
+	            List<String> choices = null;
+	            AbstractProject<?,?> project = null;
+	            
+	            if(usePredefinedVariables && req != null)
+	            {
+	                project = req.findAncestorObject(AbstractProject.class);
+	            }
+	            
+	            try
+	            {
+	                choices = runScript(scriptText, usePredefinedVariables, project);
+	            }
+	            catch(Exception e)
+	            {
+	                return FormValidation.error(e, "Failed to execute script");
+	            }
+	            
+	            if(choices == null)
+	            {
+	                return FormValidation.error("Script returned null.");
+	            }
+	            
+	            return FormValidation.ok(StringUtils.join(choices, '\n'));
+        	}
+        	else
+        	{
+        		return FormValidation.error("Script returned null.");
+        	}
         }
     }
     

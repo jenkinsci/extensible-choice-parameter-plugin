@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import hudson.Extension;
 import hudson.DescriptorExtensionList;
@@ -43,6 +44,7 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
 import net.sf.json.JSONObject;
 
 /**
@@ -167,8 +169,22 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
          */
         public DescriptorExtensionList<ChoiceListProvider,Descriptor<ChoiceListProvider>> getChoiceListProviderList()
         {
-            return ChoiceListProvider.all();
+        	return ChoiceListProvider.all();
         }
+        			
+        	public boolean getDisallowSystemGroovyScript()
+        	{
+        		ExtensibleChoiceConfig config = GlobalConfiguration.all().get(ExtensibleChoiceConfig.class);
+            	boolean disallowSystemGroovyScript = config.getDisallowSystemGroovyScript();
+            	
+        		return disallowSystemGroovyScript;
+        	}
+        	
+        	public String getSystemCommandName()
+        	{
+        		return Messages._SystemGroovyChoiceListProvider_DisplayName().toString();
+        	}
+        
         
         public FormValidation doCheckName(@QueryParameter String name){
             if(StringUtils.isBlank(name))
