@@ -24,6 +24,7 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -43,6 +44,7 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
 import net.sf.json.JSONObject;
 
 /**
@@ -79,6 +81,40 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @Extension
     public static class DescriptorImpl extends ParameterDescriptor
     {
+        private List<String> disabledChoiceLists;
+        
+        public DescriptorImpl()
+        {
+            disabledChoiceLists = Collections.emptyList();
+            load();
+        }
+        
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject json) throws hudson.model.Descriptor.FormException
+        {
+            List<String> configuredToDisableChoiceLists = new ArrayList<String>();
+            for(Descriptor<ChoiceListProvider> d: getChoiceListProviderList())
+            {
+                String name = d.getJsonSafeClassName();
+                JSONObject o = json.optJSONObject(name);
+                
+                if(o == null)
+                {
+                    configuredToDisableChoiceLists.add(d.getId());
+                }
+            }
+            disabledChoiceLists = configuredToDisableChoiceLists;
+            
+            save();
+            
+            return super.configure(req, json);
+        }
+        
+        public boolean isProviderEnabled(Descriptor<ChoiceListProvider> d)
+        {
+            return !disabledChoiceLists.contains(d.getId());
+        }
+        
         /**
          * Create a new instance of {@link SystemGroovyChoiceListProvider} from user inputs.
          * 
