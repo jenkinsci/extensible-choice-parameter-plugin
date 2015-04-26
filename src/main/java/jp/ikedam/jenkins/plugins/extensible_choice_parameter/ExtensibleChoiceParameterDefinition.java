@@ -188,12 +188,13 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
             if (formData == null || formData.isNullObject()) {
                 return null;
             }
-            if (!formData.has("stapler-class")) {
-                throw new FormException("No stapler-class is specified", fieldName);
-            }
-            String staplerClazzName = formData.getString("stapler-class");
+            String staplerClazzName = formData.optString("$class", null);
             if (staplerClazzName == null) {
-                throw new FormException("No stapler-class is specified", fieldName);
+                // Fall back on the legacy stapler-class attribute.
+                staplerClazzName = formData.optString("stapler-class", null);
+            }
+            if (staplerClazzName == null) {
+                throw new FormException("No $stapler nor stapler-class is specified", fieldName);
             }
             try {
                 @SuppressWarnings("unchecked")
