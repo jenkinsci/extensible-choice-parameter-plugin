@@ -118,7 +118,10 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
                 if(o != null)
                 {
                     configuredChoiceListEnableMap.put(d.getId(), true);
-                    d.configure(req, o);
+                    if(d instanceof ChoiceListProviderDescriptor)
+                    {
+                        d.configure(req, o);
+                    }
                 }
                 else
                 {
