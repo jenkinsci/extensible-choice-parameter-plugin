@@ -24,8 +24,13 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import jenkins.model.Jenkins;
@@ -34,6 +39,7 @@ import hudson.DescriptorExtensionList;
 import hudson.Util;
 import hudson.model.Descriptor;
 import hudson.model.Describable;
+import hudson.model.DescriptorVisibilityFilter;
 import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
 import hudson.model.SimpleParameterDefinition;
@@ -54,6 +60,7 @@ import net.sf.json.JSONObject;
 public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefinition
 {
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(ExtensibleChoiceParameterDefinition.class.getName());
     
     private static final Pattern namePattern = Pattern.compile("[A-Za-z_][A-Za-z_0-9]*");
     
@@ -81,38 +88,62 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @Extension
     public static class DescriptorImpl extends ParameterDescriptor
     {
-        private List<String> disabledChoiceLists;
+        private Map<String,Boolean> choiceListEnabledMap;
         
         public DescriptorImpl()
         {
-            disabledChoiceLists = Collections.emptyList();
+            setChoiceListEnabledMap(Collections.<String, Boolean>emptyMap());
             load();
+        }
+        
+        protected void setChoiceListEnabledMap(Map<String, Boolean> choiceListEnabledMap)
+        {
+            this.choiceListEnabledMap = choiceListEnabledMap;
+        }
+        
+        protected Map<String, Boolean> getChoiceListEnabledMap()
+        {
+            return choiceListEnabledMap;
         }
         
         @Override
         public boolean configure(StaplerRequest req, JSONObject json) throws hudson.model.Descriptor.FormException
         {
-            List<String> configuredToDisableChoiceLists = new ArrayList<String>();
+            Map<String, Boolean> configuredChoiceListEnableMap = new HashMap<String, Boolean>();
             for(Descriptor<ChoiceListProvider> d: getChoiceListProviderList())
             {
                 String name = d.getJsonSafeClassName();
                 JSONObject o = json.optJSONObject(name);
                 
-                if(o == null)
+                if(o != null)
                 {
-                    configuredToDisableChoiceLists.add(d.getId());
+                    configuredChoiceListEnableMap.put(d.getId(), true);
+                    d.configure(req, o);
+                }
+                else
+                {
+                    configuredChoiceListEnableMap.put(d.getId(), false);
                 }
             }
-            disabledChoiceLists = configuredToDisableChoiceLists;
+            setChoiceListEnabledMap(configuredChoiceListEnableMap);
             
             save();
             
             return super.configure(req, json);
         }
         
-        public boolean isProviderEnabled(Descriptor<ChoiceListProvider> d)
+        public boolean isProviderEnabled(Descriptor<?> d)
         {
-            return !disabledChoiceLists.contains(d.getId());
+            Boolean b = getChoiceListEnabledMap().get(d.getId());
+            if(b != null)
+            {
+                return b.booleanValue();
+            }
+            if(!(d instanceof ChoiceListProviderDescriptor))
+            {
+                return true;
+            }
+            return ((ChoiceListProviderDescriptor)d).isEnabledByDefault();
         }
         
         /**
@@ -197,13 +228,23 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         /**
          * Returns all the available methods to provide choices.
          * 
-         * Used for showing dropdown for users to select a choice provider.
-         * 
          * @return DescriptorExtensionList of ChoiceListProvider subclasses.
          */
         public DescriptorExtensionList<ChoiceListProvider,Descriptor<ChoiceListProvider>> getChoiceListProviderList()
         {
             return ChoiceListProvider.all();
+        }
+        
+        /**
+         * Returns all the available methods to provide choices that are enabled in the global configuration.
+         * 
+         * Used for showing dropdown for users to select a choice provider.
+         * 
+         * @return DescriptorExtensionList of ChoiceListProvider subclasses.
+         */
+        public List<Descriptor<ChoiceListProvider>> getEnabledChoiceListProviderList()
+        {
+            return DescriptorVisibilityFilter.apply(this, ChoiceListProvider.all());
         }
         
         public FormValidation doCheckName(@QueryParameter String name){
@@ -238,6 +279,21 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         }
     }
     
+    @Extension
+    public static class DescriptorVisibilityFilterImpl extends DescriptorVisibilityFilter
+    {
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean filter(Object context, @SuppressWarnings("rawtypes") Descriptor descriptor)
+        {
+            if(!(context instanceof DescriptorImpl))
+            {
+                return true;
+            }
+            return ((DescriptorImpl)context).isProviderEnabled(descriptor);
+        }
+    }
+    
     private boolean editable = false;
     
     /**
@@ -263,13 +319,38 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     }
     
     /**
+     * @return choice provider only when it's enabled
+     * @see DescriptorImpl#isProviderEnabled(Descriptor)
+     */
+    public ChoiceListProvider getEnabledChoiceListProvider()
+    {
+        ChoiceListProvider p = getChoiceListProvider();
+        if(p == null)
+        {
+            return null;
+        }
+        
+        // filter providers.
+        List<Descriptor<ChoiceListProvider>> testList = DescriptorVisibilityFilter.apply(
+                getDescriptor(),
+                Arrays.asList(p.getDescriptor())
+        );
+        if(testList.isEmpty())
+        {
+            LOGGER.log(Level.WARNING, "{0} is configured but disabled in the system configuration.", p.getDescriptor().getDisplayName());
+            return null;
+        }
+        return p;
+    }
+    
+    /**
      * Return choices available for this parameter.
      * 
      * @return list of choices. never null.
      */
     public List<String> getChoiceList()
     {
-        ChoiceListProvider provider = getChoiceListProvider();
+        ChoiceListProvider provider = getEnabledChoiceListProvider();
         List<String> choiceList = (provider !=  null)?provider.getChoiceList():null;
         return (choiceList !=  null)?choiceList:new ArrayList<String>(0);
     }
@@ -359,7 +440,8 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @Override
     public ParameterValue getDefaultParameterValue()
     {
-        String defaultChoice = (getChoiceListProvider() != null)?getChoiceListProvider().getDefaultChoice():null;
+        ChoiceListProvider p = getEnabledChoiceListProvider();
+        String defaultChoice = (p != null)?p.getDefaultChoice():null;
         if(defaultChoice != null)
         {
             return createValue(defaultChoice);

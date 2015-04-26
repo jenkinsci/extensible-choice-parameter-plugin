@@ -1,0 +1,11 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    The view shown in the System Configuration.
+  -->
+  <f:section title="${descriptor.displayName}">
+    <f:entry field="enabledByDefault" title="enabledByDefault">
+      <f:checkbox />
+    </f:entry>
+  </f:section>
+</j:jelly>

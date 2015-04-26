@@ -26,7 +26,6 @@ THE SOFTWARE.
         The view shown in the System Configuration.
         Input fields are located in config.jelly of GlobalTextChoiceListEntry.
     -->
-    <f:section title="${%Global Choice Parameter}">
         <f:block>
             <f:repeatableProperty
                 field="choiceListEntryList"
@@ -34,5 +33,4 @@ THE SOFTWARE.
                 header="${descriptor.displayName}"
             />
         </f:block>
-    </f:section>
 </j:jelly>

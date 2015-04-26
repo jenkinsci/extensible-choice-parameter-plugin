@@ -34,7 +34,7 @@ THE SOFTWARE.
     <f:dropdownList title="${%Choice Provider}" name="choiceListProvider" help="${descriptor.getHelpFile('choiceListProvider')}">
         <j:forEach
                 var="curDescriptor"
-                items="${descriptor.choiceListProviderList.iterator()}"
+                items="${descriptor.enabledChoiceListProviderList.iterator()}"
                 varStatus="loop">
             <j:scope>
             <j:set

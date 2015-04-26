@@ -28,7 +28,15 @@ THE SOFTWARE.
   -->
   <f:section title="${descriptor.displayName}">
     <j:forEach var="d" items="${instance.choiceListProviderList}">
-      <f:optionalBlock name="${d.jsonSafeClassName}" checked="${instance.isProviderEnabled(d)}" help="${d.helpFile}" title="${d.displayName}" />
+      <f:optionalBlock name="${d.jsonSafeClassName}" checked="${instance.isProviderEnabled(d)}" help="${d.helpFile}" title="${d.displayName}">
+        <j:if test="${d.globalConfigPageForChoiceListProvider != null}">
+          <j:scope>
+            <j:set var="descriptor" value="${d}" />
+            <j:set var="instance" value="${descriptor}" />
+            <st:include page="${d.globalConfigPageForChoiceListProvider}" from="${d}" />
+          </j:scope>
+        </j:if>
+      </f:optionalBlock>
     </j:forEach>
   </f:section>
 </j:jelly>

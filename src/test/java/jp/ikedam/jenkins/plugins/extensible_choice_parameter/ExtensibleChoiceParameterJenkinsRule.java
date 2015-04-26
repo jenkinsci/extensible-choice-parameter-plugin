@@ -26,6 +26,7 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 import hudson.Util;
 import hudson.PluginWrapper;
 import hudson.model.FreeStyleProject;
+import hudson.model.Job;
 
 import java.io.IOException;
 
@@ -127,6 +128,18 @@ public class ExtensibleChoiceParameterJenkinsRule extends JenkinsRule
             throws IOException
     {
         return super.createFreeStyleProject(name);
+    }
+    
+    @Override
+    public void configRoundtrip() throws Exception
+    {
+        super.configRoundtrip();
+    }
+    
+    @Override
+    protected <P extends Job> P configRoundtrip(P before) throws Exception
+    {
+        return super.configRoundtrip(before);
     }
     
     /**
