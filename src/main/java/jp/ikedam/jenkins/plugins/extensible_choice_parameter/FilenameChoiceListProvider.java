@@ -45,10 +45,6 @@ import org.kohsuke.stapler.QueryParameter;
 /**
  * Create a choice list from a list of files.
  */
-/**
- * @author yasuke
- *
- */
 public class FilenameChoiceListProvider extends ChoiceListProvider implements Serializable
 {
     private static final long serialVersionUID = 1329937323978223039L;
@@ -75,6 +71,26 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
             return name.toString();
         }
     };
+    
+    public enum EmptyChoiceType
+    {
+        None(Messages._FilenameChoiceListProvider_EmptyChoiceType_None()),
+        AtTop(Messages._FilenameChoiceListProvider_EmptyChoiceType_AtTop()),
+        AtEnd(Messages._FilenameChoiceListProvider_EmptyChoiceType_AtEnd());
+        
+        private Localizable name;
+        
+        private EmptyChoiceType(Localizable name)
+        {
+            this.name = name;
+        }
+        
+        @Override
+        public String toString()
+        {
+            return name.toString();
+        }
+    }
     
     private final String baseDirPath;
     
@@ -168,6 +184,16 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
         return reverseOrder;
     }
     
+    private final EmptyChoiceType emptyChoiceType;
+    
+    /**
+     * @return whether and where to put an empty choice.
+     */
+    public EmptyChoiceType getEmptyChoiceType()
+    {
+        return emptyChoiceType;
+    }
+    
     /**
      * The constructor called when a user posts a form.
      * 
@@ -175,15 +201,23 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
      * @param includePattern a pattern of file names to include to the list.
      * @param excludePattern a pattern of file names to exclude from the list.
      * @param scanType a type of files to list.
+     * @param emptyChoiceType whether and where to put an empty choice.
      */
     @DataBoundConstructor
-    public FilenameChoiceListProvider(String baseDirPath, String includePattern, String excludePattern, ScanType scanType, boolean reverseOrder)
+    public FilenameChoiceListProvider(String baseDirPath, String includePattern, String excludePattern, ScanType scanType, boolean reverseOrder, EmptyChoiceType emptyChoiceType)
     {
         this.baseDirPath = StringUtils.trim(baseDirPath);
         this.includePattern = StringUtils.trim(includePattern);
         this.excludePattern = StringUtils.trim(excludePattern);
         this.scanType = scanType;
         this.reverseOrder = reverseOrder;
+        this.emptyChoiceType = emptyChoiceType;
+    }
+    
+    @Deprecated
+    public FilenameChoiceListProvider(String baseDirPath, String includePattern, String excludePattern, ScanType scanType, boolean reverseOrder)
+    {
+        this(baseDirPath, includePattern, excludePattern, scanType, reverseOrder, EmptyChoiceType.None);
     }
     
     /**
@@ -215,7 +249,8 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
             String includePattern,
             String excludePattern,
             ScanType scanType,
-            boolean reverseOrder
+            boolean reverseOrder,
+            EmptyChoiceType emptyChoiceType
     )
     {
         if(baseDir == null || !baseDir.exists() || !baseDir.isDirectory())
@@ -285,7 +320,36 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
             }
         }
         
+        if(emptyChoiceType == null)
+        {
+            emptyChoiceType = EmptyChoiceType.None;
+        }
+        
+        switch(emptyChoiceType)
+        {
+        case None:
+            break;
+        case AtTop:
+            ret.add(0, "");
+            break;
+        case AtEnd:
+            ret.add("");
+            break;
+        }
+        
         return ret;
+    }
+    
+    @Deprecated
+    protected static List<String> getFileList(
+            File baseDir,
+            String includePattern,
+            String excludePattern,
+            ScanType scanType,
+            boolean reverseOrder
+    )
+    {
+        return getFileList(baseDir, includePattern, excludePattern, scanType, reverseOrder, EmptyChoiceType.None);
     }
     
     /**
@@ -323,7 +387,8 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
                getIncludePattern(),
                getExcludePattern(),
                getScanType(),
-               isReverseOrder()
+               isReverseOrder(),
+               getEmptyChoiceType()
        );
     }
     
@@ -418,7 +483,8 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
                 @QueryParameter String includePattern,
                 @QueryParameter String excludePattern,
                 @QueryParameter ScanType scanType,
-                @QueryParameter boolean reverseOrder
+                @QueryParameter boolean reverseOrder,
+                @QueryParameter EmptyChoiceType emptyChoiceType
         )
         {
             List<String> fileList = getFileList(
@@ -426,7 +492,8 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
                     includePattern,
                     excludePattern,
                     scanType,
-                    reverseOrder
+                    reverseOrder,
+                    emptyChoiceType
             );
             
             if(fileList.isEmpty())
