@@ -24,7 +24,8 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import static org.junit.Assert.*;
-
+import hudson.model.FreeStyleProject;
+import hudson.model.ParametersDefinitionProperty;
 import hudson.util.FormValidation;
 
 import java.io.File;
@@ -68,6 +69,77 @@ public class FilenameChoiceListProviderJenkinsTest
     private FilenameChoiceListProvider.DescriptorImpl getDescriptor()
     {
         return (FilenameChoiceListProvider.DescriptorImpl)Jenkins.getInstance().getDescriptor(FilenameChoiceListProvider.class);
+    }
+    
+    @Test
+    public void testConfiguration() throws Exception
+    {
+        {
+            FreeStyleProject p = j.createFreeStyleProject();
+            FilenameChoiceListProvider expected = new FilenameChoiceListProvider(
+                    "/some/path",
+                    "**/*",
+                    "**/*.java",
+                    FilenameChoiceListProvider.ScanType.File,
+                    false,
+                    FilenameChoiceListProvider.EmptyChoiceType.None
+            );
+            p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
+                    "Choice",
+                    expected,
+                    false,
+                    ""
+            )));
+            j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
+            j.assertEqualDataBoundBeans(
+                    expected,
+                    ((ExtensibleChoiceParameterDefinition)p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("Choice")).getChoiceListProvider()
+            );
+        }
+        {
+            FreeStyleProject p = j.createFreeStyleProject();
+            FilenameChoiceListProvider expected = new FilenameChoiceListProvider(
+                    "C:\\some\\path",
+                    "**/*.java",
+                    "**/*Test.java",
+                    FilenameChoiceListProvider.ScanType.Directory,
+                    true,
+                    FilenameChoiceListProvider.EmptyChoiceType.AtTop
+            );
+            p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
+                    "Choice",
+                    expected,
+                    false,
+                    ""
+            )));
+            j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
+            j.assertEqualDataBoundBeans(
+                    expected,
+                    ((ExtensibleChoiceParameterDefinition)p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("Choice")).getChoiceListProvider()
+            );
+        }
+        {
+            FreeStyleProject p = j.createFreeStyleProject();
+            FilenameChoiceListProvider expected = new FilenameChoiceListProvider(
+                    "relative/path",
+                    "**/*",
+                    "",
+                    FilenameChoiceListProvider.ScanType.FileAndDirectory,
+                    true,
+                    FilenameChoiceListProvider.EmptyChoiceType.AtEnd
+            );
+            p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
+                    "Choice",
+                    expected,
+                    false,
+                    ""
+            )));
+            j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
+            j.assertEqualDataBoundBeans(
+                    expected,
+                    ((ExtensibleChoiceParameterDefinition)p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("Choice")).getChoiceListProvider()
+            );
+        }
     }
     
     @Test
