@@ -1,7 +1,7 @@
 <!--
 The MIT License
 
-Copyright (c) 2012-2013 IKEDA Yasuyuki
+Copyright (c) 2015 IKEDA Yasuyuki
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,16 +21,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -->
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <!--
-        The view shown in the System Configuration.
-        Input fields are located in config.jelly of GlobalTextChoiceListEntry.
-    -->
-        <f:block>
-            <f:repeatableProperty
-                field="choiceListEntryList"
-                add="${%Add New Choice List}"
-                header="${descriptor.displayName}"
-            />
-        </f:block>
+  <!--
+    The view shown in the System Configuration.
+  -->
+  <f:section title="${descriptor.displayName}">
+    <j:forEach var="d" items="${instance.choiceListProviderList}">
+      <f:optionalBlock name="${d.jsonSafeClassName}" checked="${instance.isProviderEnabled(d)}" help="${d.helpFile}" title="${d.displayName}">
+        <j:if test="${d.globalConfigPageForChoiceListProvider != null}">
+          <j:scope>
+            <j:set var="descriptor" value="${d}" />
+            <j:set var="instance" value="${descriptor}" />
+            <st:include page="${d.globalConfigPageForChoiceListProvider}" from="${d}" />
+          </j:scope>
+        </j:if>
+      </f:optionalBlock>
+    </j:forEach>
+  </f:section>
 </j:jelly>

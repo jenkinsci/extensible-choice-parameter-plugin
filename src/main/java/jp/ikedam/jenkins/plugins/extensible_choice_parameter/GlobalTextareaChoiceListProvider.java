@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 
 import hudson.Extension;
 import hudson.model.AbstractProject;
-import hudson.model.Descriptor;
 import hudson.util.ListBoxModel;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -73,7 +72,7 @@ public class GlobalTextareaChoiceListProvider extends AddEditedChoiceListProvide
      * </dl>
      */
     @Extension
-    public static class DescriptorImpl extends Descriptor<ChoiceListProvider>
+    public static class DescriptorImpl extends ChoiceListProviderDescriptor
     {
         /**
          * Restore from the global configuration
