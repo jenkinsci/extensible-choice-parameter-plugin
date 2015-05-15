@@ -37,6 +37,9 @@ THE SOFTWARE.
     <f:entry title="${%Reverse Order}" field="reverseOrder">
         <f:checkbox />
     </f:entry>
+    <f:entry title="${%Empty Choice}" field="emptyChoiceType">
+        <f:enum>${it}</f:enum>
+    </f:entry>
     <f:validateButton
         method="test"
         title="${%List Files Now}"

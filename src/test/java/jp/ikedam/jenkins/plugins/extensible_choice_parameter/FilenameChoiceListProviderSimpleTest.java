@@ -34,6 +34,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
+import jp.ikedam.jenkins.plugins.extensible_choice_parameter.FilenameChoiceListProvider.EmptyChoiceType;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.FilenameChoiceListProvider.ScanType;
 
 /**
@@ -162,9 +163,16 @@ public class FilenameChoiceListProviderSimpleTest
         private static final long serialVersionUID = 5830671030985340194L;
         
         public FilenameChoiceListProviderForTest(String baseDirPath,
+                String includePattern, String excludePattern, ScanType scanType, boolean reverseOrder, 
+                EmptyChoiceType emptyChoideType)
+        {
+            super(baseDirPath, includePattern, excludePattern, scanType, reverseOrder, emptyChoideType);
+        }
+        
+        public FilenameChoiceListProviderForTest(String baseDirPath,
                 String includePattern, String excludePattern, ScanType scanType, boolean reverseOrder)
         {
-            super(baseDirPath, includePattern, excludePattern, scanType, reverseOrder);
+            this(baseDirPath, includePattern, excludePattern, scanType, reverseOrder, null);
         }
         
         public static List<String> getFileList(
@@ -537,6 +545,120 @@ public class FilenameChoiceListProviderSimpleTest
                         false
                 );
                 assertFileListEquals("null for scanType", expected, fileList);
+            }
+            
+            // No empty choice.
+            {
+                List<String> expected = Arrays.asList(
+                        "test1.txt",
+                        "test2.dat",
+                        "dir1",
+                        "dir1/test3.txt",
+                        "dir2",
+                        "dir2/dir3",
+                        "dir2/dir3/test4.dat"
+                );
+                List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
+                        tempDir,
+                        "**/*",
+                        "",
+                        ScanType.FileAndDirectory,
+                        false,
+                        EmptyChoiceType.None
+                );
+                assertFileListEquals("No empty choice", expected, fileList);
+            }
+            
+            // Empty choice at the top.
+            {
+                List<String> expected = Arrays.asList(
+                        "",
+                        "test1.txt",
+                        "test2.dat",
+                        "dir1",
+                        "dir1/test3.txt",
+                        "dir2",
+                        "dir2/dir3",
+                        "dir2/dir3/test4.dat"
+                );
+                List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
+                        tempDir,
+                        "**/*",
+                        "",
+                        ScanType.FileAndDirectory,
+                        false,
+                        EmptyChoiceType.AtTop
+                );
+                assertFileListEquals("Empty choice at the top", expected, fileList);
+            }
+            
+            // Empty choice at the end.
+            {
+                List<String> expected = Arrays.asList(
+                        "test1.txt",
+                        "test2.dat",
+                        "dir1",
+                        "dir1/test3.txt",
+                        "dir2",
+                        "dir2/dir3",
+                        "dir2/dir3/test4.dat",
+                        ""
+                );
+                List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
+                        tempDir,
+                        "**/*",
+                        "",
+                        ScanType.FileAndDirectory,
+                        false,
+                        EmptyChoiceType.AtEnd
+                );
+                assertFileListEquals("Empty choice at the end", expected, fileList);
+            }
+            
+            // Empty choice at the top and reversed
+            {
+                List<String> expected = Arrays.asList(
+                        "",
+                        "dir2/dir3/test4.dat",
+                        "dir2/dir3",
+                        "dir2",
+                        "dir1/test3.txt",
+                        "dir1",
+                        "test2.dat",
+                        "test1.txt"
+                );
+                List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
+                        tempDir,
+                        "**/*",
+                        "",
+                        ScanType.FileAndDirectory,
+                        true,
+                        EmptyChoiceType.AtTop
+                );
+                assertFileListEquals("Empty choice at the top and reversed", expected, fileList);
+            }
+            
+            // Empty choice at the end and reversed.
+            {
+                List<String> expected = Arrays.asList(
+                        "dir2/dir3/test4.dat",
+                        "dir2/dir3",
+                        "dir2",
+                        "dir1/test3.txt",
+                        "dir1",
+                        "test2.dat",
+                        "test1.txt",
+                        ""
+                );
+                List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
+                        tempDir,
+                        "**/*",
+                        "",
+                        ScanType.FileAndDirectory,
+                        true,
+                        EmptyChoiceType.AtEnd
+                );
+                assertFileListEquals("Empty choice at the end and reversed", expected, fileList);
             }
         }
         finally
