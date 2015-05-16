@@ -26,7 +26,7 @@ THE SOFTWARE.
   <!--
     The view shown in the System Configuration.
   -->
-  <f:section title="${descriptor.displayName}">
+  <f:section title="${descriptor.displayName}: ${%Available Choice Providers}">
     <j:forEach var="d" items="${instance.choiceListProviderList}">
       <f:optionalBlock name="${d.jsonSafeClassName}" checked="${instance.isProviderEnabled(d)}" help="${d.helpFile}" title="${d.displayName}">
         <j:if test="${d.globalConfigPageForChoiceListProvider != null}">
