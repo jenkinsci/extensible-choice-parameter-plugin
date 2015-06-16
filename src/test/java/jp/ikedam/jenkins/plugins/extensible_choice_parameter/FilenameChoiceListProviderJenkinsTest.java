@@ -37,6 +37,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
+
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 /**
  * Tests for FilenameChoiceListProvider, concerned with Jenkins.
@@ -302,5 +307,36 @@ public class FilenameChoiceListProviderJenkinsTest
                     descriptor.doCheckExcludePattern(pattern).kind
             );
         }
+    }
+    
+    @Bug(28841)
+    @Test
+    public void testDoTest() throws Exception
+    {
+        FreeStyleProject p = j.createFreeStyleProject();
+        p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
+                "Choice",
+                new FilenameChoiceListProvider(
+                        ".",
+                        "*",
+                        "",
+                        FilenameChoiceListProvider.ScanType.File,
+                        false,
+                        FilenameChoiceListProvider.EmptyChoiceType.None
+                ),
+                false,
+                ""
+        )));
+        
+        WebClient wc = j.createWebClient();
+        HtmlPage page = wc.getPage(p, "configure");
+        
+        // find the button to call doTest
+        //List<HtmlElement> elements = page.getElementsByName("choiceListProvider");
+        //assertEquals(1, elements.size());
+        //HtmlElement choiceListProviderBlock = elements.get(0);
+        HtmlElement button = page.<HtmlElement>getFirstByXPath("//*[@name='choiceListProvider']//button|//*[@name='choiceListProvider']//input[@type='button']");
+        assertNotNull(button);
+        button.click();
     }
 }
