@@ -44,6 +44,6 @@ THE SOFTWARE.
         method="test"
         title="${%List Files Now}"
         progress="${%Checking...}"
-        with="baseDirPath,includePattern,excludePattern,scanType,reverseOrder"
+        with="baseDirPath,includePattern,excludePattern,scanType,reverseOrder,emptyChoiceType"
     />
 </j:jelly>
