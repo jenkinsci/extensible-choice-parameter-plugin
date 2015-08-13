@@ -306,18 +306,11 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
             }
         }
         
+        ret = new ArrayList<String>(ret);
+        
         if(reverseOrder)
         {
-            try
-            {
-                Collections.reverse(ret);
-            }
-            catch(UnsupportedOperationException _)
-            {
-                // ret is immutable.
-                ret = new ArrayList<String>(ret);
-                Collections.reverse(ret);
-            }
+            Collections.reverse(ret);
         }
         
         if(emptyChoiceType == null)
