@@ -620,10 +620,7 @@ public class FilenameChoiceListProviderSimpleTest
                 List<String> expected = Arrays.asList(
                         "",
                         "dir2/dir3/test4.dat",
-                        "dir2/dir3",
-                        "dir2",
                         "dir1/test3.txt",
-                        "dir1",
                         "test2.dat",
                         "test1.txt"
                 );
@@ -631,7 +628,7 @@ public class FilenameChoiceListProviderSimpleTest
                         tempDir,
                         "**/*",
                         "",
-                        ScanType.FileAndDirectory,
+                        ScanType.File,
                         true,
                         EmptyChoiceType.AtTop
                 );
@@ -641,20 +638,16 @@ public class FilenameChoiceListProviderSimpleTest
             // Empty choice at the end and reversed.
             {
                 List<String> expected = Arrays.asList(
-                        "dir2/dir3/test4.dat",
                         "dir2/dir3",
                         "dir2",
-                        "dir1/test3.txt",
                         "dir1",
-                        "test2.dat",
-                        "test1.txt",
                         ""
                 );
                 List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
                         tempDir,
                         "**/*",
                         "",
-                        ScanType.FileAndDirectory,
+                        ScanType.Directory,
                         true,
                         EmptyChoiceType.AtEnd
                 );

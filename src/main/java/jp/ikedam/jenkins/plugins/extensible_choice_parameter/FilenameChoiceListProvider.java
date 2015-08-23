@@ -295,29 +295,20 @@ public class FilenameChoiceListProvider extends ChoiceListProvider implements Se
             }
         case Directory:
             {
-                ret = Arrays.asList(ds.getIncludedDirectories());
+                ret = new ArrayList<String>(Arrays.asList(ds.getIncludedDirectories()));
                 break;
             }
         default:
             {
                 // case File:
-                ret = Arrays.asList(ds.getIncludedFiles());
+                ret = new ArrayList<String>(Arrays.asList(ds.getIncludedFiles()));
                 break;
             }
         }
         
         if(reverseOrder)
         {
-            try
-            {
-                Collections.reverse(ret);
-            }
-            catch(UnsupportedOperationException _)
-            {
-                // ret is immutable.
-                ret = new ArrayList<String>(ret);
-                Collections.reverse(ret);
-            }
+            Collections.reverse(ret);
         }
         
         if(emptyChoiceType == null)
