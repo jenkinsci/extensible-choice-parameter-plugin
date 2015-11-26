@@ -31,7 +31,6 @@ import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -50,7 +49,7 @@ import org.kohsuke.stapler.StaplerRequest;
 /**
  * A choice provider whose choices are determined by a Groovy script.
  */
-public class SystemGroovyChoiceListProvider extends ChoiceListProvider implements Serializable
+public class SystemGroovyChoiceListProvider extends ChoiceListProvider
 {
     private static final long serialVersionUID = 2L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
