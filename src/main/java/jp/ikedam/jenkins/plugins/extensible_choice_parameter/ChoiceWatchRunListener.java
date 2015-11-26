@@ -42,13 +42,8 @@ public class ChoiceWatchRunListener extends RunListener<AbstractBuild<?,?>>
     @Override
     public void onFinalized(AbstractBuild<?,?> build)
     {
-        Object p = build.getProject();
+        AbstractProject<?,?> job = build.getProject();
         
-        if(!(p instanceof AbstractProject<?,?>))
-        {
-            return;
-        }
-        AbstractProject<?,?> job = (AbstractProject<?,?>)p;
         ParametersDefinitionProperty pp = job.getProperty(ParametersDefinitionProperty.class);
         if(pp == null)
         {
