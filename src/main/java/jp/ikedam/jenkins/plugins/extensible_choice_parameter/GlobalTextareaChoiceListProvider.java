@@ -23,7 +23,6 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -45,7 +44,7 @@ import net.sf.json.JSONObject;
  * A choice provider whose choices are defined
  * in the System Configuration page, and can be refereed from all jobs.
  */
-public class GlobalTextareaChoiceListProvider extends AddEditedChoiceListProvider implements Serializable
+public class GlobalTextareaChoiceListProvider extends AddEditedChoiceListProvider
 {
     private static final long serialVersionUID = 2L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";

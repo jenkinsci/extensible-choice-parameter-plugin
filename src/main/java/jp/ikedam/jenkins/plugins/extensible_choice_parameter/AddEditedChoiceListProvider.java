@@ -34,6 +34,8 @@ import hudson.model.AbstractProject;
  */
 public abstract class AddEditedChoiceListProvider extends ChoiceListProvider
 {
+    private static final long serialVersionUID = 2844637600583498205L;
+    
     /**
      * Used to Specify when to add a edited value
      */

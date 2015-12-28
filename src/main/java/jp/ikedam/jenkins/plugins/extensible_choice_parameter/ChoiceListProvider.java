@@ -23,6 +23,7 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import java.io.Serializable;
 import java.util.List;
 import hudson.ExtensionPoint;
 import hudson.DescriptorExtensionList;
@@ -43,8 +44,10 @@ import hudson.model.AbstractDescribableImpl;
  *    <li>annotate the DescriptorImpl with Extension</li>
  * </ol>
  */
-abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceListProvider> implements ExtensionPoint
+abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceListProvider> implements ExtensionPoint, Serializable
 {
+    private static final long serialVersionUID = 8965389708210167871L;
+    
     /**
      * Returns the choices.
      * 

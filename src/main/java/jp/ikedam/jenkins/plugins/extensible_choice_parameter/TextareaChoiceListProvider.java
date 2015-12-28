@@ -24,7 +24,6 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,7 +42,7 @@ import org.kohsuke.stapler.QueryParameter;
 /**
  * A choice provider whose choices are defined as a text, like the build-in choice parameter.
  */
-public class TextareaChoiceListProvider extends AddEditedChoiceListProvider implements Serializable
+public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
 {
     private static final long serialVersionUID = 2L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";

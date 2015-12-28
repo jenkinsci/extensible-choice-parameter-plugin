@@ -30,8 +30,8 @@ import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.XStream2;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -47,10 +47,15 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.mapper.Mapper;
+
 /**
  * A choice provider whose choices are determined by a Groovy script.
  */
-public class SystemGroovyChoiceListProvider extends ChoiceListProvider implements Serializable
+public class SystemGroovyChoiceListProvider extends ChoiceListProvider
 {
     private static final long serialVersionUID = 2L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
@@ -308,7 +313,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
      * This will be stored in job configuration XML like
      * &lt;project class=&quot;project&quot; reference=&quot;../../../../../..&quot; /&gt;
      */
-    private AbstractProject<?,?> project;
+    private transient AbstractProject<?,?> project;
     
     /**
      * @param project
@@ -327,5 +332,34 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider implement
     protected AbstractProject<?,?> getProject()
     {
         return project;
+    }
+    
+    public static class ConverterImpl extends XStream2.PassthruConverter<SystemGroovyChoiceListProvider> {
+        private final Mapper mapper;
+        
+        public ConverterImpl(XStream2 xstream) {
+            super(xstream);
+            mapper = xstream.getMapper();
+        }
+        
+        @Override
+        public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+            super.marshal(source, writer, context);
+            
+            // As project is transient, serialize it forcibly.
+            SystemGroovyChoiceListProvider src = (SystemGroovyChoiceListProvider)source;
+            if (src.project != null) {
+                writer.startNode("project");
+                String attributeName = mapper.aliasForSystemAttribute("class");
+                if (attributeName != null) {
+                    writer.addAttribute(attributeName, mapper.serializedClass(src.project.getClass()));
+                }
+                context.convertAnother(src.project);
+                writer.endNode();
+            }
+        }
+        @Override protected void callback(SystemGroovyChoiceListProvider obj, UnmarshallingContext context) {
+            // nothing to do
+        }
     }
 }
