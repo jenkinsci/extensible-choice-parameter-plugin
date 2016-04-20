@@ -45,6 +45,7 @@ import hudson.model.AbstractDescribableImpl;
  */
 abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceListProvider> implements ExtensionPoint
 {
+   
     /**
      * Returns the choices.
      * 
@@ -62,6 +63,11 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
     public String getDefaultChoice()
     {
         return null;
+    }
+    
+    public boolean isAddToTop()
+    {
+        return false;
     }
     
     /**

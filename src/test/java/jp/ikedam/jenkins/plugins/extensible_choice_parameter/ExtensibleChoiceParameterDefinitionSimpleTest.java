@@ -150,7 +150,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest
     {
         // Simple value
         {
-            ChoiceListProvider provider = new TextareaChoiceListProvider("a\nb\nc\n", null, false, null);
+            ChoiceListProvider provider = new TextareaChoiceListProvider("a\nb\nc\n", null, false, null, false /* TODO TEST*/);
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     "name",
                     provider,

@@ -144,6 +144,15 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider impl
         return defaultChoice;
     }
     
+
+    private boolean addToTop;
+
+    @Override
+    public boolean isAddToTop()
+    {
+        return addToTop;
+    }
+    
     /**
      * Constructor instantiating with parameters in the configuration page.
      * 
@@ -155,13 +164,15 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider impl
      * @param defaultChoice
      * @param addEditedValue
      * @param whenToAdd
+     * @param addToTop
      */
     @DataBoundConstructor
-    public TextareaChoiceListProvider(String choiceListText, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd)
+    public TextareaChoiceListProvider(String choiceListText, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd, boolean addToTop)
     {
         super(addEditedValue, whenToAdd);
         setChoiceList(TextareaStringListUtility.stringListFromTextarea(choiceListText));
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
+        this.addToTop = addToTop;
     }
     
     @Override
@@ -173,8 +184,14 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider impl
     {
         LOGGER.info(String.format("Add new value %s to parameter %s in project %s", value, def.getName(), project.getName()));
         List<String> newChoiceList = new ArrayList<String>(getChoiceList());
-        newChoiceList.add(value);
+        
+        if (this.addToTop)
+        	newChoiceList.add(0, value);
+        else
+        	newChoiceList.add(value);
+
         setChoiceList(newChoiceList);
+        
         try
         {
             project.save();
