@@ -149,6 +149,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
     
     public static class MockChoiceListProvider extends ChoiceListProvider
     {
+        private static final long serialVersionUID = -8216066980119568526L;
         private List<String> choiceList = null;
         private String defaultChoice = null;
         public MockChoiceListProvider(List<String> choiceList, String defaultChoice){
@@ -190,6 +191,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
     
     public static class EnableConfigurableMockChoiceListProvider extends ChoiceListProvider
     {
+        private static final long serialVersionUID = 7643544327776225136L;
         private List<String> choiceList = null;
         private String defaultChoice = null;
         public EnableConfigurableMockChoiceListProvider(List<String> choiceList, String defaultChoice){

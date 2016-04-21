@@ -28,7 +28,6 @@ import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,7 +44,7 @@ import org.kohsuke.stapler.QueryParameter;
 /**
  * Create a choice list from a list of files.
  */
-public class FilenameChoiceListProvider extends ChoiceListProvider implements Serializable
+public class FilenameChoiceListProvider extends ChoiceListProvider
 {
     private static final long serialVersionUID = 1329937323978223039L;
     

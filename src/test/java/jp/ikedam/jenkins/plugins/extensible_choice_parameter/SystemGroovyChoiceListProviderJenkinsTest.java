@@ -359,5 +359,14 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
         j.assertBuildStatusSuccess(p.getLastBuild());
         assertEquals(p.getFullName(), ceb.getEnvVars().get("test"));
+        
+        // this should be preserved even after reboot
+        p.save();
+        j.jenkins.reload();
+        p = j.jenkins.getItemByFullName(p.getFullName(), FreeStyleProject.class);
+        ceb = p.getBuildersList().get(CaptureEnvironmentBuilder.class);
+        assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
+        j.assertBuildStatusSuccess(p.getLastBuild());
+        assertEquals(p.getFullName(), ceb.getEnvVars().get("test"));
     }
 }

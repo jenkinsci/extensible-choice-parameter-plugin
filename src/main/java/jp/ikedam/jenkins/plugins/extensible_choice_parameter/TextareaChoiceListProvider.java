@@ -24,7 +24,6 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,7 +42,7 @@ import org.kohsuke.stapler.QueryParameter;
 /**
  * A choice provider whose choices are defined as a text, like the build-in choice parameter.
  */
-public class TextareaChoiceListProvider extends AddEditedChoiceListProvider implements Serializable
+public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
 {
     private static final long serialVersionUID = 2L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
@@ -147,6 +146,12 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider impl
 
     private boolean addToTop;
 
+    /**
+     * Returns if user-added values should be added to the top of the choice list.
+     * 
+     * @return if user-added values should be added to the top of the choice list.
+     * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.ChoiceListProvider#isAddToTop()
+     */
     @Override
     public boolean isAddToTop()
     {
@@ -185,6 +190,7 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider impl
         LOGGER.info(String.format("Add new value %s to parameter %s in project %s", value, def.getName(), project.getName()));
         List<String> newChoiceList = new ArrayList<String>(getChoiceList());
         
+        // check if the new value should be added to the top of the list, or not
         if (this.addToTop)
         	newChoiceList.add(0, value);
         else

@@ -259,6 +259,13 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
         return true;
     }
     
+    @Override
+    public int hashCode() {
+        int r = (name != null)?name.hashCode():0;
+        r = r * 31 + ((choiceList != null)?choiceList.hashCode():0);
+        return r;
+    }
+    
     /**
      * @return
      * @see java.lang.Object#toString()
