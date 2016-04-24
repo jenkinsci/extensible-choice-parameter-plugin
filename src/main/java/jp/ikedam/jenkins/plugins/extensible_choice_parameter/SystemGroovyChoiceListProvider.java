@@ -23,6 +23,7 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Binding;
 import hudson.Extension;
 import hudson.model.AbstractProject;
@@ -274,6 +275,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         return getGroovyScript().getScript();
     }
     
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="This causes a warning about non-Serializable. Though somehow ParameterDefinition implements Serializable, it doesn't actually require Serializable as serialized with XStream.")
     private final SecureGroovyScript groovyScript;
     
     /**
