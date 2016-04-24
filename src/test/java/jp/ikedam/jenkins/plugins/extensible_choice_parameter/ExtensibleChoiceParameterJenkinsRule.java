@@ -25,8 +25,6 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import hudson.Util;
 import hudson.PluginWrapper;
-import hudson.model.FreeStyleProject;
-import hudson.model.Job;
 
 import java.io.IOException;
 
@@ -39,8 +37,6 @@ import com.gargoylesoftware.htmlunit.WebResponse;
 
 /**
  * Utility class for Tests.
- * For JenkinsRules have its may tests methods protected in Jenkins < 1.479,
- * make these methods public.
  */
 public class ExtensibleChoiceParameterJenkinsRule extends JenkinsRule
 {
@@ -109,37 +105,6 @@ public class ExtensibleChoiceParameterJenkinsRule extends JenkinsRule
                 e.printStackTrace();
             }
         }
-    }
-    
-    @Override
-    public void waitUntilNoActivity() throws Exception
-    {
-        super.waitUntilNoActivity();
-    }
-    
-    @Override
-    public FreeStyleProject createFreeStyleProject() throws IOException
-    {
-        return super.createFreeStyleProject();
-    }
-    
-    @Override
-    public FreeStyleProject createFreeStyleProject(String name)
-            throws IOException
-    {
-        return super.createFreeStyleProject(name);
-    }
-    
-    @Override
-    public void configRoundtrip() throws Exception
-    {
-        super.configRoundtrip();
-    }
-    
-    @Override
-    protected <P extends Job> P configRoundtrip(P before) throws Exception
-    {
-        return super.configRoundtrip(before);
     }
     
     /**
