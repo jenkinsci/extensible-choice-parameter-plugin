@@ -23,8 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
@@ -33,6 +33,7 @@ import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +42,8 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.groovy.control.CompilerConfiguration;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
@@ -57,7 +59,7 @@ import com.thoughtworks.xstream.mapper.Mapper;
  */
 public class SystemGroovyChoiceListProvider extends ChoiceListProvider
 {
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
     private static final Logger LOGGER = Logger.getLogger(SystemGroovyChoiceListProvider.class.getName());
     
@@ -117,10 +119,16 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
          * @param scriptText
          * @return the selection of a default choice
          */
-        public ListBoxModel doFillDefaultChoiceItems(StaplerRequest req, @QueryParameter String scriptText, @QueryParameter boolean usePredefinedVariables)
+        public ListBoxModel doFillDefaultChoiceItems(StaplerRequest req, @QueryParameter String script, @QueryParameter boolean sandbox, @QueryParameter boolean usePredefinedVariables)
         {
             ListBoxModel ret = new ListBoxModel();
             ret.add(Messages.ExtensibleChoiceParameterDefinition_NoDefaultChoice(), NoDefaultChoice);
+            
+            if (!sandbox)
+            {
+                // You cannot evaluate scripts outside sandbox before configuring.
+                return ret;
+            }
             
             List<String> choices = null;
             AbstractProject<?,?> project = null;
@@ -132,7 +140,11 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
             
             try
             {
-                choices = runScript(scriptText, usePredefinedVariables, project);
+                choices = runScript(
+                    new SecureGroovyScript(script, sandbox, Collections.<ClasspathEntry>emptyList()).configuringWithNonKeyItem(),
+                    usePredefinedVariables,
+                    project
+                );
             }
             catch(Exception e)
             {
@@ -150,10 +162,16 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
             return ret;
         }
         
-        public FormValidation doTest(StaplerRequest req, @QueryParameter String scriptText, @QueryParameter boolean usePredefinedVariables)
+        public FormValidation doTest(StaplerRequest req, @QueryParameter String script, @QueryParameter boolean sandbox, @QueryParameter boolean usePredefinedVariables)
         {
             List<String> choices = null;
             AbstractProject<?,?> project = null;
+            
+            if (!sandbox)
+            {
+                // You cannot evaluate scripts outside sandbox before configuring.
+                return FormValidation.warning(Messages.SystemGroovyChoiceListProvider_groovyScript_TestableOnlyWithSandbox());
+            }
             
             if(usePredefinedVariables && req != null)
             {
@@ -162,7 +180,11 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
             
             try
             {
-                choices = runScript(scriptText, usePredefinedVariables, project);
+                choices = runScript(
+                    new SecureGroovyScript(script, sandbox, Collections.<ClasspathEntry>emptyList()).configuringWithNonKeyItem(),
+                    usePredefinedVariables,
+                    project
+                );
             }
             catch(Exception e)
             {
@@ -200,7 +222,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         
         try
         {
-            ret = runScript(getScriptText(), isUsePredefinedVariables(), project);
+            ret = runScript(getGroovyScript(), isUsePredefinedVariables(), project);
         }
         catch(Exception e)
         {
@@ -209,9 +231,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         return (ret != null)?ret:new ArrayList<String>(0);
     }
 
-    private static List<String> runScript(String scriptText, boolean usePredefinedVariables, AbstractProject<?,?> project) {
-        CompilerConfiguration compilerConfig = new CompilerConfiguration();
-
+    private static List<String> runScript(SecureGroovyScript groovyScript, boolean usePredefinedVariables, AbstractProject<?,?> project) throws Exception {
         // see RemotingDiagnostics.Script
         ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
 
@@ -225,10 +245,8 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
             binding.setVariable("jenkins", Jenkins.getInstance());
             binding.setVariable("project", project);
         }
-        GroovyShell shell =
-            new GroovyShell(cl, binding, compilerConfig);
 
-        Object out = shell.evaluate(scriptText);
+        Object out = groovyScript.evaluate(cl,  binding);
         if(out == null)
         {
             return null;
@@ -246,18 +264,27 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         }
         return ret;
     }
-    private final String scriptText;
+    private transient String scriptText;
 
     /**
-     * The list of choices, joined into a string.
-     * 
-     * Used for filling a field when the configuration page is shown.
-     * 
-     * @return Joined choices.
+     * @deprecated use {@link #getGroovyScript()}
      */
+    @Deprecated
     public String getScriptText()
     {
-        return scriptText;
+        return getGroovyScript().getScript();
+    }
+    
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="This causes a warning about non-Serializable. Though somehow ParameterDefinition implements Serializable, it doesn't actually require Serializable as serialized with XStream.")
+    private final SecureGroovyScript groovyScript;
+    
+    /**
+     * @return script to generate choices.
+     * @since 1.4.0
+     */
+    public SecureGroovyScript getGroovyScript()
+    {
+        return groovyScript;
     }
     
     private final String defaultChoice;
@@ -277,25 +304,45 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
     /**
      * Constructor instantiating with parameters in the configuration page.
      * 
-     * When instantiating from the saved configuration,
-     * the object is directly serialized with XStream,
-     * and no constructor is used.
-     * 
-     * @param scriptText the text where choices are written in each line.
+     * @param groovyScript
      * @param defaultChoice
      * @param usePredefinedVariables
+     * 
+     * @since 1.4.0
      */
     @DataBoundConstructor
-    public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice, boolean usePredefinedVariables)
+    public SystemGroovyChoiceListProvider(SecureGroovyScript groovyScript, String defaultChoice, boolean usePredefinedVariables)
     {
-        this.scriptText = scriptText;
+        this.groovyScript = groovyScript.configuringWithNonKeyItem();
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
         this.usePredefinedVariables = usePredefinedVariables;
+    }
+    
+    public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice, boolean usePredefinedVariables)
+    {
+        this(
+            new SecureGroovyScript(scriptText, true, Collections.<ClasspathEntry>emptyList()),
+            defaultChoice,
+            usePredefinedVariables
+        );
     }
     
     public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice)
     {
         this(scriptText, defaultChoice, false);
+    }
+    
+    private Object readResolve() {
+        if (groovyScript != null)
+        {
+            return this;
+        }
+        // < 1.4.0
+        return new SystemGroovyChoiceListProvider(
+            scriptText,
+            getDefaultChoice(),
+            isUsePredefinedVariables()
+        );
     }
     
     private final boolean usePredefinedVariables;

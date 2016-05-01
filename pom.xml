@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.466</version><!-- which version of Jenkins is this plugin built against? -->
+    <version>1.509</version><!-- which version of Jenkins is this plugin built against? -->
   </parent>
   
   <groupId>jp.ikedam.jenkins.plugins</groupId>
   <artifactId>extensible-choice-parameter</artifactId>
-  <version>1.3.3-SNAPSHOT</version>
+  <version>1.4.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>Extensible Choice Parameter plugin</name>
   <description>Jenkins plugin to define choice build parameters where the way to provide choices can be extended.</description>
@@ -41,8 +41,31 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
   
+  <dependencies>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>script-security</artifactId>
+      <version>1.16</version>
+    </dependency>
+    <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>annotations</artifactId>
+        <version>3.0.1</version>
+    </dependency>
+  </dependencies>
+  
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.jenkins-ci.tools</groupId>
+        <artifactId>maven-hpi-plugin</artifactId>
+        <!-- to avoid Dependency ui-samples-plugin (1.509) doesn't exist -->
+        <version>1.117</version>
+        <extensions>true</extensions>
+        <configuration>
+          <compatibleSinceVersion>1.4.0</compatibleSinceVersion>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
@@ -54,6 +77,20 @@
       </plugin>
     </plugins>
   </build>
+  
+  <!-- INFRA-588 -->
+  <distributionManagement>
+      <repository>
+          <id>central</id>
+          <name>jenkinsci-releases</name>
+          <url>https://repo.jenkins-ci.org/releases</url>
+      </repository>
+      <snapshotRepository>
+          <id>snapshots</id>
+          <name>jenkinsci-snapshots</name>
+          <url>https://repo.jenkins-ci.org/snapshots</url>
+      </snapshotRepository>
+  </distributionManagement>
   
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
