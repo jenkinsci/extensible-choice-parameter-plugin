@@ -445,7 +445,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         assertTrue(elements.get(0) instanceof HtmlSelect);
         HtmlSelect sel = (HtmlSelect)elements.get(0);
         assertEquals(1, sel.getOptionSize());
-        assertEquals(p.getFullName(), sel.getOption(1).getValueAttribute());
+        assertEquals(p.getFullName(), sel.getOption(0).getValueAttribute());
     }
     
     @Test
