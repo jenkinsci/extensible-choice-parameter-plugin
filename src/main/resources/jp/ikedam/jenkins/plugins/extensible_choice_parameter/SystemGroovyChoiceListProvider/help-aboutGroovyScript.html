@@ -24,14 +24,10 @@ return (6..0).collect{new Date().plus(-it).format("yyyy-MM-dd")};
 <br>
 About securities about Groovy script, see <a href="https://wiki.jenkins-ci.org/display/JENKINS/Script+Security+Plugin">Script Security Plugin</a>.
 <br>
-For security reasons, execution of Groovy scripts in configuration pages are restricted in following ways:
+For security reasons, when calculating choices in "Default Choice" and when "Run the Script Now" is clicked,
+the Groovy script is exuecuted in this way:
 <ul>
-  <li>Only scripts using the sandbox are executed.</li>
+  <li>Executed only when "Use Groovy Sandbox" is checked.</li>
   <li>Additional classpaths are not used.</li>
-</ul>
-Following features in configuration pages may not be fully functioned:
-<ul>
-  <li>Choices in "Default Choice"</li>
-  <li>Run the Script Now</li>
 </ul>
 </div>

@@ -428,13 +428,11 @@ public class SystemGroovyChoiceListProviderJenkinsTest
     @Test
     public void testVariables() throws Exception
     {
-        ScriptApproval.get().approveSignature("method hudson.model.PersistenceRoot getRootDir");
-        ScriptApproval.get().approveSignature("method java.io.File getAbsolutePath");
         ScriptApproval.get().approveSignature("method hudson.model.Item getFullName");
         FreeStyleProject p = j.createFreeStyleProject();
         p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
                 "test",
-                new SystemGroovyChoiceListProvider("[jenkins.rootDir.absolutePath, project.fullName]", null, true),
+                new SystemGroovyChoiceListProvider("[project.fullName]", null, true),
                 false,
                 "test"
         )));
@@ -446,8 +444,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         assertEquals(1, elements.size());
         assertTrue(elements.get(0) instanceof HtmlSelect);
         HtmlSelect sel = (HtmlSelect)elements.get(0);
-        assertEquals(2, sel.getOptionSize());
-        assertEquals(j.jenkins.getRootDir().getAbsolutePath(), sel.getOption(0).getValueAttribute());
+        assertEquals(1, sel.getOptionSize());
         assertEquals(p.getFullName(), sel.getOption(1).getValueAttribute());
     }
     

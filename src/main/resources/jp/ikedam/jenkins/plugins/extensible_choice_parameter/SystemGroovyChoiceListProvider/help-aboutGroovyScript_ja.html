@@ -23,14 +23,10 @@ return (6..0).collect{new Date().plus(-it).format("yyyy-MM-dd")};
 <br>
 Groovy スクリプトのセキュリティについては <a href="https://wiki.jenkins-ci.org/display/JENKINS/Script+Security+Plugin">Script Security Plugin</a> を参照してください。
 <br>
-セキュリティの都合上、設定画面でのスクリプト実行には以下の制限があります。
+セキュリティの都合上、設定画面で「デフォルト値」の選択肢を表示する時と、「スクリプトのテスト実行」をクリックした際、
+スクリプトは以下のように実行されます。
 <ul>
-  <li>Sandbox を使用するスクリプトのみが実行できます。</li>
+  <li>"Use Groovy SandboxSandbox" にチェックがある場合のみスクリプトが実行されます。</li>
   <li>追加のクラスパスは参照されません。</li>
-</ul>
-上記の制限のため、設定画面で以下の動作に制限がある場合があります。
-<ul>
-  <li>デフォルト値の選択肢</li>
-  <li>スクリプトのテスト実行</li>
 </ul>
 </div>

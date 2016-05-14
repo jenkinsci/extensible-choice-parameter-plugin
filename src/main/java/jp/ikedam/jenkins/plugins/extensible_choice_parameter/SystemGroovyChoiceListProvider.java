@@ -261,16 +261,6 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         Binding binding = new Binding();
         if(usePredefinedVariables)
         {
-            Jenkins jenkins = Jenkins.getInstance();
-            if (jenkins != null && jenkins.hasPermission(Jenkins.READ))
-            {
-                binding.setVariable("jenkins", Jenkins.getInstance());
-            }
-            else
-            {
-                binding.setVariable("jenkins", null);
-            }
-            
             if (project != null && project.hasPermission(Item.READ))
             {
                 binding.setVariable("project", project);
