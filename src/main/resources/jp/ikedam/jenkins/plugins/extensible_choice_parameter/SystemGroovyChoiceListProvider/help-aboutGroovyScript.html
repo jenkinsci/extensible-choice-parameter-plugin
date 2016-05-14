@@ -21,4 +21,17 @@ Example3------------------------------------------------------------------------
 // today and last 6 days
 return (6..0).collect{new Date().plus(-it).format("yyyy-MM-dd")};
 </code>
+<br>
+About securities about Groovy script, see <a href="https://wiki.jenkins-ci.org/display/JENKINS/Script+Security+Plugin">Script Security Plugin</a>.
+<br>
+For security reasons, execution of Groovy scripts in configuration pages are restricted in following ways:
+<ul>
+  <li>Only scripts using the sandbox are executed.</li>
+  <li>Additional classpaths are not used.</li>
+</ul>
+Following features in configuration pages may not be fully functioned:
+<ul>
+  <li>Choices in "Default Choice"</li>
+  <li>Run the Script Now</li>
+</ul>
 </div>
