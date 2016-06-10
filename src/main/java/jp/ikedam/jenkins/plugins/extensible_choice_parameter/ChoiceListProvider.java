@@ -66,16 +66,7 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
     {
         return null;
     }
-    
-    /**
-     * Returns if user-added values should be added to the top of the choice list.
-     * 
-     * @return if user-added values should be added to the top of the choice list.
-     */
-    public boolean isAddToTop()
-    {
-        return false;
-    }
+
     
     /**
      * Called when a build is triggered

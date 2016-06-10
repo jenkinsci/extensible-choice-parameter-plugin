@@ -143,21 +143,6 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
         return defaultChoice;
     }
     
-
-    private boolean addToTop;
-
-    /**
-     * Returns if user-added values should be added to the top of the choice list.
-     * 
-     * @return if user-added values should be added to the top of the choice list.
-     * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.ChoiceListProvider#isAddToTop()
-     */
-    @Override
-    public boolean isAddToTop()
-    {
-        return addToTop;
-    }
-    
     /**
      * Constructor instantiating with parameters in the configuration page.
      * 
@@ -174,10 +159,27 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
     @DataBoundConstructor
     public TextareaChoiceListProvider(String choiceListText, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd, boolean addToTop)
     {
-        super(addEditedValue, whenToAdd);
+        super(addEditedValue, whenToAdd, addToTop);
         setChoiceList(TextareaStringListUtility.stringListFromTextarea(choiceListText));
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
-        this.addToTop = addToTop;
+    }
+    
+    /**
+     * Constructor instantiating with parameters in the configuration page.
+     * 
+     * When instantiating from the saved configuration,
+     * the object is directly serialized with XStream,
+     * and no constructor is used.
+     * 
+     * @param choiceListText the text where choices are written in each line.
+     * @param defaultChoice
+     * @param addEditedValue
+     * @param whenToAdd
+     */
+    @DataBoundConstructor
+    public TextareaChoiceListProvider(String choiceListText, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd)
+    {
+        this(choiceListText, defaultChoice, addEditedValue, whenToAdd, false);
     }
     
     @Override
@@ -191,10 +193,14 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
         List<String> newChoiceList = new ArrayList<String>(getChoiceList());
         
         // check if the new value should be added to the top of the list, or not
-        if (this.addToTop)
-        	newChoiceList.add(0, value);
+        if (isAddToTop())
+        {
+            newChoiceList.add(0, value);
+        }
         else
-        	newChoiceList.add(value);
+        {
+            newChoiceList.add(value);
+        }
 
         setChoiceList(newChoiceList);
         

@@ -30,7 +30,7 @@ THE SOFTWARE.
     <f:entry title="${%When to Add}" field="whenToAdd" help="/plugin/extensible-choice-parameter/help/whenToAdd.html">
         <f:enum>${it}</f:enum>
     </f:entry>
-	<f:entry title="${%Add To Top}" field="addToTop" help="/plugin/extensible-choice-parameter/help/addToTop.html">
+    <f:entry title="${%Add To Top}" field="addToTop" help="/plugin/extensible-choice-parameter/help/addToTop.html">
         <f:checkbox />
     </f:entry>
 </f:optionalBlock>
