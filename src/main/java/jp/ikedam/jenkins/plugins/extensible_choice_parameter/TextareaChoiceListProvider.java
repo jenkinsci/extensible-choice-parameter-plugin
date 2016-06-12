@@ -163,24 +163,7 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
         setChoiceList(TextareaStringListUtility.stringListFromTextarea(choiceListText));
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
     }
-    
-    /**
-     * Constructor instantiating with parameters in the configuration page.
-     * 
-     * When instantiating from the saved configuration,
-     * the object is directly serialized with XStream,
-     * and no constructor is used.
-     * 
-     * @param choiceListText the text where choices are written in each line.
-     * @param defaultChoice
-     * @param addEditedValue
-     * @param whenToAdd
-     */
-    @DataBoundConstructor
-    public TextareaChoiceListProvider(String choiceListText, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd)
-    {
-        this(choiceListText, defaultChoice, addEditedValue, whenToAdd, false);
-    }
+
     
     @Override
     protected void addEditedValue(
