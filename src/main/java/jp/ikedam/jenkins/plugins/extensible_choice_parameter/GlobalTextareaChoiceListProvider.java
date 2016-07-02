@@ -67,7 +67,6 @@ public class GlobalTextareaChoiceListProvider extends AddEditedChoiceListProvide
      *              Call config.jelly of GlobalTextareaChoiceListEntry,
      *              for each set of choices.
      *         </dd>
-     *     </dt>
      * </dl>
      */
     @Extension

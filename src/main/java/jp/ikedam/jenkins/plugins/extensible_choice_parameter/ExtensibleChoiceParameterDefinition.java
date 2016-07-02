@@ -82,7 +82,6 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
      *         <dd>shown as a part of a job configuration page.</dd>
      *     <dt>index.jelly</dt>
      *         <dd>shown when a user launches a build, and specifies parameters of the build.</dd>
-     *     </dt>
      * </dl>
      */
     @Extension
