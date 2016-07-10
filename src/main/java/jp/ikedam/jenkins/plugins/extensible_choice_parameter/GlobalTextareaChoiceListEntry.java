@@ -70,7 +70,6 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
      *         shown as a part of the system configuration page.
      *         Called from global.jelly of GlobalTextareaChoiceListProvider.
      *         </dd>
-     *     </dt>
      * </dl>
      */
     @Extension

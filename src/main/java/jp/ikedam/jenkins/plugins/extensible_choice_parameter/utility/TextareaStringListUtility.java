@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Utility Class to work with a list of strings in a textarea.
  * 
@@ -39,24 +41,25 @@ import java.util.List;
  * 
  * Here is a examples:
  * <table>
+ *     <caption>How TextareaStringListUtility works</caption>
  *     <tr>
  *         <th>textarea</th>
  *         <th>list of string</th>
  *     </tr>
  *     <tr>
- *         <td>a[LF]<br />b[LF]<br />c[LF]<br /></td>
+ *         <td>a[LF]<br>b[LF]<br>c[LF]<br></td>
  *         <td>&quot;a&quot;, &quot;b&quot;, &quot;c&quot;</td>
  *     </tr>
  *     <tr>
- *         <td>a[LF]<br />b[LF]<br />c[LF]</td>
+ *         <td>a[LF]<br>b[LF]<br>c[LF]</td>
  *         <td>&quot;a&quot;, &quot;b&quot;, &quot;c&quot;</td>
  *     </tr>
  *     <tr>
- *         <td>a[LF]<br />b[LF]<br />c[LF]<br />[LF]<br /></td>
+ *         <td>a[LF]<br>b[LF]<br>c[LF]<br>[LF]<br></td>
  *         <td>&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;&quot; </td>
  *     </tr>
  *     <tr>
- *         <td>[LF]<br /></td>
+ *         <td>[LF]<br></td>
  *         <td>&quot;&quot;</td>
  *     </tr>
  *     <tr>
@@ -80,7 +83,7 @@ public class TextareaStringListUtility
     public static List<String> stringListFromTextarea(String choiceListText)
     {
         List<String> stringList = (choiceListText != null)?Arrays.asList(choiceListText.split("\\r?\\n", -1)):new ArrayList<String>(0);
-        if(!stringList.isEmpty() && stringList.get(stringList.size() - 1).isEmpty())
+        if(!stringList.isEmpty() && StringUtils.isEmpty(stringList.get(stringList.size() - 1)))
         {
             // The last empty line will be ignored.
             // The list object returned from asList() does not support remove,
