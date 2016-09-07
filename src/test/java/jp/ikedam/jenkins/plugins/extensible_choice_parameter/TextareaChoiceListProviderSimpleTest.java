@@ -39,7 +39,7 @@ public class TextareaChoiceListProviderSimpleTest
     {
         // complete tests are done in TextareaStringListUtilityTest.
         String choiceListText = "a\nb\nc\n";
-        TextareaChoiceListProvider target = new TextareaChoiceListProvider(choiceListText, null, false, null, false /* TODO TEST */);
+        TextareaChoiceListProvider target = new TextareaChoiceListProvider(choiceListText, null, false, null);
         assertEquals(
                 "Basic test of choiceListText in TextareaChoiceListProvider()",
                 Arrays.asList("a", "b", "c"),
@@ -57,7 +57,7 @@ public class TextareaChoiceListProviderSimpleTest
                     "a\nb\nc",
                     defaultChoice,
                     false,
-                    null, false /* TODO TEST */
+                    null
             );
             assertEquals("a value", defaultChoice, target.getDefaultChoice());
         }
@@ -69,7 +69,7 @@ public class TextareaChoiceListProviderSimpleTest
                     "a\nb\nc",
                     defaultChoice,
                     false,
-                    null, false /* TODO TEST */
+                    null
             );
             assertEquals("null", defaultChoice, target.getDefaultChoice());
         }
@@ -81,7 +81,7 @@ public class TextareaChoiceListProviderSimpleTest
                     "a\nb\nc",
                     defaultChoice,
                     false,
-                    null, false /* TODO TEST */
+                    null
             );
             assertEquals("empty", defaultChoice, target.getDefaultChoice());
         }
@@ -93,7 +93,7 @@ public class TextareaChoiceListProviderSimpleTest
                     "a\nb\nc",
                     defaultChoice,
                     false,
-                    null, false /* TODO TEST */
+                    null
             );
             assertEquals("blank", defaultChoice, target.getDefaultChoice());
         }

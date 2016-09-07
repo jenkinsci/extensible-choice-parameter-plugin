@@ -100,19 +100,6 @@ public abstract class AddEditedChoiceListProvider extends ChoiceListProvider
         return whenToAdd;
     }
     
-    private boolean addToTop;
-
-    /**
-     * Returns if user-added values should be added to the top of the choice list.
-     * 
-     * @return if user-added values should be added to the top of the choice list.
-     * @see jp.ikedam.jenkins.plugins.extensible_choice_parameter.ChoiceListProvider#isAddToTop()
-     */
-    public boolean isAddToTop()
-    {
-        return addToTop;
-    }
-    
     /**
      * Returns whether to add edited value.
      * 
@@ -126,25 +113,11 @@ public abstract class AddEditedChoiceListProvider extends ChoiceListProvider
     /**
      * Constructor
      * 
-     * @param addEditedValue decide if edited value should be added.
      * @param whenToAdd when to add a edited value.
      */
     public AddEditedChoiceListProvider(boolean addEditedValue, WhenToAdd whenToAdd)
     {
-        this(addEditedValue, whenToAdd, false);
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param whenToAdd when to add a edited value.
-     * @param whenToAdd when to add a edited value.
-     * @param whenToAdd when to add a edited value.
-     */
-    public AddEditedChoiceListProvider(boolean addEditedValue, WhenToAdd whenToAdd, boolean addToTop)
-    {
-        this.whenToAdd = addEditedValue ? whenToAdd : null;
-        this.addToTop = addToTop;
+        this.whenToAdd = addEditedValue?whenToAdd:null;
     }
     
     /**
