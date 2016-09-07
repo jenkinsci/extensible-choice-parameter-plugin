@@ -66,7 +66,6 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
     {
         return null;
     }
-
     
     /**
      * Called when a build is triggered
