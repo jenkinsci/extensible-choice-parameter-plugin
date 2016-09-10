@@ -149,7 +149,15 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
             
             return ret;
         }
-        
+
+        /**
+         * @return the special value used for "No default choice" (use the top most)
+         */
+        public String getNoDefaultChoice()
+        {
+            return NoDefaultChoice;
+        }
+
         public FormValidation doTest(StaplerRequest req, @QueryParameter String scriptText, @QueryParameter boolean usePredefinedVariables)
         {
             List<String> choices = null;

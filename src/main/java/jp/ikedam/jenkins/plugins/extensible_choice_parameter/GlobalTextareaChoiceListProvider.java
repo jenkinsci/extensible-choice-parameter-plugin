@@ -151,6 +151,15 @@ public class GlobalTextareaChoiceListProvider extends AddEditedChoiceListProvide
             return ret;
         }
         
+
+        /**
+         * @return the special value used for "No default choice" (use the top most)
+         */
+        public String getNoDefaultChoice()
+        {
+            return NoDefaultChoice;
+        }
+
         /**
          * Retrieve the set of choices entry by the name.
          * 

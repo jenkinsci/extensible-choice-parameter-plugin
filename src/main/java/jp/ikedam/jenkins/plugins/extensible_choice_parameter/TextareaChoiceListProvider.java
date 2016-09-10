@@ -93,6 +93,14 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
             }
             return ret;
         }
+
+        /**
+         * @return the special value used for "No default choice" (use the top most)
+         */
+        public String getNoDefaultChoice()
+        {
+            return NoDefaultChoice;
+        }
     }
     
     private List<String> choiceList = null;
