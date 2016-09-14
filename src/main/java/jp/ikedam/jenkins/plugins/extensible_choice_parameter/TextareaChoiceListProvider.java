@@ -154,13 +154,31 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
      * @param defaultChoice
      * @param addEditedValue
      * @param whenToAdd
+     * @param addToTop
      */
     @DataBoundConstructor
-    public TextareaChoiceListProvider(String choiceListText, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd)
+    public TextareaChoiceListProvider(String choiceListText, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd, boolean addToTop)
     {
-        super(addEditedValue, whenToAdd);
+        super(addEditedValue, whenToAdd, addToTop);
         setChoiceList(TextareaStringListUtility.stringListFromTextarea(choiceListText));
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
+    }
+    
+    /**
+     * Constructor instantiating with parameters in the configuration page.
+     * 
+     * When instantiating from the saved configuration,
+     * the object is directly serialized with XStream,
+     * and no constructor is used.
+     * 
+     * @param choiceListText the text where choices are written in each line.
+     * @param defaultChoice
+     * @param addEditedValue
+     * @param whenToAdd
+     */
+    public TextareaChoiceListProvider(String choiceListText, String defaultChoice, boolean addEditedValue, WhenToAdd whenToAdd)
+    {
+        this(choiceListText, defaultChoice, addEditedValue, whenToAdd, false);
     }
     
     @Override
@@ -172,8 +190,19 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
     {
         LOGGER.info(String.format("Add new value %s to parameter %s in project %s", value, def.getName(), project.getName()));
         List<String> newChoiceList = new ArrayList<String>(getChoiceList());
-        newChoiceList.add(value);
+        
+        // check if the new value should be added to the top of the list, or not
+        if (isAddToTop())
+        {
+            newChoiceList.add(0, value);
+        }
+        else
+        {
+            newChoiceList.add(value);
+        }
+
         setChoiceList(newChoiceList);
+        
         try
         {
             project.save();
