@@ -36,6 +36,6 @@ THE SOFTWARE.
         with="scriptText,usePredefinedVariables"
     />
     <f:entry title="${%Default Choice}" field="defaultChoice" help="/plugin/extensible-choice-parameter/help/defaultChoice.html">
-        <f:select />
+        <f:select default="${descriptor.noDefaultChoice}" />
     </f:entry>
 </j:jelly>

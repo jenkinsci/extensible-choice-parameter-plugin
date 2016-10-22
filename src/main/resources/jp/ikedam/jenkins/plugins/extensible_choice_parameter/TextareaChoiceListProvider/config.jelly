@@ -27,7 +27,7 @@ THE SOFTWARE.
         <f:textarea />
     </f:entry>
     <f:entry title="${%Default Choice}" field="defaultChoice" help="/plugin/extensible-choice-parameter/help/defaultChoice.html">
-        <f:select />
+        <f:select default="${descriptor.noDefaultChoice}" />
     </f:entry>
     <m:addEditedValue />
 </j:jelly>
