@@ -445,9 +445,12 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     {
         ChoiceListProvider p = getEnabledChoiceListProvider();
         String defaultChoice = (p != null)?p.getDefaultChoice():null;
-        if(defaultChoice != null)
-        {
-            return createValue(defaultChoice);
+        if (defaultChoice != null) {
+            try {
+                return createValue(defaultChoice);
+            } catch (IllegalArgumentException x) { // JENKINS-39647
+                return null;
+            }
         }
         
         List<String> choiceList = getChoiceList();
