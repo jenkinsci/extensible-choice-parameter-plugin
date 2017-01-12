@@ -628,7 +628,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             job.save();
             
             j.assertBuildStatusSuccess(job.scheduleBuild2(0));
-            assertEquals("non-editable, not in choice", null, ceb.getEnvVars().get("test"));
+            assertEquals("non-editable, not in choice", "value4", ceb.getEnvVars().get("test"));
         }
     }
     
@@ -997,7 +997,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     false,
                     description
             );
-            assertNull("Non-Editable, not in choices", target.getDefaultParameterValue());
+            assertEquals("Non-Editable, not in choices", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
         }
         
         // no choice is provided and non-editable. returns null.

@@ -449,7 +449,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
             try {
                 return createValue(defaultChoice);
             } catch (IllegalArgumentException x) { // JENKINS-39647
-                return null;
+                return new StringParameterValue(getName(), defaultChoice, getDescription());
             }
         }
         
