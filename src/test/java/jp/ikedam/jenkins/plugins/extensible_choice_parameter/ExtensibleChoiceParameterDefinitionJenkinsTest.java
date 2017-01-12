@@ -627,14 +627,8 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             job.getBuildersList().add(ceb);
             job.save();
             
-            try{
-                job.scheduleBuild2(job.getQuietPeriod()).get();
-                assertTrue("not reachable", false);
-            }
-            catch(IllegalArgumentException e)
-            {
-                assertTrue("non-editable, not in choice", true);
-            }
+            j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+            assertEquals("non-editable, not in choice", "value4", ceb.getEnvVars().get("test"));
         }
     }
     
@@ -1003,15 +997,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     false,
                     description
             );
-            try
-            {
-                assertEquals("Non-Editable, not in choices", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
-                assertTrue("Not reachable", false);
-            }
-            catch(IllegalArgumentException e)
-            {
-                assertTrue("Non-Editable, not in choices", true);
-            }
+            assertEquals("Non-Editable, not in choices", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
         }
         
         // no choice is provided and non-editable. returns null.
