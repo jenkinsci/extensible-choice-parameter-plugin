@@ -394,7 +394,11 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         if(!isEditable() && !getChoiceList().contains(value.value))
         {
             // Something strange!: Not editable and specified a value not in the choices.
-            throw new IllegalArgumentException("Illegal choice: " + value.value);
+            throw new IllegalArgumentException(String.format(
+                "Illegal choice '%s' in parameter '%s&",
+                value.value,
+                value.getName()
+            ));
         }
         return value;
     }
@@ -447,7 +451,12 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         String defaultChoice = (p != null)?p.getDefaultChoice():null;
         if(defaultChoice != null)
         {
-            return createValue(defaultChoice);
+            try {
+                return createValue(defaultChoice);
+            } catch (IllegalArgumentException e) {
+                LOGGER.log(Level.WARNING, "Illegal choice for the default value. Ignore and use the value in the top of the list instead.", e);
+                // pass through
+            }
         }
         
         List<String> choiceList = getChoiceList();
