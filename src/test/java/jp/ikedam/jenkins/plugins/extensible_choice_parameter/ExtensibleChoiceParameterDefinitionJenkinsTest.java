@@ -613,6 +613,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         }
         
         // non-editable, not in choice
+        // The value on the top should be used.
         {
             ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value4");
             ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
@@ -627,14 +628,8 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             job.getBuildersList().add(ceb);
             job.save();
             
-            try{
-                job.scheduleBuild2(job.getQuietPeriod()).get();
-                assertTrue("not reachable", false);
-            }
-            catch(IllegalArgumentException e)
-            {
-                assertTrue("non-editable, not in choice", true);
-            }
+            j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+            assertEquals("value1", ceb.getEnvVars().get("test"));
         }
     }
     
@@ -994,6 +989,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         }
         
         // Non-editable, not in choices
+        // The value on the top should be used.
         {
             String defaultChoice = "value4";
             ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), defaultChoice);
@@ -1003,15 +999,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     false,
                     description
             );
-            try
-            {
-                assertEquals("Non-Editable, not in choices", new StringParameterValue(name, defaultChoice, description), target.getDefaultParameterValue());
-                assertTrue("Not reachable", false);
-            }
-            catch(IllegalArgumentException e)
-            {
-                assertTrue("Non-Editable, not in choices", true);
-            }
+            assertEquals(new StringParameterValue(name, "value1", description), target.getDefaultParameterValue());
         }
         
         // no choice is provided and non-editable. returns null.
