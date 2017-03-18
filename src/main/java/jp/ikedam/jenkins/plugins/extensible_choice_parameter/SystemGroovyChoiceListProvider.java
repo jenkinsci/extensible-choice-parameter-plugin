@@ -153,7 +153,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
             try
             {
                 choices = runScript(
-                    new SecureGroovyScript(script, sandbox, Collections.<ClasspathEntry>emptyList()).configuringWithNonKeyItem(),
+                    new SecureGroovyScript(script, sandbox, null).configuringWithNonKeyItem(),
                     usePredefinedVariables,
                     project
                 );
