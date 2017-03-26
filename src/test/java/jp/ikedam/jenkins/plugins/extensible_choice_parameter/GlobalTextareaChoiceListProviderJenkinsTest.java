@@ -373,7 +373,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
             // update the descriptor to the state I want to submit.
             descriptor.setChoiceListEntryList(Arrays.asList(validEntry1, validEntry2, validEntry3));
             
-            HtmlForm configForm = wc.goTo("/configure").getFormByName("config");
+            HtmlForm configForm = wc.goTo("configure").getFormByName("config");
             
             // update the descriptor to the another state.
             descriptor.setChoiceListEntryList(null);
@@ -402,7 +402,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
             // update the descriptor to the state I want to submit.
             descriptor.setChoiceListEntryList(Arrays.asList(invalidEntry1, validEntry2, validEntry3));
             
-            HtmlForm configForm = wc.goTo("/configure").getFormByName("config");
+            HtmlForm configForm = wc.goTo("configure").getFormByName("config");
             
             // update the descriptor to the another state.
             descriptor.setChoiceListEntryList(null);
@@ -431,7 +431,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
             // update the descriptor to the state I want to submit.
             descriptor.setChoiceListEntryList(null);
             
-            HtmlForm configForm = wc.goTo("/configure").getFormByName("config");
+            HtmlForm configForm = wc.goTo("configure").getFormByName("config");
             
             // update the descriptor to the another state.
             descriptor.setChoiceListEntryList(Arrays.asList(validEntry1, validEntry2));

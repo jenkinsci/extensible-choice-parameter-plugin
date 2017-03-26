@@ -26,6 +26,7 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Binding;
 import hudson.Extension;
+import hudson.RelativePath;
 import hudson.model.Item;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
@@ -124,7 +125,12 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
          * @param usePredefinedVariables
          * @return the selection of a default choice
          */
-        public ListBoxModel doFillDefaultChoiceItems(@AncestorInPath Job<?, ?> job, @QueryParameter String script, @QueryParameter boolean sandbox, @QueryParameter boolean usePredefinedVariables)
+        public ListBoxModel doFillDefaultChoiceItems(
+            @AncestorInPath Job<?, ?> job,
+            @RelativePath("groovyScript") @QueryParameter String script,
+            @RelativePath("groovyScript") @QueryParameter boolean sandbox,
+            @QueryParameter boolean usePredefinedVariables
+        )
         {
             ListBoxModel ret = new ListBoxModel();
             ret.add(Messages.ExtensibleChoiceParameterDefinition_NoDefaultChoice(), NoDefaultChoice);
@@ -174,7 +180,14 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
             return ret;
         }
         
-        public FormValidation doTest(@AncestorInPath Job<?, ?> job, @QueryParameter String script, @QueryParameter boolean sandbox, @QueryParameter boolean usePredefinedVariables)
+        public FormValidation doTest(
+            @AncestorInPath Job<?, ?> job,
+            // Define same as `doFillDefaultChoiceItems`
+            // though @RelativePath isn't actually necessary here.
+            @RelativePath("groovyScript") @QueryParameter String script,
+            @RelativePath("groovyScript") @QueryParameter boolean sandbox,
+            @QueryParameter boolean usePredefinedVariables
+        )
         {
             List<String> choices = null;
             Job<?,?> project = null;

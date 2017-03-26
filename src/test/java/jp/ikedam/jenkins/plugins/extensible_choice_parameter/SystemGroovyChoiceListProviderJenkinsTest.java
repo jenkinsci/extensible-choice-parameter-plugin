@@ -35,6 +35,7 @@ import hudson.security.GlobalMatrixAuthorizationStrategy;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +53,7 @@ import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 import org.jvnet.hudson.test.recipes.LocalData;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 
@@ -440,7 +441,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         WebClient wc = j.createAllow405WebClient();
         HtmlPage page = wc.getPage(p, "build");
         
-        List<HtmlElement> elements = page.getElementsByTagName("select");
+        List<DomElement> elements = page.getElementsByTagName("select");
         assertEquals(1, elements.size());
         assertTrue(elements.get(0) instanceof HtmlSelect);
         HtmlSelect sel = (HtmlSelect)elements.get(0);
@@ -465,7 +466,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         WebClient wc = j.createAllow405WebClient();
         HtmlPage page = wc.getPage(p, "build");
         
-        List<HtmlElement> elements = page.getElementsByTagName("select");
+        List<DomElement> elements = page.getElementsByTagName("select");
         assertEquals(1, elements.size());
         assertTrue(elements.get(0) instanceof HtmlSelect);
         HtmlSelect sel = (HtmlSelect)elements.get(0);
@@ -562,6 +563,9 @@ public class SystemGroovyChoiceListProviderJenkinsTest
     @Test
     public void testConfiguration2() throws Exception
     {
+        // An arbitrary absolute path
+        String classPath = new File(j.jenkins.getRootDir(), "userContent/somepath.jar").getAbsolutePath();
+
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                 "test",
                 new SystemGroovyChoiceListProvider(
@@ -569,7 +573,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
                                 "[1, 2, 3]",
                                 false,           // sandbox
                                 Arrays.asList(
-                                        new ClasspathEntry("somepath")
+                                        new ClasspathEntry(classPath)
                                 )
                         ),
                         null,   // cannot configure default choice without sandbox.
