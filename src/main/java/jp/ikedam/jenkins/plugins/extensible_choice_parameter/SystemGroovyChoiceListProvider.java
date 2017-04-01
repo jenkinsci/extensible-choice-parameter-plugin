@@ -23,16 +23,20 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import hudson.Extension;
+import hudson.RelativePath;
+import hudson.model.Item;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
+import hudson.model.Job;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +45,9 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.groovy.control.CompilerConfiguration;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
@@ -57,7 +63,7 @@ import com.thoughtworks.xstream.mapper.Mapper;
  */
 public class SystemGroovyChoiceListProvider extends ChoiceListProvider
 {
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
     private static final String NoDefaultChoice = "###NODEFAULTCHOICE###";
     private static final Logger LOGGER = Logger.getLogger(SystemGroovyChoiceListProvider.class.getName());
     
@@ -93,7 +99,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
             if(provider.isUsePredefinedVariables())
             {
                 // set project only when variables is requested.
-                provider.setProject(req.findAncestorObject(AbstractProject.class));
+                provider.setProject(req.findAncestorObject(Job.class));
             }
             return provider;
         }
@@ -113,26 +119,50 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         /**
          * Returns the selection of a default choice.
          * 
-         * @param req null passed in tests.
-         * @param scriptText
+         * @param job
+         * @param script
+         * @param sandbox
+         * @param usePredefinedVariables
          * @return the selection of a default choice
          */
-        public ListBoxModel doFillDefaultChoiceItems(StaplerRequest req, @QueryParameter String scriptText, @QueryParameter boolean usePredefinedVariables)
+        public ListBoxModel doFillDefaultChoiceItems(
+            @AncestorInPath Job<?, ?> job,
+            @RelativePath("groovyScript") @QueryParameter String script,
+            @RelativePath("groovyScript") @QueryParameter boolean sandbox,
+            @QueryParameter boolean usePredefinedVariables
+        )
         {
             ListBoxModel ret = new ListBoxModel();
             ret.add(Messages.ExtensibleChoiceParameterDefinition_NoDefaultChoice(), NoDefaultChoice);
             
-            List<String> choices = null;
-            AbstractProject<?,?> project = null;
-            
-            if(usePredefinedVariables && req != null)
+            if (job == null)
             {
-                project = req.findAncestorObject(AbstractProject.class);
+                // You cannot evaluate scripts without permission checks
+                return ret;
+            }
+            job.checkPermission(Item.CONFIGURE);
+            
+            if (!sandbox)
+            {
+                // You cannot evaluate scripts outside sandbox before configuring.
+                return ret;
+            }
+            
+            List<String> choices = null;
+            Job<?,?> project = null;
+            
+            if(usePredefinedVariables)
+            {
+                project = job;
             }
             
             try
             {
-                choices = runScript(scriptText, usePredefinedVariables, project);
+                choices = runScript(
+                    new SecureGroovyScript(script, sandbox, null).configuringWithNonKeyItem(),
+                    usePredefinedVariables,
+                    project
+                );
             }
             catch(Exception e)
             {
@@ -158,19 +188,43 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
             return NoDefaultChoice;
         }
 
-        public FormValidation doTest(StaplerRequest req, @QueryParameter String scriptText, @QueryParameter boolean usePredefinedVariables)
+        public FormValidation doTest(
+            @AncestorInPath Job<?, ?> job,
+            // Define same as `doFillDefaultChoiceItems`
+            // though @RelativePath isn't actually necessary here.
+            @RelativePath("groovyScript") @QueryParameter String script,
+            @RelativePath("groovyScript") @QueryParameter boolean sandbox,
+            @QueryParameter boolean usePredefinedVariables
+        )
         {
             List<String> choices = null;
-            AbstractProject<?,?> project = null;
+            Job<?,?> project = null;
             
-            if(usePredefinedVariables && req != null)
+            if (job == null)
             {
-                project = req.findAncestorObject(AbstractProject.class);
+                // You cannot evaluate scripts without permission checks
+                return FormValidation.warning("You cannot evaluate scripts outside project configurations");
+            }
+            job.checkPermission(Item.CONFIGURE);
+            
+            if (!sandbox)
+            {
+                // You cannot evaluate scripts outside sandbox before configuring.
+                return FormValidation.warning(Messages.SystemGroovyChoiceListProvider_groovyScript_TestableOnlyWithSandbox());
+            }
+            
+            if(usePredefinedVariables)
+            {
+                project = job;
             }
             
             try
             {
-                choices = runScript(scriptText, usePredefinedVariables, project);
+                choices = runScript(
+                    new SecureGroovyScript(script, sandbox, Collections.<ClasspathEntry>emptyList()).configuringWithNonKeyItem(),
+                    usePredefinedVariables,
+                    project
+                );
             }
             catch(Exception e)
             {
@@ -196,19 +250,19 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
     public List<String> getChoiceList()
     {
         List<String> ret = null;
-        AbstractProject<?,?> project = getProject();
+        Job<?,?> project = getProject();
         if(isUsePredefinedVariables() && project == null)
         {
             // try to retrieve from current request.
             if(Stapler.getCurrentRequest() != null)
             {
-                project = Stapler.getCurrentRequest().findAncestorObject(AbstractProject.class);
+                project = Stapler.getCurrentRequest().findAncestorObject(Job.class);
             }
         }
         
         try
         {
-            ret = runScript(getScriptText(), isUsePredefinedVariables(), project);
+            ret = runScript(getGroovyScript(), isUsePredefinedVariables(), project);
         }
         catch(Exception e)
         {
@@ -217,9 +271,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         return (ret != null)?ret:new ArrayList<String>(0);
     }
 
-    private static List<String> runScript(String scriptText, boolean usePredefinedVariables, AbstractProject<?,?> project) {
-        CompilerConfiguration compilerConfig = new CompilerConfiguration();
-
+    private static List<String> runScript(SecureGroovyScript groovyScript, boolean usePredefinedVariables, Job<?,?> project) throws Exception {
         // see RemotingDiagnostics.Script
         ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
 
@@ -230,13 +282,17 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         Binding binding = new Binding();
         if(usePredefinedVariables)
         {
-            binding.setVariable("jenkins", Jenkins.getInstance());
-            binding.setVariable("project", project);
+            if (project != null && project.hasPermission(Item.READ))
+            {
+                binding.setVariable("project", project);
+            }
+            else
+            {
+                binding.setVariable("project", null);
+            }
         }
-        GroovyShell shell =
-            new GroovyShell(cl, binding, compilerConfig);
 
-        Object out = shell.evaluate(scriptText);
+        Object out = groovyScript.evaluate(cl,  binding);
         if(out == null)
         {
             return null;
@@ -254,18 +310,27 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         }
         return ret;
     }
-    private final String scriptText;
+    private transient String scriptText;
 
     /**
-     * The list of choices, joined into a string.
-     * 
-     * Used for filling a field when the configuration page is shown.
-     * 
-     * @return Joined choices.
+     * @deprecated use {@link #getGroovyScript()}
      */
+    @Deprecated
     public String getScriptText()
     {
-        return scriptText;
+        return getGroovyScript().getScript();
+    }
+    
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="This causes a warning about non-Serializable. Though somehow ParameterDefinition implements Serializable, it doesn't actually require Serializable as serialized with XStream.")
+    private final SecureGroovyScript groovyScript;
+    
+    /**
+     * @return script to generate choices.
+     * @since 1.4.0
+     */
+    public SecureGroovyScript getGroovyScript()
+    {
+        return groovyScript;
     }
     
     private final String defaultChoice;
@@ -285,25 +350,45 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
     /**
      * Constructor instantiating with parameters in the configuration page.
      * 
-     * When instantiating from the saved configuration,
-     * the object is directly serialized with XStream,
-     * and no constructor is used.
-     * 
-     * @param scriptText the text where choices are written in each line.
+     * @param groovyScript
      * @param defaultChoice
      * @param usePredefinedVariables
+     * 
+     * @since 1.4.0
      */
     @DataBoundConstructor
-    public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice, boolean usePredefinedVariables)
+    public SystemGroovyChoiceListProvider(SecureGroovyScript groovyScript, String defaultChoice, boolean usePredefinedVariables)
     {
-        this.scriptText = scriptText;
+        this.groovyScript = groovyScript.configuringWithNonKeyItem();
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
         this.usePredefinedVariables = usePredefinedVariables;
+    }
+    
+    public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice, boolean usePredefinedVariables)
+    {
+        this(
+            new SecureGroovyScript(scriptText, true, Collections.<ClasspathEntry>emptyList()),
+            defaultChoice,
+            usePredefinedVariables
+        );
     }
     
     public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice)
     {
         this(scriptText, defaultChoice, false);
+    }
+    
+    private Object readResolve() {
+        if (groovyScript != null)
+        {
+            return this;
+        }
+        // < 1.4.0
+        return new SystemGroovyChoiceListProvider(
+            scriptText,
+            getDefaultChoice(),
+            isUsePredefinedVariables()
+        );
     }
     
     private final boolean usePredefinedVariables;
@@ -321,14 +406,20 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
      * This will be stored in job configuration XML like
      * &lt;project class=&quot;project&quot; reference=&quot;../../../../../..&quot; /&gt;
      */
-    private transient AbstractProject<?,?> project;
+    private transient Job<?,?> project;
     
     /**
      * @param project
      */
-    protected void setProject(AbstractProject<?,?> project)
+    protected void setProject(Job<?,?> project)
     {
         this.project = project;
+    }
+    
+    @Deprecated
+    protected void setProject(AbstractProject<?,?> project)
+    {
+        setProject((Job<?, ?>)project);
     }
     
     /**
@@ -337,7 +428,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
      * 
      * @return project
      */
-    protected AbstractProject<?,?> getProject()
+    protected Job<?,?> getProject()
     {
         return project;
     }

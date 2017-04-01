@@ -18,6 +18,15 @@ return 1..10;
 
 Example3-----------------------------------------------------------------------------
 // 過去一週間の日付
-return (6..0).collect{new Date().plus(-it).format("yyyy-MM-dd")};
+return (6..0).collect{it -> new Date().plus(-it).format("yyyy-MM-dd")};
 </code>
+<br>
+Groovy スクリプトのセキュリティについては <a href="https://wiki.jenkins-ci.org/display/JENKINS/Script+Security+Plugin">Script Security Plugin</a> を参照してください。
+<br>
+セキュリティの都合上、設定画面で「デフォルト値」の選択肢を表示する時と、「スクリプトのテスト実行」をクリックした際、
+スクリプトは以下のように実行されます。
+<ul>
+  <li>"Use Groovy SandboxSandbox" にチェックがある場合のみスクリプトが実行されます。</li>
+  <li>追加のクラスパスは参照されません。</li>
+</ul>
 </div>

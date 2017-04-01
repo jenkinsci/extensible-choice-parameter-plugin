@@ -19,6 +19,15 @@ return 1..10;
 
 Example3-----------------------------------------------------------------------------
 // today and last 6 days
-return (6..0).collect{new Date().plus(-it).format("yyyy-MM-dd")};
+return (6..0).collect{it -> new Date().plus(-it).format("yyyy-MM-dd")};
 </code>
+<br>
+About securities about Groovy script, see <a href="https://wiki.jenkins-ci.org/display/JENKINS/Script+Security+Plugin">Script Security Plugin</a>.
+<br>
+For security reasons, when calculating choices in "Default Choice" and when "Run the Script Now" is clicked,
+the Groovy script is exuecuted in this way:
+<ul>
+  <li>Executed only when "Use Groovy Sandbox" is checked.</li>
+  <li>Additional classpaths are not used.</li>
+</ul>
 </div>

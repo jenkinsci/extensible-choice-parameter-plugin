@@ -110,6 +110,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         
         // OK: blank in the end
         assertEquals(descriptor.doCheckName("  _abc_1_2_3   ").kind, FormValidation.Kind.OK);
+        
+        // OK: value contains dots (accepted since Jenkins 1.526)
+        assertEquals(descriptor.doCheckName("a.b").kind, FormValidation.Kind.OK);
     }
     
     /**
@@ -142,9 +145,6 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         
         // WARNING: value contains a multibyte letter.
         assertEquals(descriptor.doCheckName("ａb").kind, FormValidation.Kind.WARNING);
-        
-        // WARNING: value contains dots (will be accepted since Jenkins 1.526)
-        assertEquals(descriptor.doCheckName("a.b").kind, FormValidation.Kind.WARNING);
     }
     
     public static class MockChoiceListProvider extends ChoiceListProvider
