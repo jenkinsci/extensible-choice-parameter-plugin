@@ -305,6 +305,8 @@ public class FilenameChoiceListProvider extends ChoiceListProvider
             }
         }
         
+        ret = new ArrayList<String>(ret);
+        
         if(reverseOrder)
         {
             Collections.reverse(ret);
