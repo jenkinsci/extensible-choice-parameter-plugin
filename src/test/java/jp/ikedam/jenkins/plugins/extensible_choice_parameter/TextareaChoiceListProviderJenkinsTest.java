@@ -289,7 +289,8 @@ public class TextareaChoiceListProviderJenkinsTest
                 "a\nb\nc",
                 null,
                 false,
-                null
+                null,
+                false /* TODO TEST */
         );
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                 varname,
@@ -337,7 +338,8 @@ public class TextareaChoiceListProviderJenkinsTest
                 "a\nb\nc",
                 null,
                 true,
-                WhenToAdd.Triggered
+                WhenToAdd.Triggered,
+                false
         );
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                 varname,
@@ -389,7 +391,8 @@ public class TextareaChoiceListProviderJenkinsTest
                 "a\nb\nc",
                 null,
                 true,
-                WhenToAdd.Completed
+                WhenToAdd.Completed,
+                false /* TODO TEST */
         );
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                 varname,
@@ -441,7 +444,8 @@ public class TextareaChoiceListProviderJenkinsTest
                 "a\nb\nc",
                 null,
                 true,
-                WhenToAdd.CompletedStable
+                WhenToAdd.CompletedStable,
+                false
         );
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                 varname,
@@ -493,7 +497,8 @@ public class TextareaChoiceListProviderJenkinsTest
                 "a\nb\nc",
                 null,
                 true,
-                WhenToAdd.CompletedUnstable
+                WhenToAdd.CompletedUnstable,
+                false /* TODO TEST */
         );
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                 varname,
