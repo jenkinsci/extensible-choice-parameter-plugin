@@ -299,7 +299,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
         }
         
         if  (!(out instanceof List<?>)) {
-            throw new IllegalArgumentException("Return type of the Groovy script mus be List<String>");
+            throw new IllegalArgumentException("Return type of the Groovy script must be List<String>");
         }
         
         List<String> ret = new ArrayList<String>();
