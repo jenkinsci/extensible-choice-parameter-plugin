@@ -121,8 +121,11 @@ public class FilenameChoiceListProvider extends ChoiceListProvider
         {
             return rawDir;
         }
-        
-        return new File(Jenkins.getInstance().getRootDir(), baseDirPath);
+        Jenkins jenkins = Jenkins.getInstance();
+        if (jenkins == null) {
+            throw new IllegalStateException("Jenkins instance is unavailable.");
+        }
+        return new File(jenkins.getRootDir(), baseDirPath);
     }
     
     /**

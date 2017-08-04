@@ -273,7 +273,11 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider
 
     private static List<String> runScript(SecureGroovyScript groovyScript, boolean usePredefinedVariables, Job<?,?> project) throws Exception {
         // see RemotingDiagnostics.Script
-        ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
+        Jenkins jenkins = Jenkins.getInstance();
+        if (jenkins == null) {
+            throw new IllegalStateException("Jenkins instance is unavailable.");
+        }
+        ClassLoader cl = jenkins.getPluginManager().uberClassLoader;
 
         if (cl == null) {
             cl = Thread.currentThread().getContextClassLoader();

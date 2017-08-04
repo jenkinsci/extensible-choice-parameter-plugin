@@ -198,10 +198,14 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
             if (staplerClazzName == null) {
                 throw new FormException("No $stapler nor stapler-class is specified", fieldName);
             }
+            Jenkins jenkins = Jenkins.getInstance();
+            if (jenkins == null) {
+                throw new IllegalStateException("Jenkins instance is unavailable.");
+            }
             try {
                 @SuppressWarnings("unchecked")
-                Class<? extends T> staplerClass = (Class<? extends T>)Jenkins.getInstance().getPluginManager().uberClassLoader.loadClass(staplerClazzName);
-                Descriptor<?> d = Jenkins.getInstance().getDescriptorOrDie(staplerClass);
+                Class<? extends T> staplerClass = (Class<? extends T>)jenkins.getPluginManager().uberClassLoader.loadClass(staplerClazzName);
+                Descriptor<?> d = jenkins.getDescriptorOrDie(staplerClass);
                 
                 @SuppressWarnings("unchecked")
                 T instance = (T)d.newInstance(req, formData);
