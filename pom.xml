@@ -36,6 +36,21 @@
     </license>
   </licenses>
   
+  <dependencies>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>database</artifactId>
+      <version>1.1</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>database-h2</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
   <properties>
     <jenkins.version>1.580.1</jenkins.version>
     <java.level>6</java.level>
