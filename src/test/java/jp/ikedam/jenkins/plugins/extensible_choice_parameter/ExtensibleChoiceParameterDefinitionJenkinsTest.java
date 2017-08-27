@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
+import hudson.markup.RawHtmlMarkupFormatter;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
@@ -48,10 +49,12 @@ import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
+import org.jvnet.hudson.test.Issue;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -1141,4 +1144,43 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         assertNotSame(MockChoiceListProvider.class, ((ExtensibleChoiceParameterDefinition)p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("Choice")).getChoiceListProvider().getClass());
         
     }
-}
+
+    @Issue("JENKINS-42903")
+    @Test
+    public void testSafeTitle() throws Exception {
+        FreeStyleProject p = j.createFreeStyleProject();
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+                "<span id=\"test-not-expected\">combinations</span>",
+                new MockChoiceListProvider(Arrays.asList("value1", "value2"), null),
+                false,
+                ""
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createAllow405WebClient();
+        HtmlPage page = wc.getPage(p, "build");
+
+        assertNull(page.getElementById("test-not-expected"));
+    }
+
+    @Issue("JENKINS-42903")
+    @Test
+    public void testSafeDescription() throws Exception {
+        j.jenkins.setMarkupFormatter(new RawHtmlMarkupFormatter(false));
+
+        FreeStyleProject p = j.createFreeStyleProject();
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+                "Choice",
+                new MockChoiceListProvider(Arrays.asList("value1", "value2"), null),
+                false,
+                "<span id=\"test-expected\">blahblah</span>"
+                + "<script id=\"test-not-expected\"></script>"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createAllow405WebClient();
+        HtmlPage page = wc.getPage(p, "build");
+
+        assertNotNull(page.getElementById("test-expected"));
+        assertNull(page.getElementById("test-not-expected"));
+    }}

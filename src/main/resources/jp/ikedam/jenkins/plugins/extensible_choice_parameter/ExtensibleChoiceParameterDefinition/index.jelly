@@ -28,7 +28,8 @@ THE SOFTWARE.
         In this view, the fields are not managed in Descriable/Descriptor framework,
         and results in not using /lib/form taglibs, but writing HTML input tags directory.
     -->
-    <f:entry title="${it.name}" description="${it.description}">
+    <j:set var="escapeEntryTitleAndDescription" value="false" />
+    <f:entry title="${h.escape(it.name)}" description="${it.formattedDescription}">
         <div name="parameter" description="${it.description}">
             <input type="hidden" name="name" value="${it.name}" />
             <j:scope>
