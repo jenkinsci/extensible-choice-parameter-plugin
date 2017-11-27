@@ -399,7 +399,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         {
             // Something strange!: Not editable and specified a value not in the choices.
             throw new IllegalArgumentException(String.format(
-                "Illegal choice '%s' in parameter '%s&",
+                "Illegal choice '%s' in parameter '%s'",
                 value.value,
                 value.getName()
             ));
