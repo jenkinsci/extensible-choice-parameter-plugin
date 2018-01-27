@@ -536,4 +536,54 @@ public class TextareaChoiceListProviderJenkinsTest
             assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
         }
     }
+
+    @Test
+    public void testConfiguration1() throws Exception {
+        FreeStyleProject p = j.createFreeStyleProject();
+
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new TextareaChoiceListProvider(
+                "a\nb\nc",
+                null,
+                false,
+                WhenToAdd.Completed
+            ),
+            false,
+            "description"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        j.configRoundtrip(p);
+
+        j.assertEqualDataBoundBeans(
+            def,
+            p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("test")
+        );
+    }
+
+    @Test
+    public void testConfiguration2() throws Exception {
+        FreeStyleProject p = j.createFreeStyleProject();
+
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new TextareaChoiceListProvider(
+                "a\nb\nc\n",
+                "b",
+                true,
+                WhenToAdd.Triggered
+            ),
+            true,
+            "another description"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        j.configRoundtrip(p);
+
+        j.assertEqualDataBoundBeans(
+            def,
+            p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("test")
+        );
+    }
 }

@@ -29,7 +29,6 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Result;
@@ -1019,5 +1018,87 @@ public class GlobalTextareaChoiceListProviderJenkinsTest
             Result result = Result.FAILURE;
             assertFalse("Edited value must not be containd", _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
         }
+    }
+
+    @Test
+    public void testConfiguration1() throws Exception
+    {
+        GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
+        List<GlobalTextareaChoiceListEntry> entryList = Arrays.asList(
+            new GlobalTextareaChoiceListEntry(
+                "testChoice",
+                "a\nb\nc",
+                false
+            )
+        );
+        descriptor.setChoiceListEntryList(entryList);
+
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "testVar",
+            new GlobalTextareaChoiceListProvider(
+                "testChoice",
+                null,
+                false,
+                WhenToAdd.Completed
+            ),
+            false,
+            "description"
+        );
+        FreeStyleProject p = j.createFreeStyleProject();
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        j.configRoundtrip(j.jenkins);
+
+        // actually, this doesn't make sense as
+        // this doesn't fail even if error occurs when saving global configuration.
+        j.assertEqualDataBoundBeans(entryList, descriptor.getChoiceListEntryList());
+
+        j.configRoundtrip(p);
+
+        j.assertEqualDataBoundBeans(
+            def,
+            p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("testVar")
+        );
+    }
+
+    @Test
+    public void testGlobalConfiguration2() throws Exception
+    {
+        GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
+        List<GlobalTextareaChoiceListEntry> entryList = Arrays.asList(
+            new GlobalTextareaChoiceListEntry(
+                "testChoice",
+                "a\nb\nc\n",
+                true
+            )
+        );
+        descriptor.setChoiceListEntryList(entryList);
+
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "testVar",
+            new GlobalTextareaChoiceListProvider(
+                "testChoice",
+                "b",
+                true,
+                WhenToAdd.Triggered
+            ),
+            true,
+            "description"
+        );
+        FreeStyleProject p = j.createFreeStyleProject();
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        j.configRoundtrip(j.jenkins);
+
+        // actually, this doesn't make sense as
+        // this doesn't fail even if error occurs when saving global configuration.
+        j.assertEqualDataBoundBeans(entryList, descriptor.getChoiceListEntryList());
+
+        j.configRoundtrip(p);
+
+        j.assertEqualDataBoundBeans(
+            def,
+            p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("testVar")
+        );
     }
 }
