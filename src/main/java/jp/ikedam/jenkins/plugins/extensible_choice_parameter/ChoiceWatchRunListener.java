@@ -67,7 +67,7 @@ public class ChoiceWatchRunListener extends RunListener<AbstractBuild<?,?>>
                 ExtensibleChoiceParameterDefinition choiceDef = (ExtensibleChoiceParameterDefinition)def;
                 if(choiceDef.getChoiceListProvider() != null)
                 {
-                    choiceDef.getChoiceListProvider().onBuildCompletedWithValue(build, choiceDef, value.value);
+                    choiceDef.getChoiceListProvider().onBuildCompletedWithValue(build, choiceDef, value.getValue().toString());
                 }
             }
         }
