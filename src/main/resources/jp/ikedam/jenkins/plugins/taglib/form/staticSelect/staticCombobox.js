@@ -50,12 +50,12 @@ Behaviour.register({"SELECT.staticCombobox": function(e) {
     orig.parentNode.removeChild(orig);
     
     /*
-     * Changes from the original 3:
-     *   Original behavior: Show candidates that matches the current incomplete input.
-     *   Changed behavior : Show all the candidates, not concerning with the current incomplete input.
+     * Changes from the original 4:
+     *   Original behavior: Show all the candidates, not concerning with the current incomplete input.
+     *   Changed behavior : Show candidates that matches the current incomplete input.
      */
     var c = new ComboBox(e,function(value) {
-        return items;
+        return items.filter(item => item.indexOf(value) > -1);
     }, {});
     
     /*
