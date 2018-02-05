@@ -55,7 +55,9 @@ Behaviour.register({"SELECT.staticCombobox": function(e) {
      *   Changed behavior : Show candidates that matches the current incomplete input.
      */
     var c = new ComboBox(e,function(value) {
-        return items.filter(item => item.indexOf(value) > -1);
+        return items.filter(function (item) {
+            return item.indexOf(value) > -1;
+        });
     }, {});
     
     /*
