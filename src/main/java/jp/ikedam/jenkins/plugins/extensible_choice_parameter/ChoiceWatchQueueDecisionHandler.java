@@ -94,7 +94,7 @@ public class ChoiceWatchQueueDecisionHandler extends QueueDecisionHandler
                 ExtensibleChoiceParameterDefinition choiceDef = (ExtensibleChoiceParameterDefinition)def;
                 if(choiceDef.getChoiceListProvider() != null)
                 {
-                    choiceDef.getChoiceListProvider().onBuildTriggeredWithValue(job, choiceDef, value.value);
+                    choiceDef.getChoiceListProvider().onBuildTriggeredWithValue(job, choiceDef, value.getValue().toString());
                 }
             }
         }

@@ -395,12 +395,12 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
      */
     protected ParameterValue createValueCommon(StringParameterValue value)
     {
-        if(!isEditable() && !getChoiceList().contains(value.value))
+        if(!isEditable() && !getChoiceList().contains(value.getValue()))
         {
             // Something strange!: Not editable and specified a value not in the choices.
             throw new IllegalArgumentException(String.format(
                 "Illegal choice '%s' in parameter '%s'",
-                value.value,
+                value.getValue(),
                 value.getName()
             ));
         }
