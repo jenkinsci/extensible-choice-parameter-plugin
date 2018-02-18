@@ -51,11 +51,13 @@ Behaviour.register({"SELECT.staticCombobox": function(e) {
     
     /*
      * Changes from the original 3:
-     *   Original behavior: Show candidates that matches the current incomplete input.
-     *   Changed behavior : Show all the candidates, not concerning with the current incomplete input.
+     *   Original behavior: Show candidates that start with the current incomplete input.
+     *   Changed behavior : Show candidates that contain the current incomplete input.
      */
     var c = new ComboBox(e,function(value) {
-        return items;
+        return items.filter(function (item) {
+            return item.indexOf(value) > -1;
+        });
     }, {});
     
     /*

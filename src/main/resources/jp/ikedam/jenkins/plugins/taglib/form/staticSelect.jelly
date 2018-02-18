@@ -46,7 +46,7 @@ THE SOFTWARE.
     </st:attribute>
 </st:documentation>
 <j:scope>
-    <j:set var="attrs" value="${attrs}" /> <!-- prepareDatabinding のために必要 -->
+    <j:set var="attrs" value="${attrs}" /> <!-- Required for prepareDatabinding -->
     <j:set var="defValue" value="${attrs.value ?: instance[attrs.field]}" />
     <f:prepareDatabinding/>
     
