@@ -49,7 +49,6 @@ import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
@@ -1183,4 +1182,5 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
 
         assertNotNull(page.getElementById("test-expected"));
         assertNull(page.getElementById("test-not-expected"));
-    }}
+    }
+}

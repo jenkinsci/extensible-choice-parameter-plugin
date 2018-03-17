@@ -88,7 +88,10 @@ public class TextareaStringListUtility
             // The last empty line will be ignored.
             // The list object returned from asList() does not support remove,
             // so use subList().
-            stringList = stringList.subList(0, stringList.size() - 1);
+            // And recreate ArrayList, as subList() returns java.util.RandomAccessSubList,
+            // which results complicated output in XStream (that is, complicated config.xml),
+            // and is not whitelisted in JEP-200.
+            stringList = new ArrayList<String>(stringList.subList(0, stringList.size() - 1));
         }
         
         return stringList;
