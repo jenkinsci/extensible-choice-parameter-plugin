@@ -44,6 +44,9 @@ THE SOFTWARE.
     <st:attribute name="editable">
         specify whether this field is editable.
     </st:attribute>
+    <st:attribute name="editableType">
+        Candidates for input value when editable. NoFilter, Filter is available.
+    </st:attribute>
 </st:documentation>
 <j:scope>
     <j:set var="attrs" value="${attrs}" /> <!-- Required for prepareDatabinding -->
@@ -53,8 +56,8 @@ THE SOFTWARE.
     <m:select
         xmlns:m="jelly:hudson.util.jelly.MorphTagLibrary"
         ATTRIBUTES="${attrs}"
-        EXCEPT="name field items clazz editable value"
-        class="setting-input ${attrs.clazz} ${attrs.checkUrl!=null?'validated':''} ${attrs.editable?'staticCombobox':''}"
+        EXCEPT="name field items clazz editable editableType value"
+        class="setting-input ${attrs.clazz} ${attrs.checkUrl!=null?'validated':''} ${attrs.editable?'staticCombobox':''} editableType-${attrs.editableType}"
         autocomplete="off"
         name="${attrs.name ?: '_.'+attrs.field}">
         <j:forEach var="value" items="${attrs.items}">

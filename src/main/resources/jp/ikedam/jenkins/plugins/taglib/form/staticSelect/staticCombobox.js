@@ -52,13 +52,21 @@ Behaviour.register({"SELECT.staticCombobox": function(e) {
     /*
      * Changes from the original 3:
      *   Original behavior: Show candidates that start with the current incomplete input.
-     *   Changed behavior : Show candidates that contain the current incomplete input.
+     *   Changed behavior : Change depends on the class name.
      */
-    var c = new ComboBox(e,function(value) {
-        return items.filter(function (item) {
-            return item.indexOf(value) > -1;
-        });
-    }, {});
+    // Show all the candidates, not concerning with the current incomplete input.
+    var filter = function(value) {
+        return items;
+    };
+    if ($(e).hasClassName("editableType-Filter")) {
+        // Show candidates that contain the current incomplete input.
+        filter = function(value) {
+            return items.filter(function (item) {
+                return item.indexOf(value) > -1;
+            });
+        };
+    }
+    var c = new ComboBox(e,filter,{});
     
     /*
      * Changes from the original 4:
