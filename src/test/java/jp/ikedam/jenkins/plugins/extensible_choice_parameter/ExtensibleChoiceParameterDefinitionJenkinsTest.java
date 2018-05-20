@@ -46,6 +46,7 @@ import hudson.model.ParametersDefinitionProperty;
 import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
+import jp.ikedam.jenkins.plugins.extensible_choice_parameter.ExtensibleChoiceParameterDefinition.EditableType;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
@@ -60,6 +61,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -1182,5 +1184,171 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
 
         assertNotNull(page.getElementById("test-expected"));
         assertNull(page.getElementById("test-not-expected"));
+    }
+
+
+    @Test
+    public void testConfiguration1() throws Exception {
+        FreeStyleProject p = j.createFreeStyleProject();
+
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("a", "b", "c"),
+                null
+            ),
+            false,
+            "description"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        j.configRoundtrip(p);
+
+        j.assertEqualDataBoundBeans(
+            def,
+            p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("test")
+        );
+    }
+
+    @Test
+    public void testConfiguration2() throws Exception {
+        FreeStyleProject p = j.createFreeStyleProject();
+
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("a", "b", "c"),
+                "a"
+            ),
+            true,
+            "another description"
+        );
+        def.setEditableType(EditableType.NoFilter);
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        j.configRoundtrip(p);
+
+        j.assertEqualDataBoundBeans(
+            def,
+            p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("test")
+        );
+    }
+
+    @Test
+    public void testConfiguration3() throws Exception {
+        FreeStyleProject p = j.createFreeStyleProject();
+
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("a", "b", "c"),
+                "a"
+            ),
+            true,
+            "yet another description"
+        );
+        def.setEditableType(EditableType.Filter);
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        j.configRoundtrip(p);
+
+        j.assertEqualDataBoundBeans(
+            def,
+            p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("test")
+        );
+    }
+
+    private List<String> extractCombobox(HtmlElement combobox) throws Exception
+    {
+        List<String> ret = new ArrayList<String>();
+        for (HtmlElement d: combobox.getElementsByTagName("div"))
+        {
+            ret.add(d.getTextContent());
+        }
+        return ret;
+    }
+
+    @Test
+    public void testComboboxNoFilter() throws Exception
+    {
+        FreeStyleProject p = j.createFreeStyleProject();
+
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("foo/bar/baz", "foo/bar/qux", "bar/baz/qux"),
+                null
+            ),
+            true,
+            "description"
+        );
+        def.setEditableType(EditableType.NoFilter);
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createAllow405WebClient();
+        HtmlPage page = wc.getPage(p, "build?delay=0sec");
+        HtmlTextInput in = page.getElementByName("value");
+        assertEquals("foo/bar/baz", in.getValueAttribute());
+
+        HtmlElement combobox = page.getFirstByXPath("//*[@class='comboBoxList']");
+
+        in.setValueAttribute("foo/bar");
+        in.focus(); // fire onfocus
+        assertEquals(
+            Arrays.asList(
+                "foo/bar/baz",
+                "foo/bar/qux",
+                "bar/baz/qux"
+            ),
+            extractCombobox(combobox)
+        );
+        in.blur();
+    }
+
+    @Test
+    public void testComboboxFilter() throws Exception
+    {
+        FreeStyleProject p = j.createFreeStyleProject();
+
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("foo/bar/baz", "foo/bar/qux", "bar/baz/qux"),
+                null
+            ),
+            true,
+            "description"
+        );
+        def.setEditableType(EditableType.Filter);
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createAllow405WebClient();
+        HtmlPage page = wc.getPage(p, "build?delay=0sec");
+        HtmlTextInput in = page.getElementByName("value");
+        assertEquals("foo/bar/baz", in.getValueAttribute());
+
+        HtmlElement combobox = page.getFirstByXPath("//*[@class='comboBoxList']");
+
+        in.setValueAttribute("foo/bar");
+        in.focus(); // fire onfocus
+        assertEquals(
+            Arrays.asList(
+                "foo/bar/baz",
+                "foo/bar/qux"
+            ),
+            extractCombobox(combobox)
+        );
+        in.blur();
+
+        in.setValueAttribute("bar/baz");
+        in.focus(); // fire onfocus
+        assertEquals(
+            Arrays.asList(
+                "foo/bar/baz",
+                "bar/baz/qux"
+            ),
+            extractCombobox(combobox)
+        );
+        in.blur();
     }
 }

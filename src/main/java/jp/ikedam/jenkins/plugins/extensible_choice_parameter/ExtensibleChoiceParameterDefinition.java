@@ -33,6 +33,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
+
 import jenkins.model.Jenkins;
 import hudson.Extension;
 import hudson.DescriptorExtensionList;
@@ -47,7 +49,9 @@ import hudson.util.FormValidation;
 import hudson.util.VariableResolver;
 
 import org.apache.commons.lang.StringUtils;
+import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -64,6 +68,33 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     
     private static final Pattern namePattern = Pattern.compile("[A-Za-z_][A-Za-z_0-9]*");
     
+    /**
+     * How to display choices for input values
+     */
+    public enum EditableType
+    {
+        /**
+         * The input value doesn't work as filter.
+         */
+        NoFilter(Messages._ExtensibleChoiceParameterDefinition_EditableType_NoFilter()),
+        /**
+         * The input value works as filter. Only matching values are displayed.
+         */
+        Filter(Messages._ExtensibleChoiceParameterDefinition_EditableType_Filter());
+
+        private final Localizable displayName;
+
+        private EditableType(Localizable displayName)
+        {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName()
+        {
+            return displayName.toString();
+        }
+    }
+
     /**
      * Deprecated
      */
@@ -162,12 +193,16 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
                 JSONObject formData)
                 throws hudson.model.Descriptor.FormException
         {
-            return new ExtensibleChoiceParameterDefinition(
+            ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                     formData.getString("name"),
                     bindJSONWithDescriptor(req, formData, "choiceListProvider", ChoiceListProvider.class),
                     formData.getBoolean("editable"),
                     formData.getString("description")
             );
+            if (formData.containsKey("editableType")) {
+                def.setEditableType(EditableType.valueOf(formData.getString("editableType")));
+            }
+            return def;
         }
         
         /**
@@ -313,6 +348,26 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         return editable;
     }
     
+    private EditableType editableType;
+
+    /**
+     * @return How to display choices for input values
+     */
+    @Nonnull
+    public EditableType getEditableType()
+    {
+        return (editableType != null) ? editableType : EditableType.NoFilter;
+    }
+
+    /**
+     * @param editableType How to display choices for input values
+     */
+    @DataBoundSetter
+    public void setEditableType(EditableType editableType)
+    {
+        this.editableType = editableType;
+    }
+
     private ChoiceListProvider choiceListProvider = null;
     
     /**

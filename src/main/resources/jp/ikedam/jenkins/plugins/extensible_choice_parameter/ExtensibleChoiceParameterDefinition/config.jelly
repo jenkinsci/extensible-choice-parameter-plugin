@@ -33,7 +33,9 @@ THE SOFTWARE.
         <f:textarea previewEndpoint="/markupFormatter/previewDescription" />
     </f:entry>
     <f:dropdownDescriptorSelector title="${%Choice Provider}" field="choiceListProvider" descriptors="${descriptor.enabledChoiceListProviderList}" />
-    <f:entry title="${%Editable}" field="editable">
-        <f:checkbox />
-    </f:entry>
+    <f:optionalBlock field="editable" inline="true" title="${%Editable}">
+        <f:entry title="${%Choices for input value}" field="editableType">
+            <f:enum>${it.displayName}</f:enum>
+        </f:entry>
+    </f:optionalBlock>
 </j:jelly>

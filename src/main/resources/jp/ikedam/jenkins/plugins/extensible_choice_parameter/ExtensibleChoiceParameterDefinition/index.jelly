@@ -39,6 +39,7 @@ THE SOFTWARE.
                     field="value"
                     items="${it.choiceList}"
                     editable="${it.editable}"
+                    editableType="${it.editableType.name()}"
                 />
             </j:scope>
         </div>
