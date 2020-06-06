@@ -20,7 +20,7 @@ This plugin provides Extensible Choice parameter:
 * With Global Choice Parameter, you can deal with the case that the choices is shared by multiple jobs. Updating the choice in the Configure System will immediately affect all the jobs that uses the updated choice.
 * The parameter can be set to Editable, which allows you to specify any value, even the one not in the choices. This is useful in the case that the build must be run with an irregular parameter.
 	*  Edited values can be added to the choice used next time automatically.
-* The way to provide choices can be extended by using [the Jenkins extention point featere] (https://wiki.jenkins-ci.org/display/JENKINS/Extension+points).
+* The way to provide choices can be extended by using [the Jenkins extention point featere](https://jenkins.io/doc/developer/extensions/).
 
 Extension point
 ---------------
