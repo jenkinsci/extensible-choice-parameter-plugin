@@ -56,6 +56,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.export.Exported;
 
 /**
  * Provides a choice parameter whose choices can be extended using Extension Points.
@@ -410,6 +411,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
      * 
      * @return list of choices. never null.
      */
+    @Exported
     public List<String> getChoiceList()
     {
         ChoiceListProvider provider = getEnabledChoiceListProvider();
