@@ -217,11 +217,11 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         wc.login(user.getId());
 
         // missing Configure permission
-        Page page = wc.getPage(p, descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false);
+        Page page = wc.goTo(p.getUrl() + descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
         assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
 
         // no job => nothing to reply, duplicate with withoutContext, but using web calls
-        page = wc.goTo(descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, "application/json");
+        page = wc.goTo(descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
         assertEquals(HttpServletResponse.SC_OK, page.getWebResponse().getStatusCode());
 
         // configurer has access to the job but without Item/Configure permission => 403
@@ -229,7 +229,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         wc.login(configurer.getId());
 
         // missing Configure permission
-        page = wc.getPage(p, descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false);
+        page = wc.goTo(p.getUrl() + descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
         assertEquals(HttpServletResponse.SC_FORBIDDEN, page.getWebResponse().getStatusCode());
     }
     
@@ -316,11 +316,11 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         wc.login(user.getId());
 
         // missing Configure permission
-        Page page = wc.getPage(p, descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false);
+        Page page = wc.goTo(p.getUrl() + descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
         assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
 
         // no job => nothing to reply, duplicate with withoutContext, but using web calls
-        page = wc.goTo(descriptor.getDescriptorUrl() +"/test/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, "text/html");
+        page = wc.goTo(descriptor.getDescriptorUrl() +"/test/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
         assertEquals(HttpServletResponse.SC_OK, page.getWebResponse().getStatusCode());
 
         // configurer has access to the job but without Item/Configure permission => 403
