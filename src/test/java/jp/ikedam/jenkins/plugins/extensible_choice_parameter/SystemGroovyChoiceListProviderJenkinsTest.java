@@ -24,6 +24,8 @@
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import static org.junit.Assert.*;
+
+import com.gargoylesoftware.htmlunit.Page;
 import hudson.cli.CLI;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
@@ -40,9 +42,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.acegisecurity.AccessDeniedException;
-import org.acegisecurity.context.SecurityContext;
-import org.acegisecurity.context.SecurityContextHolder;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
@@ -50,6 +49,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.recipes.LocalData;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -58,6 +58,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 
 import jenkins.model.Jenkins;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Tests for SystemGroovyChoiceListProvider, corresponding to Jenkins.
@@ -200,27 +202,35 @@ public class SystemGroovyChoiceListProviderJenkinsTest
     public void testDescriptor_doFillDefaultChoiceItemsWithoutPermission() throws Exception
     {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
-        j.jenkins.setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                .grant(Jenkins.READ).everywhere().to("user")
+                .grant(Item.READ, Jenkins.READ).everywhere().to("configurer")
+        );
         FreeStyleProject p = j.createFreeStyleProject();
         SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        SecurityContext orig = ACL.impersonate(User.get("user").impersonate());
-        try
-        {
-            descriptor.doFillDefaultChoiceItems(
-                    p,
-                    properScript,
-                    true,
-                    false
-            );
-            fail();
-        }
-        catch(AccessDeniedException e)
-        {
-        }
-        finally
-        {
-            SecurityContextHolder.setContext(orig);
-        }
+
+        WebClient wc = j.createWebClient();
+        wc.getOptions().setThrowExceptionOnFailingStatusCode(false);
+
+        // user has no access to the job => 404
+        User user = User.get("user");
+        wc.login(user.getId());
+
+        // missing Configure permission
+        Page page = wc.goTo(p.getUrl() + descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
+        assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
+
+        // no job => nothing to reply, duplicate with withoutContext, but using web calls
+        page = wc.goTo(descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
+        assertEquals(HttpServletResponse.SC_OK, page.getWebResponse().getStatusCode());
+
+        // configurer has access to the job but without Item/Configure permission => 403
+        User configurer = User.get("configurer");
+        wc.login(configurer.getId());
+
+        // missing Configure permission
+        page = wc.goTo(p.getUrl() + descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
+        assertEquals(HttpServletResponse.SC_FORBIDDEN, page.getWebResponse().getStatusCode());
     }
     
     @Test
@@ -291,27 +301,35 @@ public class SystemGroovyChoiceListProviderJenkinsTest
     public void testDescriptor_doTestWithoutPermission() throws Exception
     {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
-        j.jenkins.setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                .grant(Jenkins.READ).everywhere().to("user")
+                .grant(Item.READ, Jenkins.READ).everywhere().to("configurer")
+        );
         FreeStyleProject p = j.createFreeStyleProject();
         SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
-        SecurityContext orig = ACL.impersonate(User.get("user").impersonate());
-        try
-        {
-            descriptor.doTest(
-                    p,
-                    properScript,
-                    true,
-                    false
-            );
-            fail();
-        }
-        catch(AccessDeniedException e)
-        {
-        }
-        finally
-        {
-            SecurityContextHolder.setContext(orig);
-        }
+
+        WebClient wc = j.createWebClient();
+        wc.getOptions().setThrowExceptionOnFailingStatusCode(false);
+
+        // user has no access to the job => 404
+        User user = User.get("user");
+        wc.login(user.getId());
+
+        // missing Configure permission
+        Page page = wc.goTo(p.getUrl() + descriptor.getDescriptorUrl() +"/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
+        assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
+
+        // no job => nothing to reply, duplicate with withoutContext, but using web calls
+        page = wc.goTo(descriptor.getDescriptorUrl() +"/test/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false, null);
+        assertEquals(HttpServletResponse.SC_OK, page.getWebResponse().getStatusCode());
+
+        // configurer has access to the job but without Item/Configure permission => 403
+        User configurer = User.get("configurer");
+        wc.login(configurer.getId());
+
+        // missing Configure permission
+        page = wc.getPage(p, descriptor.getDescriptorUrl() +"/test/?script=" + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false);
+        assertEquals(HttpServletResponse.SC_FORBIDDEN, page.getWebResponse().getStatusCode());
     }
     
     @Test
@@ -627,28 +645,20 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         final String SCRIPT = "return java.util.Arrays.asList(new File('/').list());";
         
         FreeStyleProject p = j.createFreeStyleProject();
-        SecurityContext orig = ACL.impersonate(User.get("user").impersonate());
-        try
-        {
-            p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
-                    "test",
-                    new SystemGroovyChoiceListProvider(
-                            new SecureGroovyScript(
-                                    SCRIPT,
-                                    false,
-                                    Collections.<ClasspathEntry>emptyList()
-                            ),
-                            null,
-                            false
-                    ),
-                    false,
-                    "test"
-            )));
-        }
-        finally
-        {
-            SecurityContextHolder.setContext(orig);
-        }
+        p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
+                "test",
+                new SystemGroovyChoiceListProvider(
+                        new SecureGroovyScript(
+                                SCRIPT,
+                                false,
+                                Collections.<ClasspathEntry>emptyList()
+                        ),
+                        null,
+                        false
+                ),
+                false,
+                "test"
+        )));
         
         WebClient wc = j.createAllow405WebClient();
         wc.login("user");
