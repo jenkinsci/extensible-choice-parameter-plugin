@@ -41,11 +41,13 @@ import hudson.markup.RawHtmlMarkupFormatter;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
+import hudson.model.Item;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.ExtensibleChoiceParameterDefinition.EditableType;
 import net.sf.json.JSONObject;
 
@@ -54,12 +56,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.Issue;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
@@ -67,6 +71,9 @@ import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.gargoylesoftware.htmlunit.xml.XmlPage;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * Tests for ExtensibleChoiceParameterDefinition, corresponding to Jenkins.
@@ -1350,5 +1357,87 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             extractCombobox(combobox)
         );
         in.blur();
+    }
+
+    private XmlPage getXmlPage(WebClient wc, String path) throws Exception
+    {
+        // WebClient#getPageXml expects content-type "application/xml"
+        // and doesn't accept "text/xml".
+        Page p = wc.goTo(path, null);
+        if (p instanceof XmlPage) {
+            return (XmlPage)p;
+        }
+        throw new AssertionError(
+            "Expected XML but instead the content type was "
+                + p.getWebResponse().getContentType()
+        );
+    }
+
+    @Test
+    public void testRestApiWithPermission() throws Exception
+    {
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                .grant(Item.READ, Item.BUILD, Jenkins.READ).everywhere().to("user")
+        );
+
+        FreeStyleProject p = j.createFreeStyleProject();
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("foo", "bar", "baz"),
+                null
+            ),
+            true,
+            "description"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createWebClient();
+        wc.login("user");
+
+        XmlPage page = getXmlPage(wc, p.getUrl() + "/api/xml");
+        assertEquals(
+            Arrays.asList("foo", "bar", "baz"),
+            Lists.transform(
+                page.getByXPath("//freeStyleProject/property/parameterDefinition[name='test']/choice"),
+                new Function<Object, String>() {
+                    public String apply(Object e) {
+                        return (e instanceof DomElement) ? ((DomElement)e).getTextContent() : null;
+                    }
+                }
+            )
+        );
+    }
+
+    @Test
+    public void testRestApiWithoutPermission() throws Exception
+    {
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        // No Item.BUILD permission!
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                .grant(Item.READ, Jenkins.READ).everywhere().to("user")
+        );
+
+        FreeStyleProject p = j.createFreeStyleProject();
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("foo", "bar", "baz"),
+                null
+            ),
+            true,
+            "description"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createWebClient();
+        wc.login("user");
+
+        XmlPage page = getXmlPage(wc, p.getUrl() + "/api/xml");
+        assertEquals(
+            Collections.emptyList(),
+            page.getByXPath("//freeStyleProject/property/parameterDefinition[name='test']/choice")
+        );
     }
 }
