@@ -1,0 +1,96 @@
+= Extensible Choice Parameter plugin
+
+:sectanchors:
+
+Older versions of this plugin may not be safe to use. Please review the following warnings before using an older version:
+
+* https://jenkins.io/security/advisory/2017-04-10/[Arbitrary code execution vulnerability]
+
+This plugin adds "Extensible Choice" as a build parameter.You can select how to retrieve choices, including the way to share choices among all jobs.
+
+[[ExtensibleChoiceParameterplugin-Whatsthis]]
+== What's this?
+
+This plugin provides a Extensible Choice parameter:
+
+* When building, the value can be selected with a dropdown like a built-in Choice parameter.
+* The choices can be provided in several ways:
+** Global Choice Parameter: defines choices in the Configure System page.
+*** Choices can be shared by multiple jobs.
+*** Updating the choices in the Configure System, every job can immediately refer the updated choices.
+** Textarea Choice Parameter: writes choices in a textarea, just like a built-in Choice parameter.
+** System Groovy Script Choice Parameter: runs a System Groovy script to
+determine the list of choices
+** File Choice Parameter: lists files in a directory.
+* Checking Editable checkbox allows you to specify any value, even one not in the choices.
+** Edited values can be added to the choice used next time automatically by checking "Add Edited Value".
+* You can add a new way to provide choices with Extension Points.
+
+[[ExtensibleChoiceParameterplugin-Disablingproviders]]
+== Disabling providers
+
+Some choice providers may cause security issues in your system:
+
+[cols=",,",options="header",]
+|===
+|Choice Provider |Security Issue |Note
+|File Choice Parameter |Any users with project configuration privilege can list files in the OS with the privilege of the OS user Jenkins run with. |Users can do that also with "Execute shell" or "Execute Windows Batch" build step.
+|===
+
+You can disable specific providers in system configuration page:
+
+#image:docs/images/extensible-choice-parameter-global-configuration.png[Global configuration]#
+
+In the above screen, System Groovy Script Choice Parameter (unchecked one) is disabled.
+
+[[ExtensibleChoiceParameterplugin-Screenshots]]
+== Screenshots
+
+* "Extensible Choice" is added as a type of build parameters. +
+#image:docs/images/sc1_newparameter.png[Add Parameter]#
+* You can select the way to define choices of the parameter. +
+#image:docs/images/sc2_choiceprovider.png[Choice Provider]#
+** A new way to provide choices can be added with Extension Points.
+* Selecting "Textarea Choice Parameter", you can define choices like the built-in Choice parameter. +
+#image:docs/images/sc3_textarea.png[Textarea Choice Parameter]#
+* "Global Choice Parameter" enables you to select a set of choices from the ones defined in System Configuration page.
+** Defining in System Configuration page: +
+#image:docs/images/sc4_globalchoice1.png[Global Choice Parameter in System Configuration]#
+** Select which set of choices to use: +
+#image:docs/images/sc5_globalchoice2.png[Global Choice Parameter]#
+* "System Groovy Choice Parameter" generate choices with a Groovy script: +
+#image:docs/images/sc7_groovy.png[System Groovy Choice Parameter]#
+* "File Choice Parameter" enables select a file in a specified directory: +
+#image:docs/images/sc8_files.png[File Choice Parameter]#
+* You can specify its default value. This is useful with Global Choice Parameter to specify different default values in jobs: +
+#image:docs/images/sc9_default.png[Default Choice]#
+* Checking "Editable" enables you to input a value not in choices at build time: +
+#image:docs/images/sc6_editable.png[Editable]#
+** Textarea Choice Parameter and Global Choice Parameter provides "Add Edited Value", which automatically adds a value not in the choice list: +
+#image:docs/images/sc10_editedvalue.png[Add Edited Value]#
+
+[[ExtensibleChoiceParameterplugin-Extensionpoint]]
+== Extension point
+
+A new way to provide choices can be added with extending
+`+ChoiceListProvider+`, overriding the following method:
+
+[source,syntaxhighlighter-pre]
+----
+abstract public List<String> getChoiceList()
+----
+
+[[ExtensibleChoiceParameterplugin-Issues]]
+== Issues
+
+https://issues.jenkins-ci.org/issues/?jql=project%20%3D%20JENKINS%20AND%20status%20in%20(Open%2C%20%22In%20Progress%22%2C%20Reopened%2C%20%22In%20Review%22%2C%20Verified)%20AND%20component%20%3D%20%27extensible-choice-parameter-plugin%27%20%20%20[Open Issues]
+
+To report a bug or request an enhancement to this plugin please create a ticket in JIRA (you need to login or to sign up for an account).
+Also have a look on https://www.jenkins.io/participate/report-issue/[How to report an issue]
+
+* https://issues.jenkins-ci.org/secure/CreateIssueDetails!init.jspa?pid=10172&issuetype=1&components=17512&priority=4&assignee=ikedam[Bug report]
+* https://issues.jenkins-ci.org/secure/CreateIssueDetails!init.jspa?pid=10172&issuetype=4&components=17512&priority=4[Request or propose an improvement of existing feature]
+* https://issues.jenkins-ci.org/secure/CreateIssueDetails!init.jspa?pid=10172&issuetype=2&components=17512&priority=4[Request or propose a new feature]
+
+
+include::CHANGELOG.adoc[]
