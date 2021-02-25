@@ -61,7 +61,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
-
+import org.jenkinsci.Symbol;
 import net.sf.json.JSONObject;
 
 /**
@@ -123,6 +123,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
      * </dl>
      */
     @Extension
+    @Symbol({"extensibleChoice"})
     public static class DescriptorImpl extends ParameterDescriptor
     {
         private Map<String,Boolean> choiceListEnabledMap;
