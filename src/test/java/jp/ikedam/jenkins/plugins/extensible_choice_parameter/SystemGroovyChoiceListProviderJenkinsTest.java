@@ -492,8 +492,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         assertEquals(p.getFullName(), sel.getOption(0).getValueAttribute());
         
         // from CLI, the project does not passed properly.
-        CLI cli = new CLI(j.getURL());
-        assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
+        assertEquals(0, CLI._main( new String[]{"build", p.getFullName(), "-s"}));
         j.assertBuildStatusSuccess(p.getLastBuild());
         assertEquals("none", ceb.getEnvVars().get("test"));
         
@@ -501,8 +500,8 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         p.getBuildersList().clear(); // CaptureEnvironmentBuilder does not support configuration pages.
         j.submit(wc.getPage(p, "configure").getFormByName("config"));
         p.getBuildersList().add(ceb);
-        
-        assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
+
+        assertEquals(0, CLI._main( new String[]{"build", p.getFullName(), "-s"}));
         j.assertBuildStatusSuccess(p.getLastBuild());
         assertEquals(p.getFullName(), ceb.getEnvVars().get("test"));
         
@@ -511,7 +510,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         j.jenkins.reload();
         p = j.jenkins.getItemByFullName(p.getFullName(), FreeStyleProject.class);
         ceb = p.getBuildersList().get(CaptureEnvironmentBuilder.class);
-        assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
+        assertEquals(0, CLI._main( new String[]{"build", p.getFullName(), "-s"}));
         j.assertBuildStatusSuccess(p.getLastBuild());
         assertEquals(p.getFullName(), ceb.getEnvVars().get("test"));
     }
