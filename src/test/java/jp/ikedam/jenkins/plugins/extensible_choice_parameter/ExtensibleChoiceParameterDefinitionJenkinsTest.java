@@ -1411,6 +1411,44 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
     }
 
     @Test
+    public void testRestApiWithPermissionForView() throws Exception
+    {
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+            .grant(Item.READ, Item.BUILD, Jenkins.READ).everywhere().to("user")
+        );
+
+        FreeStyleProject p = j.createFreeStyleProject();
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("foo", "bar", "baz"),
+                null
+            ),
+            true,
+            "description"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createWebClient();
+        wc.login("user");
+
+        final String onlyChoices = "?tree=jobs[property[parameterDefinitions[name,choices]]]";
+        XmlPage page = getXmlPage(wc, "api/xml" + onlyChoices);
+        assertEquals(
+            Arrays.asList("foo", "bar", "baz"),
+            Lists.transform(
+                page.getByXPath("//hudson/job/property/parameterDefinition[name='test']/choice"),
+                new Function<Object, String>() {
+                    public String apply(Object e) {
+                        return (e instanceof DomElement) ? ((DomElement)e).getTextContent() : null;
+                    }
+                }
+            )
+        );
+    }
+
+    @Test
     public void testRestApiWithoutPermission() throws Exception
     {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());

@@ -23,6 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import hudson.model.ViewGroup;
+import hudson.security.AccessControlled;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,7 +56,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -444,11 +445,12 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
             return null;
         }
         Job<?, ?> job = req.findAncestorObject(Job.class);
-        if (job == null)
+        AccessControlled jobOrView = (job == null)?req.findAncestorObject(ViewGroup.class):job;
+        if (jobOrView == null)
         {
             return null;
         }
-        if (!job.hasPermission(Item.BUILD))
+        if (!jobOrView.hasPermission(Item.BUILD))
         {
             return Collections.emptyList();
         }
