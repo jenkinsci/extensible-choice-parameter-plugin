@@ -25,6 +25,7 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import static org.junit.Assert.*;
 
+import hudson.model.AbstractProject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -197,6 +198,56 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                 return "MockChoiceListProvider";
             }
             
+        }
+    }
+
+    public static class MockTextAreaChoiceListProvider extends AddEditedChoiceListProvider
+    {
+        private static final long serialVersionUID = -8216066980119568526L;
+        private List<String> choiceList = null;
+        private String defaultChoice = null;
+        public MockTextAreaChoiceListProvider(List<String> choiceList, String defaultChoice){
+            super(false,WhenToAdd.Triggered);
+            this.choiceList = choiceList;
+            this.defaultChoice = defaultChoice;
+        }
+        @DataBoundConstructor
+        public MockTextAreaChoiceListProvider(String choiceListString, String defaultChoice){
+            super(false,WhenToAdd.Triggered);
+            this.choiceList = Arrays.asList(StringUtils.split(choiceListString, ","));
+            this.defaultChoice = Util.fixEmpty(defaultChoice);
+        }
+        @Override
+        public List<String> getChoiceList()
+        {
+            return choiceList;
+        }
+        public String getChoiceListString()
+        {
+            return StringUtils.join(getChoiceList(),",");
+        }
+
+        @Override
+        public String getDefaultChoice()
+        {
+            return defaultChoice;
+        }
+
+        @Override
+        protected void addEditedValue(AbstractProject<?, ?> project,
+            ExtensibleChoiceParameterDefinition def, String value) {
+            choiceList.add(value);
+        }
+
+        @Extension
+        public static class DescriptorImpl extends Descriptor<ChoiceListProvider>
+        {
+            @Override
+            public String getDisplayName()
+            {
+                return "MockChoiceListProvider";
+            }
+
         }
     }
     
@@ -1422,6 +1473,44 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
             "test",
             new MockChoiceListProvider(
+                Arrays.asList("foo", "bar", "baz"),
+                null
+            ),
+            true,
+            "description"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createWebClient();
+        wc.login("user");
+
+        final String onlyChoices = "?tree=jobs[property[parameterDefinitions[name,choices]]]";
+        XmlPage page = getXmlPage(wc, "api/xml" + onlyChoices);
+        assertEquals(
+            Collections.emptyList(),
+            Lists.transform(
+                page.getByXPath("//hudson/job/property/parameterDefinition[name='test']/choice"),
+                new Function<Object, String>() {
+                    public String apply(Object e) {
+                        return (e instanceof DomElement) ? ((DomElement)e).getTextContent() : null;
+                    }
+                }
+            )
+        );
+    }
+
+    @Test
+    public void testRestApiForTextAreaWithPermissionForView() throws Exception
+    {
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+            .grant(Item.READ, Item.BUILD, Jenkins.READ).everywhere().to("user")
+        );
+
+        FreeStyleProject p = j.createFreeStyleProject();
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockTextAreaChoiceListProvider(
                 Arrays.asList("foo", "bar", "baz"),
                 null
             ),

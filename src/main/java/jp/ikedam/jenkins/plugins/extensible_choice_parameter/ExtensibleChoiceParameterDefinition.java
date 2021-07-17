@@ -23,8 +23,6 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import hudson.model.ViewGroup;
-import hudson.security.AccessControlled;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,8 +42,6 @@ import hudson.Util;
 import hudson.model.Descriptor;
 import hudson.model.Describable;
 import hudson.model.DescriptorVisibilityFilter;
-import hudson.model.Item;
-import hudson.model.Job;
 import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
 import hudson.model.SimpleParameterDefinition;
@@ -444,13 +440,9 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         {
             return null;
         }
-        Job<?, ?> job = req.findAncestorObject(Job.class);
-        AccessControlled jobOrView = (job == null)?req.findAncestorObject(ViewGroup.class):job;
-        if (jobOrView == null)
-        {
-            return null;
-        }
-        if (!jobOrView.hasPermission(Item.BUILD))
+        final ChoiceListProvider provider = getEnabledChoiceListProvider();
+        boolean allowRestApiAccess = (provider !=  null) && provider.isAllowRestApiAccess(req);
+        if (!allowRestApiAccess)
         {
             return Collections.emptyList();
         }
