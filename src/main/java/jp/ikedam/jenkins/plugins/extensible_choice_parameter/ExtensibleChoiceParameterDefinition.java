@@ -42,6 +42,8 @@ import hudson.Util;
 import hudson.model.Descriptor;
 import hudson.model.Describable;
 import hudson.model.DescriptorVisibilityFilter;
+import hudson.model.Item;
+import hudson.model.Job;
 import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
 import hudson.model.SimpleParameterDefinition;
@@ -441,10 +443,14 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
             return null;
         }
         final ChoiceListProvider provider = getEnabledChoiceListProvider();
-        boolean allowRestApiAccess = (provider !=  null) && provider.isAllowRestApiAccess(req);
-        if (!allowRestApiAccess)
+        boolean requiresBuildPermission = (provider !=  null) && provider.requiresBuildPermission();
+        if (requiresBuildPermission)
         {
-            return Collections.emptyList();
+            Job<?, ?> job = req.findAncestorObject(Job.class);
+            if (job == null || !job.hasPermission(Item.BUILD))
+            {
+                return Collections.emptyList();
+            }
         }
         return getChoiceList();
     }

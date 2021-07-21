@@ -23,10 +23,6 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import hudson.model.Item;
-import hudson.model.Job;
-import hudson.model.ViewGroup;
-import hudson.security.AccessControlled;
 import java.io.Serializable;
 import java.util.List;
 import hudson.ExtensionPoint;
@@ -36,7 +32,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.AbstractDescribableImpl;
-import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * The abstract base class of modules provides choices.
@@ -59,11 +54,6 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
      * @return the choices list.
      */
     abstract public List<String> getChoiceList();
-
-    public boolean isAllowRestApiAccess(StaplerRequest request) {
-        Job<?, ?> job = request.findAncestorObject(Job.class);
-        return job!=null && job.hasPermission(Item.BUILD);
-    }
     
     /**
      * Returns the default choice value.
@@ -113,6 +103,10 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
     )
     {
         // Nothing to do.
+    }
+
+    public boolean requiresBuildPermission() {
+        return true;
     }
     
     /**

@@ -150,6 +150,11 @@ public class TextareaChoiceListProvider extends AddEditedChoiceListProvider
     {
         return defaultChoice;
     }
+
+    @Override
+    public boolean requiresBuildPermission() {
+        return false;
+    }
     
     /**
      * Constructor instantiating with parameters in the configuration page.

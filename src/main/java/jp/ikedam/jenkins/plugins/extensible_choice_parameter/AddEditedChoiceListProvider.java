@@ -23,16 +23,11 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import hudson.model.Item;
-import hudson.model.Job;
-import hudson.model.ViewGroup;
-import hudson.security.AccessControlled;
 import org.jvnet.localizer.Localizable;
 
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * ChoiceListProvider that can add edited value.
@@ -123,15 +118,6 @@ public abstract class AddEditedChoiceListProvider extends ChoiceListProvider
     public AddEditedChoiceListProvider(boolean addEditedValue, WhenToAdd whenToAdd)
     {
         this.whenToAdd = addEditedValue?whenToAdd:null;
-    }
-
-    public boolean isAllowRestApiAccess(StaplerRequest request) {
-        return super.isAllowRestApiAccess(request) || isCalledFromView(request);
-    }
-
-    private boolean isCalledFromView(StaplerRequest request) {
-        AccessControlled view = request.findAncestorObject(ViewGroup.class);
-        return view!=null && view.hasPermission(Item.READ);
     }
     
     /**
