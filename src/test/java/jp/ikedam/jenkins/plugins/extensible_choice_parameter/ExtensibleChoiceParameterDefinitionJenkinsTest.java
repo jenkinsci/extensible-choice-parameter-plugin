@@ -217,20 +217,14 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         }
 
         @Override
+        public Descriptor<ChoiceListProvider> getDescriptor() {
+            return new DescriptorImpl();
+        }
+
+        @Override
         protected void addEditedValue(AbstractProject<?, ?> project,
             ExtensibleChoiceParameterDefinition def, String value) {
             choiceList.add(value);
-        }
-
-        @Extension
-        public static class DescriptorImpl extends Descriptor<ChoiceListProvider>
-        {
-            @Override
-            public String getDisplayName()
-            {
-                return "MockGlobalTextAreaChoiceListProvider";
-            }
-
         }
     }
 
