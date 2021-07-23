@@ -3,14 +3,24 @@
 
 :sectanchors:
 
+[[ExtensibleChoiceParameterplugin-Version1.8.0]]
+=== 1.8.0
+
+Release date: Jul 31, 2021
+
+* Expose choices to remote access API even without `+Item.BUILD+` permission for some choice providers. (https://issues.jenkins.io/browse/JENKINS-66145[JENKINS-66145])
+** Following choice providers:
+*** Textarea Choice Parameter
+** For plugin developers: Overriding `+ChoiceListProviders#requiresBuildPermission+` to return `+false+` allows exposing choices to remote access API without `+Item.BUILD+` permission. It should be allowed only when choices can be calculated only from the job configuration for security reasons.
+
 [[ExtensibleChoiceParameterplugin-Version1.7.0]]
 === 1.7.0
 
 Release date: Nov 7, 2020
 
-* Expose choices to remove access API (https://issues.jenkins-ci.org/browse/JENKINS-63786[JENKINS-63786])
+* Expose choices to remote access API (https://issues.jenkins-ci.org/browse/JENKINS-63786[JENKINS-63786])
 ** You can retrieve choice values in JENKINS_URI/job/JOBNAME/api/json and so on. See https://www.jenkins.io/doc/book/using/remote-access-api/ for more details aboud remote access API.
-** An empty list will be returned if you don't have Item.BUILD permission for that job.
+** An empty list will be returned if you don't have `+Item.BUILD+` permission for that job.
 * Move documentation to GitHub (https://github.com/jenkinsci/extensible-choice-parameter-plugin/pull/45[#45])
 
 [[ExtensibleChoiceParameterplugin-Version1.6.0]]
