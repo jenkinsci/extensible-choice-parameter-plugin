@@ -25,7 +25,6 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import static org.junit.Assert.*;
 
-import hudson.model.AbstractProject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -164,9 +163,14 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         private static final long serialVersionUID = -8216066980119568526L;
         private List<String> choiceList = null;
         private String defaultChoice = null;
-        public MockChoiceListProvider(List<String> choiceList, String defaultChoice){
+        private boolean requiresBuildPermission = false;
+        public MockChoiceListProvider(List<String> choiceList, String defaultChoice, boolean requiresBuildPermission){
             this.choiceList = choiceList;
             this.defaultChoice = defaultChoice;
+            this.requiresBuildPermission = requiresBuildPermission;
+        }
+        public MockChoiceListProvider(List<String> choiceList, String defaultChoice){
+            this(choiceList, defaultChoice, true);
         }
         @DataBoundConstructor
         public MockChoiceListProvider(String choiceListString, String defaultChoice){
@@ -182,7 +186,12 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         {
             return StringUtils.join(getChoiceList(),",");
         }
-        
+    
+        @Override
+        public boolean requiresBuildPermission() {
+            return requiresBuildPermission;
+        }
+    
         @Override
         public String getDefaultChoice()
         {
@@ -201,33 +210,6 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         }
     }
     
-    public static class MockGlobalTextAreaChoiceListProvider extends GlobalTextareaChoiceListProvider
-    {
-        private static final long serialVersionUID = -8216066980119568526L;
-        private List<String> choiceList = null;
-        @DataBoundConstructor
-        public MockGlobalTextAreaChoiceListProvider(String choiceListString, String defaultChoice){
-            super("GlobalTest",defaultChoice,false,WhenToAdd.Triggered);
-            this.choiceList = Arrays.asList(StringUtils.split(choiceListString, ","));
-        }
-        @Override
-        public List<String> getChoiceList()
-        {
-            return choiceList;
-        }
-
-        @Override
-        public Descriptor<ChoiceListProvider> getDescriptor() {
-            return new DescriptorImpl();
-        }
-
-        @Override
-        protected void addEditedValue(AbstractProject<?, ?> project,
-            ExtensibleChoiceParameterDefinition def, String value) {
-            choiceList.add(value);
-        }
-    }
-
     public static class EnableConfigurableMockChoiceListProvider extends ChoiceListProvider
     {
         private static final long serialVersionUID = 7643544327776225136L;
@@ -1439,7 +1421,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
     }
 
     @Test
-    public void testRestApiWithPermissionForView() throws Exception
+    public void testRestApiWithoutRequireBuildPermission() throws Exception
     {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
@@ -1451,82 +1433,8 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             "test",
             new MockChoiceListProvider(
                 Arrays.asList("foo", "bar", "baz"),
-                null
-            ),
-            true,
-            "description"
-        );
-        p.addProperty(new ParametersDefinitionProperty(def));
-
-        WebClient wc = j.createWebClient();
-        wc.login("user");
-
-        final String onlyChoices = "?tree=jobs[property[parameterDefinitions[name,choices]]]";
-        XmlPage page = getXmlPage(wc, "api/xml" + onlyChoices);
-        assertEquals(
-            Collections.emptyList(),
-            Lists.transform(
-                page.getByXPath("//hudson/job/property/parameterDefinition[name='test']/choice"),
-                new Function<Object, String>() {
-                    public String apply(Object e) {
-                        return (e instanceof DomElement) ? ((DomElement)e).getTextContent() : null;
-                    }
-                }
-            )
-        );
-    }
-
-    @Test
-    public void testRestApiForGlobalTextareaWithPermissionForView() throws Exception
-    {
-        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
-        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
-            .grant(Item.READ, Item.BUILD, Jenkins.READ).everywhere().to("user")
-        );
-
-        FreeStyleProject p = j.createFreeStyleProject();
-        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
-            "test",
-            new MockGlobalTextAreaChoiceListProvider(
-                "foo,bar,baz",null
-            ),
-            true,
-            "description"
-        );
-        p.addProperty(new ParametersDefinitionProperty(def));
-
-        WebClient wc = j.createWebClient();
-        wc.login("user");
-
-        final String onlyChoices = "?tree=jobs[property[parameterDefinitions[name,choices]]]";
-        XmlPage page = getXmlPage(wc, "api/xml" + onlyChoices);
-        assertEquals(
-            Collections.emptyList(),
-            Lists.transform(
-                page.getByXPath("//hudson/job/property/parameterDefinition[name='test']/choice"),
-                new Function<Object, String>() {
-                    public String apply(Object e) {
-                        return (e instanceof DomElement) ? ((DomElement)e).getTextContent() : null;
-                    }
-                }
-            )
-        );
-    }
-
-    @Test
-    public void testRestApiForTextAreaWithPermissionForView() throws Exception
-    {
-        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
-        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
-            .grant(Item.READ, Item.BUILD, Jenkins.READ).everywhere().to("user")
-        );
-
-        FreeStyleProject p = j.createFreeStyleProject();
-        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
-            "test",
-            new TextareaChoiceListProvider(
-                "foo\nbar\nbaz",null, false,
-                    AddEditedChoiceListProvider.WhenToAdd.Triggered
+                null,
+                false
             ),
             true,
             "description"
