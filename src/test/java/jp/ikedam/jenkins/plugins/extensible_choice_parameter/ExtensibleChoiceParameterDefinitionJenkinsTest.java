@@ -1,18 +1,18 @@
 /*
  * The MIT License
- *
+ * 
  * Copyright (c) 2012-2013 IKEDA Yasuyuki
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -276,7 +276,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
      * @param def
      * @param value
      * @return
-     * @throws Exception
+     * @throws Exception 
      */
     /**
      * @param def
@@ -350,7 +350,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
     
     /**
      * test for createValue(StaplerRequest request, JSONObject jo)
-     * @throws Exception
+     * @throws Exception 
      */
     @Test
     public void testCreateValueFromView() throws Exception
@@ -371,7 +371,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     ),
                     value
             );
-            assertEquals("select with non-editable", value, envVars.get(name));
+            assertEquals("select with non-editable", value, envVars.get(name)); 
         }
         
         // select with non-editable
@@ -386,7 +386,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     ),
                     value
             );
-            assertEquals("select with non-editable", value, envVars.get(name));
+            assertEquals("select with non-editable", value, envVars.get(name)); 
         }
         
         // input with editable
@@ -401,7 +401,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     ),
                     value
             );
-            assertEquals("input with editable", value, envVars.get(name));
+            assertEquals("input with editable", value, envVars.get(name)); 
         }
         
         // input with non-editable. causes exception.
@@ -438,7 +438,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     ),
                     value
             );
-            assertEquals("not trimmed", value, envVars.get(name));
+            assertEquals("not trimmed", value, envVars.get(name)); 
         }
         
         // no choice is provided and editable. any values can be accepted.
@@ -453,7 +453,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     ),
                     value
             );
-            assertEquals("provider is null and editable", value, envVars.get(name));
+            assertEquals("provider is null and editable", value, envVars.get(name)); 
         }
         
         // no choice is provided and non-editable. always throw exception.
@@ -482,13 +482,13 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
     
     /**
      * test for createValue(StaplerRequest request, JSONObject jo)
-     *
+     * 
      * Test patterns with invalid choice providers.
      * It seems that too many requests in a test function results in
      * java.net.SocketTimeoutException: Read timed out (Why?),
      * so put these patterns from  testCreateValueFromView apart.
-     *
-     * @throws Exception
+     * 
+     * @throws Exception 
      */
     @Test
     public void testCreateValueFromViewWithInvalidProvider() throws Exception
@@ -508,7 +508,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     ),
                     value
             );
-            assertEquals("provider is null and editable", value, envVars.get(name));
+            assertEquals("provider is null and editable", value, envVars.get(name)); 
         }
         
         // provider is null and non-editable. always throw exception.
@@ -546,7 +546,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
                     ),
                     value
             );
-            assertEquals("provider returns null and editable", value, envVars.get(name));
+            assertEquals("provider returns null and editable", value, envVars.get(name)); 
         }
         
         // provider returns null non-editable. always throw exception.
@@ -1421,7 +1421,78 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
     }
 
     @Test
+    public void testRestApiForViewWithPermission() throws Exception
+    {
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+            .grant(Item.READ, Item.BUILD, Jenkins.READ).everywhere().to("user")
+        );
+
+        FreeStyleProject p = j.createFreeStyleProject();
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("foo", "bar", "baz"),
+                null
+            ),
+            true,
+            "description"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createWebClient();
+        wc.login("user");
+
+        final String onlyChoices = "?tree=jobs[property[parameterDefinitions[name,choices]]]";
+        XmlPage page = getXmlPage(wc, "api/xml" + onlyChoices);
+        assertEquals(
+            // even with BUILD permission, empty is returned for views.
+            Collections.emptyList(),
+            page.getByXPath("//freeStyleProject/property/parameterDefinition[name='test']/choice")
+        );
+    }
+
+    @Test
     public void testRestApiWithoutRequireBuildPermission() throws Exception
+    {
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        // No Item.BUILD permission!
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                .grant(Item.READ, Jenkins.READ).everywhere().to("user")
+        );
+
+        FreeStyleProject p = j.createFreeStyleProject();
+        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
+            "test",
+            new MockChoiceListProvider(
+                Arrays.asList("foo", "bar", "baz"),
+                null,
+                false   // requireBuildPermission
+            ),
+            true,
+            "description"
+        );
+        p.addProperty(new ParametersDefinitionProperty(def));
+
+        WebClient wc = j.createWebClient();
+        wc.login("user");
+
+        XmlPage page = getXmlPage(wc, p.getUrl() + "/api/xml");
+        assertEquals(
+            Arrays.asList("foo", "bar", "baz"),
+            Lists.transform(
+                page.getByXPath("//freeStyleProject/property/parameterDefinition[name='test']/choice"),
+                new Function<Object, String>() {
+                    public String apply(Object e) {
+                        return (e instanceof DomElement) ? ((DomElement)e).getTextContent() : null;
+                    }
+                }
+            )
+        );
+    }
+
+    @Test
+    public void testRestApiForViewWithoutRequireBuildPermission() throws Exception
     {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
@@ -1434,7 +1505,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             new MockChoiceListProvider(
                 Arrays.asList("foo", "bar", "baz"),
                 null,
-                false
+                false   // requireBuildPermission
             ),
             true,
             "description"
