@@ -54,7 +54,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -443,14 +442,15 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         {
             return null;
         }
-        Job<?, ?> job = req.findAncestorObject(Job.class);
-        if (job == null)
+        final ChoiceListProvider provider = getEnabledChoiceListProvider();
+        boolean requiresBuildPermission = (provider !=  null) && provider.requiresBuildPermission();
+        if (requiresBuildPermission)
         {
-            return null;
-        }
-        if (!job.hasPermission(Item.BUILD))
-        {
-            return Collections.emptyList();
+            Job<?, ?> job = req.findAncestorObject(Job.class);
+            if (job == null || !job.hasPermission(Item.BUILD))
+            {
+                return Collections.emptyList();
+            }
         }
         return getChoiceList();
     }

@@ -104,6 +104,18 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
     {
         // Nothing to do.
     }
+
+
+    /**
+     * Checks if access {@link #getChoiceList()} from REST API needs the {@link hudson.model.Item#BUILD} permission.
+     * If true this will currently return the choices only for Job based API calls.
+     *
+     * @return true if allow access to choices only if BUILD permission was granted. false otherwise.
+     * @since 1.8.0
+     */
+    public boolean requiresBuildPermission() {
+        return true;
+    }
     
     /**
      * Returns all the ChoiceListProvider subclass whose DescriptorImpl is annotated with Extension.
