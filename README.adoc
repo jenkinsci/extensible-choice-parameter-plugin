@@ -8,6 +8,15 @@ Older versions of this plugin may not be safe to use. Please review the followin
 
 This plugin adds "Extensible Choice" as a build parameter.You can select how to retrieve choices, including the way to share choices among all jobs.
 
+[NOTE]
+====
+For pipeline users:
+
+https://plugins.jenkins.io/editable-choice/[Editable Choice plugin] is available and designed pipeline friendly. Please try that for pipelines.
+
+Extensible Choice Parameter plugin is designed for GUI-based jobs like freestyle projects, matrix projects and so on. It's not planned to support pipeline syntaxes.
+====
+
 [[ExtensibleChoiceParameterplugin-Whatsthis]]
 == What's this?
 
