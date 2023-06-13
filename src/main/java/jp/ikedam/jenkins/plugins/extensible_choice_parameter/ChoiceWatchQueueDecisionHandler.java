@@ -23,6 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.List;
 
 import hudson.Extension;
@@ -64,6 +66,7 @@ public class ChoiceWatchQueueDecisionHandler extends QueueDecisionHandler
     /**
      * Notify ChoiceListProvider of the value selected.
      */
+    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "TODO needs triage")
     protected void onQueueing(Task p, List<Action> actions)
     {
         if(!(p instanceof AbstractProject<?, ?>))

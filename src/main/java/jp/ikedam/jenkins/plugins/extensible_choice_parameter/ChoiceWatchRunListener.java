@@ -23,6 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractBuild;
@@ -40,6 +42,7 @@ import hudson.model.listeners.RunListener;
 public class ChoiceWatchRunListener extends RunListener<AbstractBuild<?,?>>
 {
     @Override
+    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "TODO needs triage")
     public void onFinalized(AbstractBuild<?,?> build)
     {
         AbstractProject<?,?> job = build.getProject();

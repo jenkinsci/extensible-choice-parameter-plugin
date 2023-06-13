@@ -52,13 +52,13 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlOption;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlSelect;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import org.htmlunit.ElementNotFoundException;
+import org.htmlunit.html.DomElement;
+import org.htmlunit.html.HtmlForm;
+import org.htmlunit.html.HtmlOption;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlSelect;
+import org.htmlunit.html.HtmlTextInput;
 
 /**
  * Tests for TextareaChoiceListProvider, corresponding to Jenkins.
@@ -253,7 +253,7 @@ public class TextareaChoiceListProviderJenkinsTest
             // selectbox was not found.
             // selectbox is replaced with input field.
             HtmlTextInput input = (HtmlTextInput)form.getInputByName("value");
-            input.setValueAttribute(value);
+            input.setValue(value);
         }
         j.submit(form);
         

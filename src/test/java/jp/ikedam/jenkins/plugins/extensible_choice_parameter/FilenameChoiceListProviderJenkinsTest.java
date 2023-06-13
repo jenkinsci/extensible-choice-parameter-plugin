@@ -40,8 +40,8 @@ import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlElement;
+import org.htmlunit.html.HtmlPage;
 
 /**
  * Tests for FilenameChoiceListProvider, concerned with Jenkins.
