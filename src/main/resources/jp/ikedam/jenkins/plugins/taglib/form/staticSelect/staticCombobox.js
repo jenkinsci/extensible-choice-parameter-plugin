@@ -28,7 +28,7 @@ Behaviour.register({"SELECT.staticCombobox": function(e) {
      *   Original behavior: Retrieves the contents whenever the value is updated.
      *   Changed behavior : Retrieves the contents only once in initializing.
      */
-    $A(e.getElementsByTagName("option")).each(function(o){
+    Array.from(e.getElementsByTagName("option")).forEach(function(o){
         items.push(o.value);
     });
     
@@ -44,7 +44,7 @@ Behaviour.register({"SELECT.staticCombobox": function(e) {
     for(var i = 0; i < orig.attributes.length; ++i){
         e.setAttribute(orig.attributes[i].name, orig.attributes[i].value);
     }
-    e.setAttribute("value", $(orig).value);
+    e.setAttribute("value", orig.value);
     
     orig.parentNode.insertBefore(e, orig);
     orig.parentNode.removeChild(orig);
@@ -58,7 +58,7 @@ Behaviour.register({"SELECT.staticCombobox": function(e) {
     var filter = function(value) {
         return items;
     };
-    if ($(e).hasClassName("editableType-Filter")) {
+    if (e.classList.contains("editableType-Filter")) {
         // Show candidates that contain the current incomplete input.
         filter = function(value) {
             return items.filter(function (item) {
