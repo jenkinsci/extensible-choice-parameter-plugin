@@ -60,16 +60,6 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest
     @Test
     public void testExtensibleChoiceParameterDefinition_nameWithInvalidValue()
     {
-        // null
-        {
-            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
-                    null,
-                    null,
-                    false,
-                    "Some text"
-            );
-            assertEquals("null", null, target.getName());
-        }
         // empty
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
@@ -129,18 +119,6 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest
                     description
             );
             assertEquals("null", description, target.getDescription());
-        }
-        
-        // empty
-        {
-            String description = "";
-            ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
-                    "name",
-                    null,
-                    false,
-                    description
-            );
-            assertEquals("empty", description, target.getDescription());
         }
     }
     

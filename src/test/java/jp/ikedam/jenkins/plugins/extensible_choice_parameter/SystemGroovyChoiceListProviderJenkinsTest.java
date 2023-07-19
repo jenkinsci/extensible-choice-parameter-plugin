@@ -25,8 +25,9 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
 import static org.junit.Assert.*;
 
-import com.gargoylesoftware.htmlunit.Page;
-import hudson.cli.CLI;
+import org.htmlunit.Page;
+import hudson.cli.BuildCommand;
+import hudson.cli.CLICommandInvoker;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.ParametersDefinitionProperty;
@@ -52,10 +53,10 @@ import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.recipes.LocalData;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlSelect;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.html.DomElement;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlSelect;
 
 import jenkins.model.Jenkins;
 
@@ -492,8 +493,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         assertEquals(p.getFullName(), sel.getOption(0).getValueAttribute());
         
         // from CLI, the project does not passed properly.
-        CLI cli = new CLI(j.getURL());
-        assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
+        assertThat(new CLICommandInvoker(j, new BuildCommand()).invokeWithArgs("-s", p.getFullName()), CLICommandInvoker.Matcher.succeeded());
         j.assertBuildStatusSuccess(p.getLastBuild());
         assertEquals("none", ceb.getEnvVars().get("test"));
         
@@ -502,7 +502,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         j.submit(wc.getPage(p, "configure").getFormByName("config"));
         p.getBuildersList().add(ceb);
         
-        assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
+        assertThat(new CLICommandInvoker(j, new BuildCommand()).invokeWithArgs("-s", p.getFullName()), CLICommandInvoker.Matcher.succeeded());
         j.assertBuildStatusSuccess(p.getLastBuild());
         assertEquals(p.getFullName(), ceb.getEnvVars().get("test"));
         
@@ -511,7 +511,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest
         j.jenkins.reload();
         p = j.jenkins.getItemByFullName(p.getFullName(), FreeStyleProject.class);
         ceb = p.getBuildersList().get(CaptureEnvironmentBuilder.class);
-        assertEquals(0, cli.execute("build", p.getFullName(), "-s"));
+        assertThat(new CLICommandInvoker(j, new BuildCommand()).invokeWithArgs("-s", p.getFullName()), CLICommandInvoker.Matcher.succeeded());
         j.assertBuildStatusSuccess(p.getLastBuild());
         assertEquals(p.getFullName(), ceb.getEnvVars().get("test"));
     }

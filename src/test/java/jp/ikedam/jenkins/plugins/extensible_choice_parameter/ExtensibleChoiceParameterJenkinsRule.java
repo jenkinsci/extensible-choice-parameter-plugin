@@ -23,10 +23,9 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import org.apache.commons.httpclient.HttpStatus;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import com.gargoylesoftware.htmlunit.WebResponse;
+import org.htmlunit.WebResponse;
 
 /**
  * Utility class for Tests.
@@ -49,7 +48,7 @@ public class ExtensibleChoiceParameterJenkinsRule extends JenkinsRule
             public void throwFailingHttpStatusCodeExceptionIfNecessary(
                     WebResponse webResponse)
             {
-                if(webResponse.getStatusCode() == HttpStatus.SC_METHOD_NOT_ALLOWED)
+                if(webResponse.getStatusCode() == 405)
                 {
                     // allow 405.
                     return;
@@ -60,7 +59,7 @@ public class ExtensibleChoiceParameterJenkinsRule extends JenkinsRule
             @Override
             public void printContentIfNecessary(WebResponse webResponse)
             {
-                if(webResponse.getStatusCode() == HttpStatus.SC_METHOD_NOT_ALLOWED)
+                if(webResponse.getStatusCode() == 405)
                 {
                     // allow 405.
                     return;

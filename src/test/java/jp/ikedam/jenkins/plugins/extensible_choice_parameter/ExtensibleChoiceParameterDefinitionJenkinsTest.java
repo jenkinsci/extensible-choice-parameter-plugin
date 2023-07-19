@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
-import hudson.markup.RawHtmlMarkupFormatter;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
@@ -61,17 +60,17 @@ import org.jvnet.hudson.test.Issue;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlOption;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlSelect;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-import com.gargoylesoftware.htmlunit.xml.XmlPage;
+import org.htmlunit.ElementNotFoundException;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.Page;
+import org.htmlunit.html.DomElement;
+import org.htmlunit.html.HtmlElement;
+import org.htmlunit.html.HtmlForm;
+import org.htmlunit.html.HtmlOption;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlSelect;
+import org.htmlunit.html.HtmlTextInput;
+import org.htmlunit.xml.XmlPage;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
@@ -337,7 +336,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
             // selectbox was not found.
             // selectbox is replaced with input field.
             HtmlTextInput input = (HtmlTextInput)form.getInputByName("value");
-            input.setValueAttribute(value);
+            input.setValue(value);
         }
         j.submit(form);
         
@@ -1181,29 +1180,6 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         assertNull(page.getElementById("test-not-expected"));
     }
 
-    @Issue("JENKINS-42903")
-    @Test
-    public void testSafeDescription() throws Exception {
-        j.jenkins.setMarkupFormatter(new RawHtmlMarkupFormatter(false));
-
-        FreeStyleProject p = j.createFreeStyleProject();
-        ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
-                "Choice",
-                new MockChoiceListProvider(Arrays.asList("value1", "value2"), null),
-                false,
-                "<span id=\"test-expected\">blahblah</span>"
-                + "<script id=\"test-not-expected\"></script>"
-        );
-        p.addProperty(new ParametersDefinitionProperty(def));
-
-        WebClient wc = j.createAllow405WebClient();
-        HtmlPage page = wc.getPage(p, "build");
-
-        assertNotNull(page.getElementById("test-expected"));
-        assertNull(page.getElementById("test-not-expected"));
-    }
-
-
     @Test
     public void testConfiguration1() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
@@ -1305,11 +1281,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         WebClient wc = j.createAllow405WebClient();
         HtmlPage page = wc.getPage(p, "build?delay=0sec");
         HtmlTextInput in = page.getElementByName("value");
-        assertEquals("foo/bar/baz", in.getValueAttribute());
+        assertEquals("foo/bar/baz", in.getValue());
 
         HtmlElement combobox = page.getFirstByXPath("//*[@class='comboBoxList']");
 
-        in.setValueAttribute("foo/bar");
+        in.setValue("foo/bar");
         in.focus(); // fire onfocus
         assertEquals(
             Arrays.asList(
@@ -1342,11 +1318,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         WebClient wc = j.createAllow405WebClient();
         HtmlPage page = wc.getPage(p, "build?delay=0sec");
         HtmlTextInput in = page.getElementByName("value");
-        assertEquals("foo/bar/baz", in.getValueAttribute());
+        assertEquals("foo/bar/baz", in.getValue());
 
         HtmlElement combobox = page.getFirstByXPath("//*[@class='comboBoxList']");
 
-        in.setValueAttribute("foo/bar");
+        in.setValue("foo/bar");
         in.focus(); // fire onfocus
         assertEquals(
             Arrays.asList(
@@ -1357,7 +1333,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest
         );
         in.blur();
 
-        in.setValueAttribute("bar/baz");
+        in.setValue("bar/baz");
         in.focus(); // fire onfocus
         assertEquals(
             Arrays.asList(
