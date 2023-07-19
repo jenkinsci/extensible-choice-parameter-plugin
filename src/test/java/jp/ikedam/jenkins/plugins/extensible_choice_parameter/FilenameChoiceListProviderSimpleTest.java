@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,9 +45,7 @@ public class FilenameChoiceListProviderSimpleTest
 {
     private File createTempDir() throws IOException
     {
-        File tempFile = File.createTempFile("test", null);
-        tempFile.delete();
-        tempFile.mkdir();
+        File tempFile = Files.createTempDirectory("test").toFile();
         
         return tempFile;
     }
