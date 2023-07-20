@@ -62,8 +62,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>script-security</artifactId>
-      <!-- TODO SECURITY-2450 breaks jp.ikedam.jenkins.plugins.extensible_choice_parameter.SystemGroovyChoiceListProviderJenkinsTest#testConfiguration{1,2} -->
-      <version>1158.v7c1b_73a_69a_08</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>

@@ -528,6 +528,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
         p.addProperty(new ParametersDefinitionProperty(def));
 
         j.configRoundtrip(p);
+        p.doReload(); // Workaround to drop transient properties in Script Security 1172.v35f6a_0b_8207e+
 
         j.assertEqualDataBoundBeans(
                 def, p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("test"));
@@ -553,6 +554,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
         p.addProperty(new ParametersDefinitionProperty(def));
 
         j.configRoundtrip(p);
+        p.doReload(); // Workaround to drop transient properties in Script Security 1172.v35f6a_0b_8207e+
 
         j.assertEqualDataBoundBeans(
                 def, p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("test"));
