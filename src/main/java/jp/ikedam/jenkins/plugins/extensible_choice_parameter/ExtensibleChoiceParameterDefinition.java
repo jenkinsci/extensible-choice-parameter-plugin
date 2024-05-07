@@ -23,6 +23,7 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.Util;
@@ -45,7 +46,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -314,7 +314,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     /**
      * @return How to display choices for input values
      */
-    @Nonnull
+    @NonNull
     public EditableType getEditableType() {
         return (editableType != null) ? editableType : EditableType.NoFilter;
     }
