@@ -56,7 +56,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.export.Exported;
 
 /**
@@ -130,7 +130,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         }
 
         @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws hudson.model.Descriptor.FormException {
+        public boolean configure(StaplerRequest2 req, JSONObject json) throws hudson.model.Descriptor.FormException {
             Map<String, Boolean> configuredChoiceListEnableMap = new HashMap<String, Boolean>();
             for (Descriptor<ChoiceListProvider> d : getChoiceListProviderList()) {
                 String name = d.getJsonSafeClassName();
@@ -170,10 +170,10 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
          * @param formData
          * @return
          * @throws hudson.model.Descriptor.FormException
-         * @see hudson.model.Descriptor#newInstance(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
+         * @see hudson.model.Descriptor#newInstance(org.kohsuke.stapler.StaplerRequest2, net.sf.json.JSONObject)
          */
         @Override
-        public ExtensibleChoiceParameterDefinition newInstance(StaplerRequest req, JSONObject formData)
+        public ExtensibleChoiceParameterDefinition newInstance(StaplerRequest2 req, JSONObject formData)
                 throws hudson.model.Descriptor.FormException {
             ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                     formData.getString("name"),
@@ -197,7 +197,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
          * @throws hudson.model.Descriptor.FormException
          */
         private <T extends Describable<?>> T bindJSONWithDescriptor(
-                StaplerRequest req, JSONObject formData, String fieldName, Class<T> clazz)
+                StaplerRequest2 req, JSONObject formData, String fieldName, Class<T> clazz)
                 throws hudson.model.Descriptor.FormException {
             formData = formData.getJSONObject(fieldName);
             if (formData == null || formData.isNullObject()) {
@@ -385,7 +385,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
     @Restricted(DoNotUse.class)
     @Exported(name = "choices")
     public List<String> getChoicesForRestApi() {
-        StaplerRequest req = Stapler.getCurrentRequest();
+        StaplerRequest2 req = Stapler.getCurrentRequest2();
         if (req == null) {
             return null;
         }
@@ -446,10 +446,10 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
      * @param request
      * @param jo the user input
      * @return the value of this parameter.
-     * @see hudson.model.ParameterDefinition#createValue(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
+     * @see hudson.model.ParameterDefinition#createValue(org.kohsuke.stapler.StaplerRequest2, net.sf.json.JSONObject)
      */
     @Override
-    public ParameterValue createValue(StaplerRequest request, JSONObject jo) {
+    public ParameterValue createValue(StaplerRequest2 request, JSONObject jo) {
         StringParameterValue value = request.bindJSON(StringParameterValue.class, jo);
         value.setDescription(getDescription());
 
