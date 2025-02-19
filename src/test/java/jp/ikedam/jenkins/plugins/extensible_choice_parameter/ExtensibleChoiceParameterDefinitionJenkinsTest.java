@@ -68,8 +68,9 @@ import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.recipes.WithTimeout;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 /**
  * Tests for ExtensibleChoiceParameterDefinition, corresponding to Jenkins.
@@ -250,7 +251,8 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             }
 
             @Override
-            public boolean configure(StaplerRequest req, JSONObject json) throws hudson.model.Descriptor.FormException {
+            public boolean configure(StaplerRequest2 req, JSONObject json)
+                    throws hudson.model.Descriptor.FormException {
                 setEnabledByDefault(json.getBoolean("enabledByDefault"));
                 return super.configure(req, json);
             }
@@ -324,10 +326,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     /**
-     * test for createValue(StaplerRequest request, JSONObject jo)
+     * test for createValue(StaplerRequest2 request, JSONObject jo)
      * @throws Exception
      */
     @Test
+    @WithTimeout(300)
     public void testCreateValueFromView() throws Exception {
         String name = "PARAM1";
         String description = "Some Text";
@@ -405,7 +408,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     /**
-     * test for createValue(StaplerRequest request, JSONObject jo)
+     * test for createValue(StaplerRequest2 request, JSONObject jo)
      *
      * Test patterns with invalid choice providers.
      * It seems that too many requests in a test function results in
