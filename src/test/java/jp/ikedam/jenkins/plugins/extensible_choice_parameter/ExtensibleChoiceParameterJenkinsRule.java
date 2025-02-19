@@ -37,7 +37,7 @@ public class ExtensibleChoiceParameterJenkinsRule extends JenkinsRule {
      * @return WebClient
      */
     public WebClient createAllow405WebClient() {
-        return new WebClient() {
+        WebClient webClient = new WebClient() {
             private static final long serialVersionUID = -7231209645303821638L;
 
             @Override
@@ -58,5 +58,7 @@ public class ExtensibleChoiceParameterJenkinsRule extends JenkinsRule {
                 super.printContentIfNecessary(webResponse);
             }
         };
+        webClient.getOptions().setFetchPolyfillEnabled(true);
+        return webClient;
     }
 }

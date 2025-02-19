@@ -331,10 +331,15 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider {
     }
 
     public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice, boolean usePredefinedVariables) {
-        this(
-                new SecureGroovyScript(scriptText, true, Collections.<ClasspathEntry>emptyList()),
-                defaultChoice,
-                usePredefinedVariables);
+        this(newSecureGroovyScript(scriptText), defaultChoice, usePredefinedVariables);
+    }
+
+    private static SecureGroovyScript newSecureGroovyScript(String scriptText) {
+        try {
+            return new SecureGroovyScript(scriptText, true, Collections.emptyList());
+        } catch (Descriptor.FormException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public SystemGroovyChoiceListProvider(String scriptText, String defaultChoice) {
