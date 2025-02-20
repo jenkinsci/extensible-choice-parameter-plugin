@@ -52,7 +52,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 /**
  * A choice provider whose choices are determined by a Groovy script.
@@ -83,10 +83,10 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider {
          * @param formData
          * @return
          * @throws hudson.model.Descriptor.FormException
-         * @see hudson.model.Descriptor#newInstance(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
+         * @see hudson.model.Descriptor#newInstance(org.kohsuke.stapler.StaplerRequest2, net.sf.json.JSONObject)
          */
         @Override
-        public SystemGroovyChoiceListProvider newInstance(StaplerRequest req, JSONObject formData)
+        public SystemGroovyChoiceListProvider newInstance(StaplerRequest2 req, JSONObject formData)
                 throws hudson.model.Descriptor.FormException {
             SystemGroovyChoiceListProvider provider = (SystemGroovyChoiceListProvider) super.newInstance(req, formData);
             if (provider.isUsePredefinedVariables()) {
@@ -223,8 +223,8 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider {
         Job<?, ?> project = getProject();
         if (isUsePredefinedVariables() && project == null) {
             // try to retrieve from current request.
-            if (Stapler.getCurrentRequest() != null) {
-                project = Stapler.getCurrentRequest().findAncestorObject(Job.class);
+            if (Stapler.getCurrentRequest2() != null) {
+                project = Stapler.getCurrentRequest2().findAncestorObject(Job.class);
             }
         }
 
