@@ -411,6 +411,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
     @Test
     public void testVariables() throws Exception {
         ScriptApproval.get().approveSignature("method hudson.model.Item getFullName");
+        ScriptApproval.get().approveSignature("method jenkins.model.FullyNamed getFullName");
         FreeStyleProject p = j.createFreeStyleProject();
         p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
                 "test", new SystemGroovyChoiceListProvider("[project.fullName]", null, true), false, "test")));
@@ -429,6 +430,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
     @Test
     public void testProjectVariable() throws Exception {
         ScriptApproval.get().approveSignature("method hudson.model.Item getFullName");
+        ScriptApproval.get().approveSignature("method jenkins.model.FullyNamed getFullName");
         FreeStyleProject p = j.createFreeStyleProject();
         CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
         p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
