@@ -23,18 +23,19 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for GlobalTextareaChoiceListEntry, not corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListEntrySimpleTest {
+class GlobalTextareaChoiceListEntrySimpleTest {
+
     @Test
-    public void testGlobalTextareaChoiceListEntry_name() {
+    void testGlobalTextareaChoiceListEntry_name() {
         // Easy case.
         {
             String name = "abc";
@@ -74,7 +75,7 @@ public class GlobalTextareaChoiceListEntrySimpleTest {
      * for the parameter check must be performed with the descriptor.
      */
     @Test
-    public void testGlobalTextareaChoiceListEntry_nameWithImproperValue() {
+    void testGlobalTextareaChoiceListEntry_nameWithImproperValue() {
         // null.
         {
             String name = null;
@@ -133,14 +134,14 @@ public class GlobalTextareaChoiceListEntrySimpleTest {
     }
 
     @Test
-    public void testGlobalTextareaChoiceListEntry_choiceListText() {
+    void testGlobalTextareaChoiceListEntry_choiceListText() {
         // complete tests are done in TextareaStringListUtilityTest.
         String choiceListText = "a\nb\nc\n";
         GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry("test", choiceListText, false);
         assertEquals(
-                "Basic test of choiceListText in GlobalTextareaChoiceListEntry()",
                 Arrays.asList("a", "b", "c"),
-                entry.getChoiceList());
-        assertEquals("Basic test of getChoiceListText()", choiceListText, entry.getChoiceListText());
+                entry.getChoiceList(),
+                "Basic test of choiceListText in GlobalTextareaChoiceListEntry()");
+        assertEquals(choiceListText, entry.getChoiceListText(), "Basic test of getChoiceListText()");
     }
 }

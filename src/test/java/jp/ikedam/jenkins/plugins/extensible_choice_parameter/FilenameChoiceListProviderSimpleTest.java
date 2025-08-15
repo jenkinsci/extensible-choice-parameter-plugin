@@ -23,10 +23,13 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,20 +37,19 @@ import java.util.List;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.FilenameChoiceListProvider.EmptyChoiceType;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.FilenameChoiceListProvider.ScanType;
 import org.apache.commons.io.FileUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for FilenameChoiceListProvider, not concerned with Jenkins.
  */
-public class FilenameChoiceListProviderSimpleTest {
-    private File createTempDir() throws IOException {
-        File tempFile = Files.createTempDirectory("test").toFile();
+class FilenameChoiceListProviderSimpleTest {
 
-        return tempFile;
+    private File createTempDir() throws IOException {
+        return Files.createTempDirectory("test").toFile();
     }
 
     @Test
-    public void testFilenameChoiceListProvider() {
+    void testFilenameChoiceListProvider() {
         // simple value
         {
             String baseDirPath = "baseDirPath";
@@ -57,10 +59,10 @@ public class FilenameChoiceListProviderSimpleTest {
             boolean reverseOrder = false;
             FilenameChoiceListProvider target =
                     new FilenameChoiceListProvider(baseDirPath, includePattern, excludePattern, scanType, reverseOrder);
-            assertEquals("simple value for baseDirPath", baseDirPath, target.getBaseDirPath());
-            assertEquals("simple value for includePattern", includePattern, target.getIncludePattern());
-            assertEquals("simple value for excludePattern", excludePattern, target.getExcludePattern());
-            assertEquals("scanType must be reserved", scanType, target.getScanType());
+            assertEquals(baseDirPath, target.getBaseDirPath(), "simple value for baseDirPath");
+            assertEquals(includePattern, target.getIncludePattern(), "simple value for includePattern");
+            assertEquals(excludePattern, target.getExcludePattern(), "simple value for excludePattern");
+            assertEquals(scanType, target.getScanType(), "scanType must be reserved");
             assertEquals(reverseOrder, target.isReverseOrder());
         }
 
@@ -73,10 +75,10 @@ public class FilenameChoiceListProviderSimpleTest {
             boolean reverseOrder = false;
             FilenameChoiceListProvider target =
                     new FilenameChoiceListProvider(baseDirPath, includePattern, excludePattern, scanType, reverseOrder);
-            assertEquals("null for baseDirPath", baseDirPath, target.getBaseDirPath());
-            assertEquals("null for includePattern", includePattern, target.getIncludePattern());
-            assertEquals("null for excludePattern", excludePattern, target.getExcludePattern());
-            assertEquals("scanType must be reserved", scanType, target.getScanType());
+            assertEquals(baseDirPath, target.getBaseDirPath(), "null for baseDirPath");
+            assertEquals(includePattern, target.getIncludePattern(), "null for includePattern");
+            assertEquals(excludePattern, target.getExcludePattern(), "null for excludePattern");
+            assertEquals(scanType, target.getScanType(), "scanType must be reserved");
             assertEquals(reverseOrder, target.isReverseOrder());
         }
 
@@ -89,10 +91,10 @@ public class FilenameChoiceListProviderSimpleTest {
             boolean reverseOrder = true;
             FilenameChoiceListProvider target =
                     new FilenameChoiceListProvider(baseDirPath, includePattern, excludePattern, scanType, reverseOrder);
-            assertEquals("empty for baseDirPath", baseDirPath, target.getBaseDirPath());
-            assertEquals("empty for includePattern", includePattern, target.getIncludePattern());
-            assertEquals("empty for excludePattern", excludePattern, target.getExcludePattern());
-            assertEquals("scanType must be reserved", scanType, target.getScanType());
+            assertEquals(baseDirPath, target.getBaseDirPath(), "empty for baseDirPath");
+            assertEquals(includePattern, target.getIncludePattern(), "empty for includePattern");
+            assertEquals(excludePattern, target.getExcludePattern(), "empty for excludePattern");
+            assertEquals(scanType, target.getScanType(), "scanType must be reserved");
             assertEquals(reverseOrder, target.isReverseOrder());
         }
 
@@ -109,10 +111,10 @@ public class FilenameChoiceListProviderSimpleTest {
                     excludePattern + " ",
                     scanType,
                     reverseOrder);
-            assertEquals("blank for baseDirPath", baseDirPath, target.getBaseDirPath());
-            assertEquals("blank for includePattern", includePattern, target.getIncludePattern());
-            assertEquals("blank for excludePattern", excludePattern, target.getExcludePattern());
-            assertEquals("scanType must be reserved", scanType, target.getScanType());
+            assertEquals(baseDirPath, target.getBaseDirPath(), "blank for baseDirPath");
+            assertEquals(includePattern, target.getIncludePattern(), "blank for includePattern");
+            assertEquals(excludePattern, target.getExcludePattern(), "blank for excludePattern");
+            assertEquals(scanType, target.getScanType(), "scanType must be reserved");
             assertEquals(reverseOrder, target.isReverseOrder());
         }
 
@@ -129,13 +131,14 @@ public class FilenameChoiceListProviderSimpleTest {
                     excludePattern + " ",
                     scanType,
                     reverseOrder);
-            assertEquals("baseDirPath must be trimmed", baseDirPath, target.getBaseDirPath());
-            assertEquals("includePattern must be trimmed", includePattern, target.getIncludePattern());
-            assertEquals("excludePattern must be trimmed", excludePattern, target.getExcludePattern());
+            assertEquals(baseDirPath, target.getBaseDirPath(), "baseDirPath must be trimmed");
+            assertEquals(includePattern, target.getIncludePattern(), "includePattern must be trimmed");
+            assertEquals(excludePattern, target.getExcludePattern(), "excludePattern must be trimmed");
         }
     }
 
     private static class FilenameChoiceListProviderForTest extends FilenameChoiceListProvider {
+        @Serial
         private static final long serialVersionUID = 5830671030985340194L;
 
         public FilenameChoiceListProviderForTest(
@@ -165,18 +168,18 @@ public class FilenameChoiceListProviderSimpleTest {
     }
 
     private static void assertFileListEquals(String message, List<String> expected, List<String> fileList) {
-        assertEquals(message, expected.size(), fileList.size());
+        assertEquals(expected.size(), fileList.size(), message);
         for (String file : fileList) {
             if (file.contains("\\")) {
                 // fix windows path to unix path
                 file = file.replace('\\', '/');
             }
-            assertTrue(String.format("%s: must contains %s", message, file), expected.contains(file));
+            assertTrue(expected.contains(file), String.format("%s: must contains %s", message, file));
         }
     }
 
     @Test
-    public void testGetFileList() throws IOException {
+    void testGetFileList() throws IOException {
         File tempDir = createTempDir();
         File emptyDir = createTempDir();
         try {
@@ -190,13 +193,13 @@ public class FilenameChoiceListProviderSimpleTest {
             //       dir3/
             //          test4.dat
             {
-                FileUtils.writeStringToFile(new File(tempDir, "test1.txt"), "test");
-                FileUtils.writeStringToFile(new File(tempDir, "test2.dat"), "test");
+                FileUtils.writeStringToFile(new File(tempDir, "test1.txt"), "test", StandardCharsets.UTF_8);
+                FileUtils.writeStringToFile(new File(tempDir, "test2.dat"), "test", StandardCharsets.UTF_8);
                 new File(tempDir, "dir1").mkdir();
-                FileUtils.writeStringToFile(new File(tempDir, "dir1/test3.txt"), "test");
+                FileUtils.writeStringToFile(new File(tempDir, "dir1/test3.txt"), "test", StandardCharsets.UTF_8);
                 new File(tempDir, "dir2").mkdir();
                 new File(tempDir, "dir2/dir3").mkdir();
-                FileUtils.writeStringToFile(new File(tempDir, "dir2/dir3/test4.dat"), "test");
+                FileUtils.writeStringToFile(new File(tempDir, "dir2/dir3/test4.dat"), "test", StandardCharsets.UTF_8);
             }
 
             // List all files and directories.
@@ -285,7 +288,7 @@ public class FilenameChoiceListProviderSimpleTest {
 
             // all file excluded.
             {
-                List<String> expected = new ArrayList<String>(0);
+                List<String> expected = new ArrayList<>(0);
                 List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
                         tempDir, "**/*", "**/*", ScanType.FileAndDirectory, false);
                 assertFileListEquals("excluded all files", expected, fileList);
@@ -293,7 +296,7 @@ public class FilenameChoiceListProviderSimpleTest {
 
             // no file included.
             {
-                List<String> expected = new ArrayList<String>(0);
+                List<String> expected = new ArrayList<>(0);
                 List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
                         tempDir, "", "", ScanType.FileAndDirectory, false);
                 assertFileListEquals("no file included", expected, fileList);
@@ -301,7 +304,7 @@ public class FilenameChoiceListProviderSimpleTest {
 
             // no file.
             {
-                List<String> expected = new ArrayList<String>(0);
+                List<String> expected = new ArrayList<>(0);
                 List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
                         emptyDir, "**/*", "", ScanType.FileAndDirectory, false);
                 assertFileListEquals("no file", expected, fileList);
@@ -309,7 +312,7 @@ public class FilenameChoiceListProviderSimpleTest {
 
             // non-exist directory.
             {
-                List<String> expected = new ArrayList<String>(0);
+                List<String> expected = new ArrayList<>(0);
                 List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
                         new File(emptyDir, "test"), "**/*", "", ScanType.FileAndDirectory, false);
                 assertFileListEquals("non-exist directory", expected, fileList);
@@ -317,7 +320,7 @@ public class FilenameChoiceListProviderSimpleTest {
 
             // not directory.
             {
-                List<String> expected = new ArrayList<String>(0);
+                List<String> expected = new ArrayList<>(0);
                 List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
                         new File(tempDir, "test1.txt"), "**/*", "", ScanType.FileAndDirectory, false);
                 assertFileListEquals("not directory", expected, fileList);
@@ -325,7 +328,7 @@ public class FilenameChoiceListProviderSimpleTest {
 
             // null for directory.
             {
-                List<String> expected = new ArrayList<String>(0);
+                List<String> expected = new ArrayList<>(0);
                 List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
                         null, "**/*", "", ScanType.FileAndDirectory, false);
                 assertFileListEquals("null for directory", expected, fileList);
@@ -333,7 +336,7 @@ public class FilenameChoiceListProviderSimpleTest {
 
             // null for include pattern.
             {
-                List<String> expected = new ArrayList<String>(0);
+                List<String> expected = new ArrayList<>(0);
                 List<String> fileList = FilenameChoiceListProviderForTest.getFileList(
                         tempDir, null, "", ScanType.FileAndDirectory, false);
                 assertFileListEquals("null for include pattern", expected, fileList);

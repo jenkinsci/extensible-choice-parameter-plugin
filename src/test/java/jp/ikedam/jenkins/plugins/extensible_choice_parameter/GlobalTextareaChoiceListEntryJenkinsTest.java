@@ -23,99 +23,107 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for GlobalTextareaChoiceListEntry, corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListEntryJenkinsTest {
-    @Rule
-    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+@WithJenkins
+class GlobalTextareaChoiceListEntryJenkinsTest {
+
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     private GlobalTextareaChoiceListEntry.DescriptorImpl getDescriptor() {
         return (GlobalTextareaChoiceListEntry.DescriptorImpl)
-                Jenkins.getInstance().getDescriptor(GlobalTextareaChoiceListEntry.class);
+                Jenkins.get().getDescriptor(GlobalTextareaChoiceListEntry.class);
     }
 
     /**
      * Good inputs for name.
      */
     @Test
-    public void testDescriptorDoCheckNameOk() {
+    void testDescriptorDoCheckNameOk() {
         GlobalTextareaChoiceListEntry.DescriptorImpl descriptor = getDescriptor();
 
         // OK: lower alphabets
-        assertEquals(descriptor.doCheckName("abc").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("abc").kind);
 
         // OK: upper alphabets
-        assertEquals(descriptor.doCheckName("ABC").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("ABC").kind);
 
         // OK: alphabets and numbers
-        assertEquals(descriptor.doCheckName("abc123").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("abc123").kind);
 
         // OK: alphabets, numbers, and underscores.
-        assertEquals(descriptor.doCheckName("abc_1_2_3").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("abc_1_2_3").kind);
 
         // OK: starts with underscore.
-        assertEquals(descriptor.doCheckName("_abc_1_2_3").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("_abc_1_2_3").kind);
 
         // OK: blank in the beginning
-        assertEquals(descriptor.doCheckName("  _abc_1_2_3").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("  _abc_1_2_3").kind);
 
         // OK: blank in the end
-        assertEquals(descriptor.doCheckName("  _abc_1_2_3   ").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("  _abc_1_2_3   ").kind);
     }
 
     /**
      * Bad inputs for name.
      */
     @Test
-    public void testDescriptorDoCheckNameError() {
+    void testDescriptorDoCheckNameError() {
         GlobalTextareaChoiceListEntry.DescriptorImpl descriptor = getDescriptor();
 
         // ERROR: null
-        assertEquals(descriptor.doCheckName(null).kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName(null).kind);
 
         // ERROR: empty
-        assertEquals(descriptor.doCheckName("").kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName("").kind);
 
         // ERROR: blank
-        assertEquals(descriptor.doCheckName(" ").kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName(" ").kind);
 
         // ERROR: value containing blank
-        assertEquals(descriptor.doCheckName("a b").kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName("a b").kind);
 
         // ERROR: value starts with a numeric letter.
-        assertEquals(descriptor.doCheckName("1ab").kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName("1ab").kind);
 
         // ERROR: value contains a letter, not alphabet, number, nor underscore.
-        assertEquals(descriptor.doCheckName("a-b-c").kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName("a-b-c").kind);
 
         // ERROR: value starts with a letter, not alphabet, number, nor underscore.
-        assertEquals(descriptor.doCheckName("!ab").kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName("!ab").kind);
 
         // ERROR: value contains a multibyte letter.
-        assertEquals(descriptor.doCheckName("ａb").kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName("ａb").kind);
     }
 
     @Test
-    public void testIsValid() {
+    void testIsValid() {
         // OK
         {
             GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry("  _abc_123  ", "", false);
-            assertTrue("Valid entry", entry.isValid());
+            assertTrue(entry.isValid(), "Valid entry");
         }
 
         // NG
         {
             GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry("a b c", "", false);
-            assertFalse("Invalid entry", entry.isValid());
+            assertFalse(entry.isValid(), "Invalid entry");
         }
     }
 }

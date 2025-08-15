@@ -23,7 +23,7 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -38,7 +38,6 @@ import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import jenkins.model.Jenkins;
@@ -50,34 +49,42 @@ import org.htmlunit.html.HtmlOption;
 import org.htmlunit.html.HtmlPage;
 import org.htmlunit.html.HtmlSelect;
 import org.htmlunit.html.HtmlTextInput;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for TextareaChoiceListProvider, corresponding to Jenkins.
  */
-public class TextareaChoiceListProviderJenkinsTest {
-    @Rule
-    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+@WithJenkins
+class TextareaChoiceListProviderJenkinsTest {
+
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     private TextareaChoiceListProvider.DescriptorImpl getDescriptor() {
         return (TextareaChoiceListProvider.DescriptorImpl)
-                Jenkins.getInstance().getDescriptor(TextareaChoiceListProvider.class);
+                Jenkins.get().getDescriptor(TextareaChoiceListProvider.class);
     }
 
     private static void assertListBoxEquals(
             String message, List<ListBoxModel.Option> expected, List<ListBoxModel.Option> test) {
-        assertEquals(message, expected.size(), test.size());
+        assertEquals(expected.size(), test.size(), message);
         for (int i = 0; i < test.size(); ++i) {
-            assertEquals(String.format("%s: %d-th name", message, i), expected.get(i).name, test.get(i).name);
-            assertEquals(String.format("%s: %d-th value", message, i), expected.get(i).value, test.get(i).value);
+            assertEquals(expected.get(i).name, test.get(i).name, String.format("%s: %d-th name", message, i));
+            assertEquals(expected.get(i).value, test.get(i).value, String.format("%s: %d-th value", message, i));
         }
     }
 
     @Test
-    public void testDoFillDefaultChoiceItems() {
+    void testDoFillDefaultChoiceItems() {
         TextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
 
         // Easy case
@@ -119,13 +126,12 @@ public class TextareaChoiceListProviderJenkinsTest {
         }
 
         @Override
-        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                throws InterruptedException, IOException {
+        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
             ExtensibleChoiceParameterDefinition def = (ExtensibleChoiceParameterDefinition) build.getParent()
                     .getRootProject()
                     .getProperty(ParametersDefinitionProperty.class)
                     .getParameterDefinition(defname);
-            choiceList = new ArrayList<String>(def.getChoiceList());
+            choiceList = new ArrayList<>(def.getChoiceList());
 
             return true;
         }
@@ -148,8 +154,7 @@ public class TextareaChoiceListProviderJenkinsTest {
         }
 
         @Override
-        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                throws InterruptedException, IOException {
+        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
             if (result != null) {
                 build.setResult(result);
             }
@@ -158,7 +163,7 @@ public class TextareaChoiceListProviderJenkinsTest {
 
         public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
             @Override
-            public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
+            public boolean isApplicable(Class<? extends AbstractProject> jobType) {
                 return true;
             }
 
@@ -170,7 +175,7 @@ public class TextareaChoiceListProviderJenkinsTest {
 
         private static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
-        @SuppressWarnings({"rawtypes", "unchecked"})
+        @SuppressWarnings({"rawtypes"})
         @Override
         public BuildStepDescriptor getDescriptor() {
             return DESCRIPTOR;
@@ -183,7 +188,7 @@ public class TextareaChoiceListProviderJenkinsTest {
 
         List<String> choiceList = null;
 
-        FreeStyleProject job = (FreeStyleProject) Jenkins.getInstance().getItem(jobname);
+        FreeStyleProject job = (FreeStyleProject) Jenkins.get().getItem(jobname);
 
         job.getBuildersList().clear();
 
@@ -199,7 +204,7 @@ public class TextareaChoiceListProviderJenkinsTest {
 
         job.save();
 
-        WebClient wc = j.createAllow405WebClient();
+        WebClient wc = j.createWebClient().withThrowExceptionOnFailingStatusCode(false);
 
         HtmlPage page = wc.getPage(job, "build?delay=0sec");
 
@@ -226,7 +231,7 @@ public class TextareaChoiceListProviderJenkinsTest {
         } catch (ElementNotFoundException e) {
             // selectbox was not found.
             // selectbox is replaced with input field.
-            HtmlTextInput input = (HtmlTextInput) form.getInputByName("value");
+            HtmlTextInput input = form.getInputByName("value");
             input.setValue(value);
         }
         j.submit(form);
@@ -239,24 +244,23 @@ public class TextareaChoiceListProviderJenkinsTest {
         j.waitUntilNoActivity();
 
         j.assertBuildStatus(result, job.getLastBuild());
-        assertEquals(
-                "build launched with unexpected value", value, ceb.getEnvVars().get(defname));
+        assertEquals(value, ceb.getEnvVars().get(defname), "build launched with unexpected value");
 
         if (choiceList == null) {
             // reload configuration to test saved configuration.
-            Jenkins.getInstance().reload();
+            Jenkins.get().reload();
 
-            job = (FreeStyleProject) Jenkins.getInstance().getItem(jobname);
+            job = (FreeStyleProject) Jenkins.get().getItem(jobname);
             ExtensibleChoiceParameterDefinition def = (ExtensibleChoiceParameterDefinition)
                     job.getProperty(ParametersDefinitionProperty.class).getParameterDefinition(defname);
-            choiceList = new ArrayList<String>(def.getChoiceList());
+            choiceList = new ArrayList<>(def.getChoiceList());
         }
 
         return choiceList.contains(value);
     }
 
     @Test
-    public void testAddEditedValue_Disabled() throws Exception {
+    void testAddEditedValue_Disabled() throws Exception {
         String varname = "test";
         TextareaChoiceListProvider provider = new TextareaChoiceListProvider("a\nb\nc", null, false, null);
         ExtensibleChoiceParameterDefinition def =
@@ -271,37 +275,37 @@ public class TextareaChoiceListProviderJenkinsTest {
         {
             String value = "Triggered";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, null, varname, value));
+                    _testEditedValueWillBeContained(jobname, null, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
         {
             String value = "Success";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.SUCCESS, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.SUCCESS, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Unstable
         {
             String value = "Unstable";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.UNSTABLE, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.UNSTABLE, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Failure
         {
             String value = "Failure";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.FAILURE, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.FAILURE, varname, value),
+                    "Edited value must not be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_Trigger() throws Exception {
+    void testAddEditedValue_Trigger() throws Exception {
         String varname = "test";
         TextareaChoiceListProvider provider =
                 new TextareaChoiceListProvider("a\nb\nc", null, true, WhenToAdd.Triggered);
@@ -318,7 +322,7 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Triggered";
             Result result = null;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
 
         // Success
@@ -326,7 +330,7 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Success";
             Result result = Result.SUCCESS;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
 
         // Unstable
@@ -334,7 +338,7 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Unstable";
             Result result = Result.UNSTABLE;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
 
         // Failure
@@ -342,12 +346,12 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Failure";
             Result result = Result.FAILURE;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_Completed() throws Exception {
+    void testAddEditedValue_Completed() throws Exception {
         String varname = "test";
         TextareaChoiceListProvider provider =
                 new TextareaChoiceListProvider("a\nb\nc", null, true, WhenToAdd.Completed);
@@ -364,8 +368,8 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Triggered";
             Result result = null;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
@@ -373,7 +377,7 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Success";
             Result result = Result.SUCCESS;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
 
         // Unstable
@@ -381,7 +385,7 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Unstable";
             Result result = Result.UNSTABLE;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
 
         // Failure
@@ -389,12 +393,12 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Failure";
             Result result = Result.FAILURE;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_CompletedStable() throws Exception {
+    void testAddEditedValue_CompletedStable() throws Exception {
         String varname = "test";
         TextareaChoiceListProvider provider =
                 new TextareaChoiceListProvider("a\nb\nc", null, true, WhenToAdd.CompletedStable);
@@ -411,8 +415,8 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Triggered";
             Result result = null;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
@@ -420,7 +424,7 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Success";
             Result result = Result.SUCCESS;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
 
         // Unstable
@@ -428,8 +432,8 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Unstable";
             Result result = Result.UNSTABLE;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Failure
@@ -437,13 +441,13 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Failure";
             Result result = Result.FAILURE;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value),
+                    "Edited value must not be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_CompletedUnstable() throws Exception {
+    void testAddEditedValue_CompletedUnstable() throws Exception {
         String varname = "test";
         TextareaChoiceListProvider provider =
                 new TextareaChoiceListProvider("a\nb\nc", null, true, WhenToAdd.CompletedUnstable);
@@ -460,8 +464,8 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Triggered";
             Result result = null;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
@@ -469,7 +473,7 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Success";
             Result result = Result.SUCCESS;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
 
         // Unstable
@@ -477,7 +481,7 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Unstable";
             Result result = Result.UNSTABLE;
             assertTrue(
-                    "Edited value must be containd", _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value), "Edited value must be contained");
         }
 
         // Failure
@@ -485,13 +489,13 @@ public class TextareaChoiceListProviderJenkinsTest {
             String value = "Failure";
             Result result = Result.FAILURE;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, varname, value),
+                    "Edited value must not be contained");
         }
     }
 
     @Test
-    public void testConfiguration1() throws Exception {
+    void testConfiguration1() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
@@ -508,7 +512,7 @@ public class TextareaChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testConfiguration2() throws Exception {
+    void testConfiguration2() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(

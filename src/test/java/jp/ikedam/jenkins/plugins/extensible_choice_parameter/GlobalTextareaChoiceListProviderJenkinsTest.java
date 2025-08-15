@@ -23,7 +23,7 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -38,14 +38,12 @@ import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.ListBoxModel;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import jenkins.model.Jenkins;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.AddEditedChoiceListProvider.WhenToAdd;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.htmlunit.ElementNotFoundException;
 import org.htmlunit.html.DomElement;
 import org.htmlunit.html.HtmlForm;
@@ -53,27 +51,35 @@ import org.htmlunit.html.HtmlOption;
 import org.htmlunit.html.HtmlPage;
 import org.htmlunit.html.HtmlSelect;
 import org.htmlunit.html.HtmlTextInput;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for GlobalTextareaChoiceListProvider, corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListProviderJenkinsTest {
-    @Rule
-    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+@WithJenkins
+class GlobalTextareaChoiceListProviderJenkinsTest {
+
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     private static GlobalTextareaChoiceListProvider.DescriptorImpl getDescriptor() {
         return (GlobalTextareaChoiceListProvider.DescriptorImpl)
-                Jenkins.getInstance().getDescriptor(GlobalTextareaChoiceListProvider.class);
+                Jenkins.get().getDescriptor(GlobalTextareaChoiceListProvider.class);
         // return new GlobalTextareaChoiceListProvider.DescriptorImpl();
     }
 
     @Test
-    public void testDescriptorSetChoiceListEntryList() {
+    void testDescriptorSetChoiceListEntryList() {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry validEntry1 =
                 new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2\n", false);
@@ -93,23 +99,23 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             List<GlobalTextareaChoiceListEntry> passed = Arrays.asList(validEntry1, validEntry2, validEntry3);
             List<GlobalTextareaChoiceListEntry> expected = Arrays.asList(validEntry1, validEntry2, validEntry3);
             descriptor.setChoiceListEntryList(passed);
-            assertEquals("all entries are valid", expected, descriptor.getChoiceListEntryList());
+            assertEquals(expected, descriptor.getChoiceListEntryList(), "all entries are valid");
         }
 
         // empty
         {
-            List<GlobalTextareaChoiceListEntry> passed = new ArrayList<GlobalTextareaChoiceListEntry>(0);
-            List<GlobalTextareaChoiceListEntry> expected = new ArrayList<GlobalTextareaChoiceListEntry>(0);
+            List<GlobalTextareaChoiceListEntry> passed = new ArrayList<>(0);
+            List<GlobalTextareaChoiceListEntry> expected = new ArrayList<>(0);
             descriptor.setChoiceListEntryList(passed);
-            assertEquals("empty", expected, descriptor.getChoiceListEntryList());
+            assertEquals(expected, descriptor.getChoiceListEntryList(), "empty");
         }
 
         // null
         {
             List<GlobalTextareaChoiceListEntry> passed = null;
-            List<GlobalTextareaChoiceListEntry> expected = new ArrayList<GlobalTextareaChoiceListEntry>(0);
+            List<GlobalTextareaChoiceListEntry> expected = new ArrayList<>(0);
             descriptor.setChoiceListEntryList(passed);
-            assertEquals("null", expected, descriptor.getChoiceListEntryList());
+            assertEquals(expected, descriptor.getChoiceListEntryList(), "null");
         }
 
         // contains invalid entries
@@ -118,54 +124,49 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
                     Arrays.asList(invalidEntry1, validEntry1, validEntry2, invalidEntry2, validEntry3, invalidEntry3);
             List<GlobalTextareaChoiceListEntry> expected = Arrays.asList(validEntry1, validEntry2, validEntry3);
             descriptor.setChoiceListEntryList(passed);
-            assertEquals("contains invalid entries", expected, descriptor.getChoiceListEntryList());
+            assertEquals(expected, descriptor.getChoiceListEntryList(), "contains invalid entries");
         }
 
         // all entries are invalid
         {
             List<GlobalTextareaChoiceListEntry> passed = Arrays.asList(invalidEntry1, invalidEntry2, invalidEntry3);
-            List<GlobalTextareaChoiceListEntry> expected = new ArrayList<GlobalTextareaChoiceListEntry>(0);
+            List<GlobalTextareaChoiceListEntry> expected = new ArrayList<>(0);
             descriptor.setChoiceListEntryList(passed);
-            assertEquals("all entries are invalid", expected, descriptor.getChoiceListEntryList());
+            assertEquals(expected, descriptor.getChoiceListEntryList(), "all entries are invalid");
         }
     }
 
     private static void assertListBoxEquals(
             String message, List<ListBoxModel.Option> expected, List<ListBoxModel.Option> test) {
-        assertEquals(message, expected.size(), test.size());
+        assertEquals(expected.size(), test.size(), message);
         for (int i = 0; i < test.size(); ++i) {
-            assertEquals(String.format("%s: %d-th name", message, i), expected.get(i).name, test.get(i).name);
-            assertEquals(String.format("%s: %d-th value", message, i), expected.get(i).value, test.get(i).value);
+            assertEquals(expected.get(i).name, test.get(i).name, String.format("%s: %d-th name", message, i));
+            assertEquals(expected.get(i).value, test.get(i).value, String.format("%s: %d-th value", message, i));
         }
     }
 
-    @SuppressWarnings("unchecked") // CollectionUtils.transformedCollection is not generic.
+    @SuppressWarnings("unchecked")
+    // CollectionUtils.transformedCollection is not generic.
     @Test
-    public void testDescriptorDoFillNameItems() {
+    void testDescriptorDoFillNameItems() {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         // Easy case
         {
             List<String> nameList = Arrays.asList("entry1", "entry2", "entry3");
             @SuppressWarnings("rawtypes")
             List choiceListEntry = new ArrayList(nameList);
-            CollectionUtils.transform(choiceListEntry, new Transformer() {
-                @Override
-                public Object transform(Object input) {
-                    return new GlobalTextareaChoiceListEntry((String) input, "value1\nvalue2\n", false);
-                }
-            });
+            CollectionUtils.transform(
+                    choiceListEntry,
+                    input -> new GlobalTextareaChoiceListEntry((String) input, "value1\nvalue2\n", false));
             descriptor.setChoiceListEntryList(choiceListEntry);
 
             ListBoxModel fillList = descriptor.doFillNameItems();
 
             @SuppressWarnings("rawtypes")
             List optionList = new ArrayList(nameList);
-            CollectionUtils.transform(optionList, new Transformer() {
-                @Override
-                public Object transform(Object input) {
-                    String name = (String) input;
-                    return new ListBoxModel.Option(name, name);
-                }
+            CollectionUtils.transform(optionList, input -> {
+                String name = (String) input;
+                return new ListBoxModel.Option(name, name);
             });
             ListBoxModel expected = new ListBoxModel(optionList);
 
@@ -174,7 +175,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
 
         // Empty
         {
-            descriptor.setChoiceListEntryList(new ArrayList<GlobalTextareaChoiceListEntry>(0));
+            descriptor.setChoiceListEntryList(new ArrayList<>(0));
 
             ListBoxModel fillList = descriptor.doFillNameItems();
 
@@ -196,7 +197,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testDoFillDefaultChoiceItems() {
+    void testDoFillDefaultChoiceItems() {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
 
         // Easy case
@@ -231,7 +232,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
 
         // Empty
         {
-            List<GlobalTextareaChoiceListEntry> choiceListEntry = new ArrayList<GlobalTextareaChoiceListEntry>(0);
+            List<GlobalTextareaChoiceListEntry> choiceListEntry = new ArrayList<>(0);
             descriptor.setChoiceListEntryList(choiceListEntry);
 
             ListBoxModel fillList = descriptor.doFillDefaultChoiceItems("entry2");
@@ -279,7 +280,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testDescriptorGetChoiceListEntry() {
+    void testDescriptorGetChoiceListEntry() {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry entry1 = new GlobalTextareaChoiceListEntry("entry1", "value1\nvalue2\n", false);
         GlobalTextareaChoiceListEntry entry2 = new GlobalTextareaChoiceListEntry("entry2", "value1\nvalue2\n", false);
@@ -291,34 +292,34 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
         {
             descriptor.setChoiceListEntryList(Arrays.asList(entry1, entry2, entry3));
 
-            assertEquals("Easy case1", entry1, descriptor.getChoiceListEntry("entry1"));
-            assertEquals("Easy case2", entry2, descriptor.getChoiceListEntry("entry2"));
-            assertEquals("Easy case3", entry3, descriptor.getChoiceListEntry("entry3"));
+            assertEquals(entry1, descriptor.getChoiceListEntry("entry1"), "Easy case1");
+            assertEquals(entry2, descriptor.getChoiceListEntry("entry2"), "Easy case2");
+            assertEquals(entry3, descriptor.getChoiceListEntry("entry3"), "Easy case3");
         }
 
         // duplicate
         {
             descriptor.setChoiceListEntryList(Arrays.asList(sameEntry3, entry1, entry2, entry3));
-            assertEquals("Duplicate 1", sameEntry3, descriptor.getChoiceListEntry("entry3"));
+            assertEquals(sameEntry3, descriptor.getChoiceListEntry("entry3"), "Duplicate 1");
 
             descriptor.setChoiceListEntryList(Arrays.asList(entry1, entry2, entry3, sameEntry3));
-            assertEquals("Duplicate 2", entry3, descriptor.getChoiceListEntry("entry3"));
+            assertEquals(entry3, descriptor.getChoiceListEntry("entry3"), "Duplicate 2");
         }
 
         // No matches
         {
             descriptor.setChoiceListEntryList(Arrays.asList(entry1, entry2, entry3));
 
-            assertEquals("No matches", null, descriptor.getChoiceListEntry("entryX"));
-            assertEquals("No matches", new ArrayList<String>(0), descriptor.getChoiceList("entryX"));
+            assertNull(descriptor.getChoiceListEntry("entryX"), "No matches");
+            assertEquals(new ArrayList<String>(0), descriptor.getChoiceList("entryX"), "No matches");
         }
 
         // Empty
         {
-            descriptor.setChoiceListEntryList(new ArrayList<GlobalTextareaChoiceListEntry>(0));
+            descriptor.setChoiceListEntryList(new ArrayList<>(0));
 
-            assertEquals("Empty", null, descriptor.getChoiceListEntry("entry1"));
-            assertEquals("Empty", new ArrayList<String>(0), descriptor.getChoiceList("entryX"));
+            assertNull(descriptor.getChoiceListEntry("entry1"), "Empty");
+            assertEquals(new ArrayList<String>(0), descriptor.getChoiceList("entryX"), "Empty");
         }
     }
 
@@ -336,7 +337,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
      * @throws Exception
      */
     @Test
-    public void testDescriptorConfigure() throws Exception {
+    void testDescriptorConfigure() throws Exception {
         WebClient wc = j.createWebClient();
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry validEntry1 =
@@ -361,9 +362,9 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             j.submit(configForm);
 
             assertEquals(
-                    "Simple submission: descriptor after submission",
                     Arrays.asList(validEntry1, validEntry2, validEntry3),
-                    descriptor.getChoiceListEntryList());
+                    descriptor.getChoiceListEntryList(),
+                    "Simple submission: descriptor after submission");
 
             // update the descriptor to the another state.
             descriptor.setChoiceListEntryList(null);
@@ -372,9 +373,9 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
                     new GlobalTextareaChoiceListProvider.DescriptorImpl();
 
             assertEquals(
-                    "Simple submission: descriptor serialized from config.xml",
                     Arrays.asList(validEntry1, validEntry2, validEntry3),
-                    newDescriptor.getChoiceListEntryList());
+                    newDescriptor.getChoiceListEntryList(),
+                    "Simple submission: descriptor serialized from config.xml");
         }
 
         // Submission with invalid entry.
@@ -390,9 +391,9 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             j.submit(configForm);
 
             assertEquals(
-                    "Submission with invalid entry: descriptor after submission",
                     Arrays.asList(validEntry2, validEntry3),
-                    descriptor.getChoiceListEntryList());
+                    descriptor.getChoiceListEntryList(),
+                    "Submission with invalid entry: descriptor after submission");
 
             // update the descriptor to the another state.
             descriptor.setChoiceListEntryList(null);
@@ -401,9 +402,9 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
                     new GlobalTextareaChoiceListProvider.DescriptorImpl();
 
             assertEquals(
-                    "Submission with invalid entry: descriptor serialized from config.xml",
                     Arrays.asList(validEntry2, validEntry3),
-                    newDescriptor.getChoiceListEntryList());
+                    newDescriptor.getChoiceListEntryList(),
+                    "Submission with invalid entry: descriptor serialized from config.xml");
         }
 
         // Empty submission
@@ -419,9 +420,9 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             j.submit(configForm);
 
             assertEquals(
-                    "Empty submission: descriptor after submission",
                     new ArrayList<GlobalTextareaChoiceListEntry>(0),
-                    descriptor.getChoiceListEntryList());
+                    descriptor.getChoiceListEntryList(),
+                    "Empty submission: descriptor after submission");
 
             // update the descriptor to the another state.
             descriptor.setChoiceListEntryList(Arrays.asList(validEntry1, validEntry2));
@@ -430,9 +431,9 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
                     new GlobalTextareaChoiceListProvider.DescriptorImpl();
 
             assertEquals(
-                    "Empty submission: descriptor serialized from config.xml",
                     new ArrayList<GlobalTextareaChoiceListEntry>(0),
-                    newDescriptor.getChoiceListEntryList());
+                    newDescriptor.getChoiceListEntryList(),
+                    "Empty submission: descriptor serialized from config.xml");
         }
     }
 
@@ -445,12 +446,11 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
         }
 
         @Override
-        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                throws InterruptedException, IOException {
+        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
             GlobalTextareaChoiceListProvider.DescriptorImpl descriptor =
                     GlobalTextareaChoiceListProviderJenkinsTest.getDescriptor();
             GlobalTextareaChoiceListEntry entry = descriptor.getChoiceListEntry(entryName);
-            choiceList = new ArrayList<String>(entry.getChoiceList());
+            choiceList = new ArrayList<>(entry.getChoiceList());
 
             return true;
         }
@@ -473,8 +473,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
         }
 
         @Override
-        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                throws InterruptedException, IOException {
+        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
             if (result != null) {
                 build.setResult(result);
             }
@@ -483,7 +482,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
 
         public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
             @Override
-            public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
+            public boolean isApplicable(Class<? extends AbstractProject> jobType) {
                 return true;
             }
 
@@ -495,7 +494,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
 
         private static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
-        @SuppressWarnings({"rawtypes", "unchecked"})
+        @SuppressWarnings({"rawtypes"})
         @Override
         public BuildStepDescriptor getDescriptor() {
             return DESCRIPTOR;
@@ -508,7 +507,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
 
         List<String> choiceList = null;
 
-        FreeStyleProject job = (FreeStyleProject) Jenkins.getInstance().getItem(jobname);
+        FreeStyleProject job = (FreeStyleProject) Jenkins.get().getItem(jobname);
 
         job.getBuildersList().clear();
 
@@ -524,7 +523,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
 
         job.save();
 
-        WebClient wc = j.createAllow405WebClient();
+        WebClient wc = j.createWebClient().withThrowExceptionOnFailingStatusCode(false);
 
         HtmlPage page = wc.getPage(job, "build?delay=0sec");
 
@@ -551,7 +550,7 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
         } catch (ElementNotFoundException e) {
             // selectbox was not found.
             // selectbox is replaced with input field.
-            HtmlTextInput input = (HtmlTextInput) form.getInputByName("value");
+            HtmlTextInput input = form.getInputByName("value");
             input.setValue(value);
         }
         j.submit(form);
@@ -564,29 +563,28 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
         j.waitUntilNoActivity();
 
         j.assertBuildStatus(result, job.getLastBuild());
-        assertEquals(
-                "build launched with unexpected value", value, ceb.getEnvVars().get(defname));
+        assertEquals(value, ceb.getEnvVars().get(defname), "build launched with unexpected value");
 
         if (choiceList == null) {
             // reload configuration to test saved configuration.
-            Jenkins.getInstance().reload();
+            Jenkins.get().reload();
 
             GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
             GlobalTextareaChoiceListEntry entry = descriptor.getChoiceListEntry(entryname);
-            choiceList = new ArrayList<String>(entry.getChoiceList());
+            choiceList = new ArrayList<>(entry.getChoiceList());
         }
 
         return choiceList.contains(value);
     }
 
     @Test
-    public void testAddEditedValue_Disabled1() throws Exception {
+    void testAddEditedValue_Disabled1() throws Exception {
         String varname = "test";
         String entryname = "test";
 
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
-        descriptor.setChoiceListEntryList(Arrays.asList(entry));
+        descriptor.setChoiceListEntryList(List.of(entry));
         descriptor.save();
 
         GlobalTextareaChoiceListProvider provider = new GlobalTextareaChoiceListProvider(entryname, null, false, null);
@@ -602,43 +600,43 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
         {
             String value = "Triggered";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, null, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, null, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
         {
             String value = "Success";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.SUCCESS, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.SUCCESS, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Unstable
         {
             String value = "Unstable";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.UNSTABLE, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.UNSTABLE, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Failure
         {
             String value = "Failure";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.FAILURE, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.FAILURE, entryname, varname, value),
+                    "Edited value must not be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_Disabled2() throws Exception {
+    void testAddEditedValue_Disabled2() throws Exception {
         String varname = "test";
         String entryname = "test";
 
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", false);
-        descriptor.setChoiceListEntryList(Arrays.asList(entry));
+        descriptor.setChoiceListEntryList(List.of(entry));
         descriptor.save();
 
         GlobalTextareaChoiceListProvider provider =
@@ -655,43 +653,43 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
         {
             String value = "Triggered";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, null, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, null, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
         {
             String value = "Success";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.SUCCESS, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.SUCCESS, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Unstable
         {
             String value = "Unstable";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.UNSTABLE, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.UNSTABLE, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Failure
         {
             String value = "Failure";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.FAILURE, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.FAILURE, entryname, varname, value),
+                    "Edited value must not be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_Disabled3() throws Exception {
+    void testAddEditedValue_Disabled3() throws Exception {
         String varname = "test";
         String entryname = "test";
 
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
-        descriptor.setChoiceListEntryList(Arrays.asList(entry));
+        descriptor.setChoiceListEntryList(List.of(entry));
         descriptor.save();
 
         GlobalTextareaChoiceListProvider provider = new GlobalTextareaChoiceListProvider(entryname, null, true, null);
@@ -707,43 +705,43 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
         {
             String value = "Triggered";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, null, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, null, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
         {
             String value = "Success";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.SUCCESS, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.SUCCESS, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Unstable
         {
             String value = "Unstable";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.UNSTABLE, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.UNSTABLE, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Failure
         {
             String value = "Failure";
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, Result.FAILURE, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, Result.FAILURE, entryname, varname, value),
+                    "Edited value must not be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_Trigger() throws Exception {
+    void testAddEditedValue_Trigger() throws Exception {
         String varname = "test";
         String entryname = "test";
 
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
-        descriptor.setChoiceListEntryList(Arrays.asList(entry));
+        descriptor.setChoiceListEntryList(List.of(entry));
         descriptor.save();
 
         GlobalTextareaChoiceListProvider provider =
@@ -761,8 +759,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Triggered";
             Result result = null;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
 
         // Success
@@ -770,8 +768,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Success";
             Result result = Result.SUCCESS;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
 
         // Unstable
@@ -779,8 +777,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Unstable";
             Result result = Result.UNSTABLE;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
 
         // Failure
@@ -788,19 +786,19 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Failure";
             Result result = Result.FAILURE;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_Completed() throws Exception {
+    void testAddEditedValue_Completed() throws Exception {
         String varname = "test";
         String entryname = "test";
 
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
-        descriptor.setChoiceListEntryList(Arrays.asList(entry));
+        descriptor.setChoiceListEntryList(List.of(entry));
         descriptor.save();
 
         GlobalTextareaChoiceListProvider provider =
@@ -818,8 +816,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Triggered";
             Result result = null;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
@@ -827,8 +825,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Success";
             Result result = Result.SUCCESS;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
 
         // Unstable
@@ -836,8 +834,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Unstable";
             Result result = Result.UNSTABLE;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
 
         // Failure
@@ -845,19 +843,19 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Failure";
             Result result = Result.FAILURE;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_CompletedStable() throws Exception {
+    void testAddEditedValue_CompletedStable() throws Exception {
         String varname = "test";
         String entryname = "test";
 
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
-        descriptor.setChoiceListEntryList(Arrays.asList(entry));
+        descriptor.setChoiceListEntryList(List.of(entry));
         descriptor.save();
 
         GlobalTextareaChoiceListProvider provider =
@@ -875,8 +873,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Triggered";
             Result result = null;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
@@ -884,8 +882,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Success";
             Result result = Result.SUCCESS;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
 
         // Unstable
@@ -893,8 +891,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Unstable";
             Result result = Result.UNSTABLE;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Failure
@@ -902,19 +900,19 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Failure";
             Result result = Result.FAILURE;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must not be contained");
         }
     }
 
     @Test
-    public void testAddEditedValue_CompletedUnstable() throws Exception {
+    void testAddEditedValue_CompletedUnstable() throws Exception {
         String varname = "test";
         String entryname = "test";
 
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         GlobalTextareaChoiceListEntry entry = new GlobalTextareaChoiceListEntry(entryname, "value1\nvalue2", true);
-        descriptor.setChoiceListEntryList(Arrays.asList(entry));
+        descriptor.setChoiceListEntryList(List.of(entry));
         descriptor.save();
 
         GlobalTextareaChoiceListProvider provider =
@@ -932,8 +930,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Triggered";
             Result result = null;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must not be contained");
         }
 
         // Success
@@ -941,8 +939,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Success";
             Result result = Result.SUCCESS;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
 
         // Unstable
@@ -950,8 +948,8 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Unstable";
             Result result = Result.UNSTABLE;
             assertTrue(
-                    "Edited value must be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must be contained");
         }
 
         // Failure
@@ -959,16 +957,16 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
             String value = "Failure";
             Result result = Result.FAILURE;
             assertFalse(
-                    "Edited value must not be containd",
-                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value));
+                    _testEditedValueWillBeContained(jobname, result, entryname, varname, value),
+                    "Edited value must not be contained");
         }
     }
 
     @Test
-    public void testConfiguration1() throws Exception {
+    void testConfiguration1() throws Exception {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         List<GlobalTextareaChoiceListEntry> entryList =
-                Arrays.asList(new GlobalTextareaChoiceListEntry("testChoice", "a\nb\nc", false));
+                List.of(new GlobalTextareaChoiceListEntry("testChoice", "a\nb\nc", false));
         descriptor.setChoiceListEntryList(entryList);
 
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
@@ -992,10 +990,10 @@ public class GlobalTextareaChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testGlobalConfiguration2() throws Exception {
+    void testGlobalConfiguration2() throws Exception {
         GlobalTextareaChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         List<GlobalTextareaChoiceListEntry> entryList =
-                Arrays.asList(new GlobalTextareaChoiceListEntry("testChoice", "a\nb\nc\n", true));
+                List.of(new GlobalTextareaChoiceListEntry("testChoice", "a\nb\nc\n", true));
         descriptor.setChoiceListEntryList(entryList);
 
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
