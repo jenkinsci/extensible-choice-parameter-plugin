@@ -23,24 +23,25 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for GlobalTextareaChoiceListProvider, not corresponding to Jenkins.
  *
  */
-public class GlobalTextareaChoiceListProviderSimpleTest {
+class GlobalTextareaChoiceListProviderSimpleTest {
+
     @Test
-    public void testGlobalTextareaChoiceListProvider_name() {
+    void testGlobalTextareaChoiceListProvider_name() {
         String name = "abc";
         GlobalTextareaChoiceListProvider target = new GlobalTextareaChoiceListProvider(name, null, false, null);
-        assertEquals("Basic test of passing name to GlobalTextareaChoiceListProvider()", name, target.getName());
+        assertEquals(name, target.getName(), "Basic test of passing name to GlobalTextareaChoiceListProvider()");
     }
 
     @Test
-    public void testGlobalTextareaChoiceListProvider_defaultChoice() {
+    void testGlobalTextareaChoiceListProvider_defaultChoice() {
         String name = "abc";
 
         // a value
@@ -48,7 +49,7 @@ public class GlobalTextareaChoiceListProviderSimpleTest {
             String defaultChoice = "some value";
             GlobalTextareaChoiceListProvider target =
                     new GlobalTextareaChoiceListProvider(name, defaultChoice, false, null);
-            assertEquals("a value", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "a value");
         }
 
         // null
@@ -56,7 +57,7 @@ public class GlobalTextareaChoiceListProviderSimpleTest {
             String defaultChoice = null;
             GlobalTextareaChoiceListProvider target =
                     new GlobalTextareaChoiceListProvider(name, defaultChoice, false, null);
-            assertEquals("null", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "null");
         }
 
         // empty
@@ -64,7 +65,7 @@ public class GlobalTextareaChoiceListProviderSimpleTest {
             String defaultChoice = "";
             GlobalTextareaChoiceListProvider target =
                     new GlobalTextareaChoiceListProvider(name, defaultChoice, false, null);
-            assertEquals("empty", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "empty");
         }
 
         // blank
@@ -72,7 +73,7 @@ public class GlobalTextareaChoiceListProviderSimpleTest {
             String defaultChoice = "  ";
             GlobalTextareaChoiceListProvider target =
                     new GlobalTextareaChoiceListProvider(name, defaultChoice, false, null);
-            assertEquals("blank", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "blank");
         }
     }
 }

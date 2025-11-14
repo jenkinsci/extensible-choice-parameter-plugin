@@ -23,38 +23,48 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.util.FormValidation;
 import java.io.File;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.htmlunit.html.HtmlElement;
 import org.htmlunit.html.HtmlPage;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for FilenameChoiceListProvider, concerned with Jenkins.
  */
-public class FilenameChoiceListProviderJenkinsTest {
-    @Rule
-    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+@WithJenkins
+class FilenameChoiceListProviderJenkinsTest {
+
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     @Test
-    public void testGetBaseDir() {
+    void testGetBaseDir() {
         // relative path
         {
             String path = "path/relative";
             File test = FilenameChoiceListProvider.getBaseDir(path);
-            File expect = new File(Jenkins.getInstance().getRootDir(), path);
-            assertEquals("relative path must start from JENKINS_HOME", expect, test);
+            File expect = new File(Jenkins.get().getRootDir(), path);
+            assertEquals(expect, test, "relative path must start from JENKINS_HOME");
         }
 
         // absolute path
@@ -62,17 +72,17 @@ public class FilenameChoiceListProviderJenkinsTest {
             String path = (SystemUtils.IS_OS_WINDOWS) ? "C:\\path\\abosolute" : "/path/absolute";
             File test = FilenameChoiceListProvider.getBaseDir(path);
             File expect = new File(path);
-            assertEquals("absolute path must be treat as is.", expect, test);
+            assertEquals(expect, test, "absolute path must be treat as is.");
         }
     }
 
     private FilenameChoiceListProvider.DescriptorImpl getDescriptor() {
         return (FilenameChoiceListProvider.DescriptorImpl)
-                Jenkins.getInstance().getDescriptor(FilenameChoiceListProvider.class);
+                Jenkins.get().getDescriptor(FilenameChoiceListProvider.class);
     }
 
     @Test
-    public void testConfiguration() throws Exception {
+    void testConfiguration() throws Exception {
         {
             FreeStyleProject p = j.createFreeStyleProject();
             FilenameChoiceListProvider expected = new FilenameChoiceListProvider(
@@ -130,50 +140,50 @@ public class FilenameChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testDescriptor_doCheckBaseDirPath() throws IOException {
+    void testDescriptor_doCheckBaseDirPath() throws Exception {
         FilenameChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
 
-        File tempDir = j.createTmpDir();
+        File tempDir = Files.createTempDirectory("junit").toFile();
         try {
             // a proper directory
             {
                 assertEquals(
-                        "a proper directory",
                         FormValidation.Kind.OK,
-                        descriptor.doCheckBaseDirPath(tempDir.getAbsolutePath()).kind);
+                        descriptor.doCheckBaseDirPath(tempDir.getAbsolutePath()).kind,
+                        "a proper directory");
             }
 
             // not exist
             {
                 assertEquals(
-                        "not exist",
                         FormValidation.Kind.WARNING,
-                        descriptor.doCheckBaseDirPath(new File(tempDir, "hogehoge").getAbsolutePath()).kind);
+                        descriptor.doCheckBaseDirPath(new File(tempDir, "hogehoge").getAbsolutePath()).kind,
+                        "not exist");
             }
 
             // not a directory
             {
                 File testFile = new File(tempDir, "test.txt");
-                FileUtils.writeStringToFile(testFile, "hogehoge");
+                FileUtils.writeStringToFile(testFile, "hogehoge", StandardCharsets.UTF_8);
                 assertEquals(
-                        "not exist",
                         FormValidation.Kind.WARNING,
-                        descriptor.doCheckBaseDirPath(testFile.getAbsolutePath()).kind);
+                        descriptor.doCheckBaseDirPath(testFile.getAbsolutePath()).kind,
+                        "not exist");
             }
 
             // null
             {
-                assertEquals("null", FormValidation.Kind.ERROR, descriptor.doCheckBaseDirPath(null).kind);
+                assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckBaseDirPath(null).kind, "null");
             }
 
             // empty
             {
-                assertEquals("empty", FormValidation.Kind.ERROR, descriptor.doCheckBaseDirPath("").kind);
+                assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckBaseDirPath("").kind, "empty");
             }
 
             // blank
             {
-                assertEquals("blank", FormValidation.Kind.ERROR, descriptor.doCheckBaseDirPath("  ").kind);
+                assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckBaseDirPath("  ").kind, "blank");
             }
         } finally {
             FileUtils.deleteDirectory(tempDir);
@@ -181,66 +191,66 @@ public class FilenameChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testDescriptor_doCheckIncludePattern() throws IOException {
+    void testDescriptor_doCheckIncludePattern() {
         FilenameChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
 
         // a proper pattern
         {
             String pattern = "**/*";
-            assertEquals("a proper pattern", FormValidation.Kind.OK, descriptor.doCheckIncludePattern(pattern).kind);
+            assertEquals(FormValidation.Kind.OK, descriptor.doCheckIncludePattern(pattern).kind, "a proper pattern");
         }
 
         // null
         {
             String pattern = null;
-            assertEquals("null", FormValidation.Kind.ERROR, descriptor.doCheckIncludePattern(pattern).kind);
+            assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckIncludePattern(pattern).kind, "null");
         }
 
         // empty
         {
             String pattern = "";
-            assertEquals("empty", FormValidation.Kind.ERROR, descriptor.doCheckIncludePattern(pattern).kind);
+            assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckIncludePattern(pattern).kind, "empty");
         }
 
         // blank
         {
             String pattern = "  ";
-            assertEquals("blank", FormValidation.Kind.ERROR, descriptor.doCheckIncludePattern(pattern).kind);
+            assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckIncludePattern(pattern).kind, "blank");
         }
     }
 
     @Test
-    public void testDescriptor_doCheckExcludePattern() throws IOException {
+    void testDescriptor_doCheckExcludePattern() {
         FilenameChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
 
         // a proper pattern
         {
             String pattern = "**/*";
-            assertEquals("a proper pattern", FormValidation.Kind.OK, descriptor.doCheckExcludePattern(pattern).kind);
+            assertEquals(FormValidation.Kind.OK, descriptor.doCheckExcludePattern(pattern).kind, "a proper pattern");
         }
 
         // null
         {
             String pattern = null;
-            assertEquals("null", FormValidation.Kind.OK, descriptor.doCheckExcludePattern(pattern).kind);
+            assertEquals(FormValidation.Kind.OK, descriptor.doCheckExcludePattern(pattern).kind, "null");
         }
 
         // empty
         {
             String pattern = "";
-            assertEquals("empty", FormValidation.Kind.OK, descriptor.doCheckExcludePattern(pattern).kind);
+            assertEquals(FormValidation.Kind.OK, descriptor.doCheckExcludePattern(pattern).kind, "empty");
         }
 
         // blank
         {
             String pattern = "  ";
-            assertEquals("blank", FormValidation.Kind.OK, descriptor.doCheckExcludePattern(pattern).kind);
+            assertEquals(FormValidation.Kind.OK, descriptor.doCheckExcludePattern(pattern).kind, "blank");
         }
     }
 
-    @Bug(28841)
+    @Issue("JENKINS-28841")
     @Test
-    public void testDoTest() throws Exception {
+    void testDoTest() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
                 "Choice",
@@ -261,7 +271,7 @@ public class FilenameChoiceListProviderJenkinsTest {
         // List<HtmlElement> elements = page.getElementsByName("choiceListProvider");
         // assertEquals(1, elements.size());
         // HtmlElement choiceListProviderBlock = elements.get(0);
-        HtmlElement button = page.<HtmlElement>getFirstByXPath(
+        HtmlElement button = page.getFirstByXPath(
                 "//*[@name='choiceListProvider']//button|//*[@name='choiceListProvider']//input[@type='button']");
         assertNotNull(button);
         button.click();

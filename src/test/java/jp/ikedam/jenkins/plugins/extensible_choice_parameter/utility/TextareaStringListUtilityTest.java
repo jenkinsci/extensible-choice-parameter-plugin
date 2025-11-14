@@ -3,45 +3,46 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter.utility;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for TextareaStringListUtility
  */
-public class TextareaStringListUtilityTest {
+class TextareaStringListUtilityTest {
+
     @Test
-    public void testStringListFromTextarea() {
+    void testStringListFromTextarea() {
         // Easy case
         {
             String text = "a\nb\nc";
             List<String> expected = Arrays.asList("a", "b", "c");
-            assertEquals("Easy case", expected, TextareaStringListUtility.stringListFromTextarea(text));
+            assertEquals(expected, TextareaStringListUtility.stringListFromTextarea(text), "Easy case");
         }
 
         // null
         {
             String text = null;
-            List<String> expected = new ArrayList<String>(0);
-            assertEquals("null", expected, TextareaStringListUtility.stringListFromTextarea(text));
+            List<String> expected = new ArrayList<>(0);
+            assertEquals(expected, TextareaStringListUtility.stringListFromTextarea(text), "null");
         }
 
         // Empty
         {
             String text = "";
-            List<String> expected = new ArrayList<String>(0);
-            assertEquals("Empty", expected, TextareaStringListUtility.stringListFromTextarea(text));
+            List<String> expected = new ArrayList<>(0);
+            assertEquals(expected, TextareaStringListUtility.stringListFromTextarea(text), "Empty");
         }
 
         // Empty line in the middle.
         {
             String text = "a\n\nc";
             List<String> expected = Arrays.asList("a", "", "c");
-            assertEquals("Empty line in the middle", expected, TextareaStringListUtility.stringListFromTextarea(text));
+            assertEquals(expected, TextareaStringListUtility.stringListFromTextarea(text), "Empty line in the middle");
         }
 
         // Multiple empty line in the middle.
@@ -49,9 +50,9 @@ public class TextareaStringListUtilityTest {
             String text = "a\n\n\nc";
             List<String> expected = Arrays.asList("a", "", "", "c");
             assertEquals(
-                    "Multiple empty line in the middle",
                     expected,
-                    TextareaStringListUtility.stringListFromTextarea(text));
+                    TextareaStringListUtility.stringListFromTextarea(text),
+                    "Multiple empty line in the middle");
         }
 
         // Empty line in the beginning.
@@ -59,7 +60,7 @@ public class TextareaStringListUtilityTest {
             String text = "\na\nb\nc";
             List<String> expected = Arrays.asList("", "a", "b", "c");
             assertEquals(
-                    "Empty line in the beginning", expected, TextareaStringListUtility.stringListFromTextarea(text));
+                    expected, TextareaStringListUtility.stringListFromTextarea(text), "Empty line in the beginning");
         }
 
         // Multiple empty line in the beginning.
@@ -67,16 +68,16 @@ public class TextareaStringListUtilityTest {
             String text = "\n\na\nb\nc";
             List<String> expected = Arrays.asList("", "", "a", "b", "c");
             assertEquals(
-                    "Multiple empty line in the beginning",
                     expected,
-                    TextareaStringListUtility.stringListFromTextarea(text));
+                    TextareaStringListUtility.stringListFromTextarea(text),
+                    "Multiple empty line in the beginning");
         }
 
         // Empty line in the end.
         {
             String text = "a\nb\nc\n";
             List<String> expected = Arrays.asList("a", "b", "c");
-            assertEquals("Empty line in the end", expected, TextareaStringListUtility.stringListFromTextarea(text));
+            assertEquals(expected, TextareaStringListUtility.stringListFromTextarea(text), "Empty line in the end");
         }
 
         // Multiple empty line in the end.
@@ -84,28 +85,28 @@ public class TextareaStringListUtilityTest {
             String text = "a\nb\nc\n\n";
             List<String> expected = Arrays.asList("a", "b", "c", "");
             assertEquals(
-                    "Multiple empty line in the end", expected, TextareaStringListUtility.stringListFromTextarea(text));
+                    expected, TextareaStringListUtility.stringListFromTextarea(text), "Multiple empty line in the end");
         }
 
         // Multiple empty line only
         {
             String text = "\n";
-            List<String> expected = Arrays.asList("");
-            assertEquals("Multiple empty line only", expected, TextareaStringListUtility.stringListFromTextarea(text));
+            List<String> expected = List.of("");
+            assertEquals(expected, TextareaStringListUtility.stringListFromTextarea(text), "Multiple empty line only");
         }
 
         // Newline code is CR LF.
         {
             String text = "a\r\nb\r\nc";
             List<String> expected = Arrays.asList("a", "b", "c");
-            assertEquals("Newline code is CR LF.", expected, TextareaStringListUtility.stringListFromTextarea(text));
+            assertEquals(expected, TextareaStringListUtility.stringListFromTextarea(text), "Newline code is CR LF.");
         }
 
         // Newline code is mixed.
         {
             String text = "a\nb\r\nc";
             List<String> expected = Arrays.asList("a", "b", "c");
-            assertEquals("Newline code is mixed.", expected, TextareaStringListUtility.stringListFromTextarea(text));
+            assertEquals(expected, TextareaStringListUtility.stringListFromTextarea(text), "Newline code is mixed.");
         }
 
         // Newline code is mixed, and occurred in sequence
@@ -113,9 +114,9 @@ public class TextareaStringListUtilityTest {
             String text = "a\n\r\n\nc";
             List<String> expected = Arrays.asList("a", "", "", "c");
             assertEquals(
-                    "Newline code is mixed, and occurred in sequence.",
                     expected,
-                    TextareaStringListUtility.stringListFromTextarea(text));
+                    TextareaStringListUtility.stringListFromTextarea(text),
+                    "Newline code is mixed, and occurred in sequence.");
         }
 
         // lines containing white spaces
@@ -123,31 +124,31 @@ public class TextareaStringListUtilityTest {
             String text = " a\nb \n c \n ";
             List<String> expected = Arrays.asList(" a", "b ", " c ", " ");
             assertEquals(
-                    "lines containing white spaces.", expected, TextareaStringListUtility.stringListFromTextarea(text));
+                    expected, TextareaStringListUtility.stringListFromTextarea(text), "lines containing white spaces.");
         }
     }
 
     @Test
-    public void testTextareaFromStringList() {
+    void testTextareaFromStringList() {
         // Easy case.
         {
             List<String> lst = Arrays.asList("a", "b", "c");
             String expected = "a\nb\nc\n";
-            assertEquals("Easy case.", expected, TextareaStringListUtility.textareaFromStringList(lst));
+            assertEquals(expected, TextareaStringListUtility.textareaFromStringList(lst), "Easy case.");
         }
 
         // null
         {
             List<String> lst = null;
             String expected = "";
-            assertEquals("Empty.", expected, TextareaStringListUtility.textareaFromStringList(lst));
+            assertEquals(expected, TextareaStringListUtility.textareaFromStringList(lst), "Empty.");
         }
 
         // Empty
         {
-            List<String> lst = new ArrayList<String>(0);
+            List<String> lst = new ArrayList<>(0);
             String expected = "";
-            assertEquals("Empty.", expected, TextareaStringListUtility.textareaFromStringList(lst));
+            assertEquals(expected, TextareaStringListUtility.textareaFromStringList(lst), "Empty.");
         }
 
         // Empty string in the middle.
@@ -155,7 +156,7 @@ public class TextareaStringListUtilityTest {
             List<String> lst = Arrays.asList("a", "", "c");
             String expected = "a\n\nc\n";
             assertEquals(
-                    "Empty string in the middle.", expected, TextareaStringListUtility.textareaFromStringList(lst));
+                    expected, TextareaStringListUtility.textareaFromStringList(lst), "Empty string in the middle.");
         }
 
         // Multiple empty strings in the middle.
@@ -163,9 +164,9 @@ public class TextareaStringListUtilityTest {
             List<String> lst = Arrays.asList("a", "", "", "c");
             String expected = "a\n\n\nc\n";
             assertEquals(
-                    "Multiple empty strings in the middle.",
                     expected,
-                    TextareaStringListUtility.textareaFromStringList(lst));
+                    TextareaStringListUtility.textareaFromStringList(lst),
+                    "Multiple empty strings in the middle.");
         }
 
         // Empty string in the beginning.
@@ -173,7 +174,7 @@ public class TextareaStringListUtilityTest {
             List<String> lst = Arrays.asList("", "a", "b", "c");
             String expected = "\na\nb\nc\n";
             assertEquals(
-                    "Empty string in the beginning.", expected, TextareaStringListUtility.textareaFromStringList(lst));
+                    expected, TextareaStringListUtility.textareaFromStringList(lst), "Empty string in the beginning.");
         }
 
         // Multiple empty strings in the beginning.
@@ -181,16 +182,16 @@ public class TextareaStringListUtilityTest {
             List<String> lst = Arrays.asList("", "", "a", "b", "c");
             String expected = "\n\na\nb\nc\n";
             assertEquals(
-                    "Multiple empty strings in the beginning.",
                     expected,
-                    TextareaStringListUtility.textareaFromStringList(lst));
+                    TextareaStringListUtility.textareaFromStringList(lst),
+                    "Multiple empty strings in the beginning.");
         }
 
         // Empty string in the end.
         {
             List<String> lst = Arrays.asList("a", "b", "c", "");
             String expected = "a\nb\nc\n\n";
-            assertEquals("Empty string in the end.", expected, TextareaStringListUtility.textareaFromStringList(lst));
+            assertEquals(expected, TextareaStringListUtility.textareaFromStringList(lst), "Empty string in the end.");
         }
 
         // Multiple empty strings in the end.
@@ -198,16 +199,16 @@ public class TextareaStringListUtilityTest {
             List<String> lst = Arrays.asList("a", "b", "c", "", "");
             String expected = "a\nb\nc\n\n\n";
             assertEquals(
-                    "Multiple empty strings in the end.",
                     expected,
-                    TextareaStringListUtility.textareaFromStringList(lst));
+                    TextareaStringListUtility.textareaFromStringList(lst),
+                    "Multiple empty strings in the end.");
         }
 
         // Empty string only
         {
-            List<String> lst = Arrays.asList("");
+            List<String> lst = List.of("");
             String expected = "\n";
-            assertEquals("Empty string only.", expected, TextareaStringListUtility.textareaFromStringList(lst));
+            assertEquals(expected, TextareaStringListUtility.textareaFromStringList(lst), "Empty string only.");
         }
 
         // Multiple empty strings only
@@ -215,7 +216,7 @@ public class TextareaStringListUtilityTest {
             List<String> lst = Arrays.asList("", "");
             String expected = "\n\n";
             assertEquals(
-                    "Multiple empty strings only.", expected, TextareaStringListUtility.textareaFromStringList(lst));
+                    expected, TextareaStringListUtility.textareaFromStringList(lst), "Multiple empty strings only.");
         }
 
         // Strings containing white spaces
@@ -223,7 +224,7 @@ public class TextareaStringListUtilityTest {
             List<String> lst = Arrays.asList(" ", " a", " ", "b ", " c ", " ");
             String expected = " \n a\n \nb \n c \n \n";
             assertEquals(
-                    "Multiple empty strings only.", expected, TextareaStringListUtility.textareaFromStringList(lst));
+                    expected, TextareaStringListUtility.textareaFromStringList(lst), "Multiple empty strings only.");
         }
     }
 }

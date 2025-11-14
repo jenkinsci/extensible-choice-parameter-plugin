@@ -23,54 +23,55 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for ExtensibleChoiceParameterDefinition, not corresponding to Jenkins.
  */
-public class ExtensibleChoiceParameterDefinitionSimpleTest {
+class ExtensibleChoiceParameterDefinitionSimpleTest {
+
     @Test
-    public void testExtensibleChoiceParameterDefinition_name() {
+    void testExtensibleChoiceParameterDefinition_name() {
         // Simple value
         {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("name", null, false, "Some text");
-            assertEquals("Simple value", "name", target.getName());
+            assertEquals("name", target.getName(), "Simple value");
         }
         // value surrounded with spaces.
         {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("  name ", null, false, "Some text");
-            assertEquals("value surrounded with spaces.", "name", target.getName());
+            assertEquals("name", target.getName(), "value surrounded with spaces.");
         }
     }
 
     @Test
-    public void testExtensibleChoiceParameterDefinition_nameWithInvalidValue() {
+    void testExtensibleChoiceParameterDefinition_nameWithInvalidValue() {
         // empty
         {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("", null, false, "Some text");
-            assertEquals("Empty", "", target.getName());
+            assertEquals("", target.getName(), "Empty");
         }
         // blank.
         {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("  ", null, false, "Some text");
-            assertEquals("blank", "", target.getName());
+            assertEquals("", target.getName(), "blank");
         }
     }
 
     @Test
-    public void testExtensibleChoiceParameterDefinition_description() {
+    void testExtensibleChoiceParameterDefinition_description() {
         // Simple value
         {
             String description = "Some text";
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("name", null, false, description);
-            assertEquals("Simple value", description, target.getDescription());
+            assertEquals(description, target.getDescription(), "Simple value");
         }
 
         // value surrounded with blank letters
@@ -78,7 +79,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest {
             String description = " \nSome\n text ";
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("name", null, false, description);
-            assertEquals("value surrounded with blank letters", description, target.getDescription());
+            assertEquals(description, target.getDescription(), "value surrounded with blank letters");
         }
 
         // null
@@ -86,18 +87,18 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest {
             String description = null;
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("name", null, false, description);
-            assertEquals("null", description, target.getDescription());
+            assertEquals(description, target.getDescription(), "null");
         }
     }
 
     @Test
-    public void testExtensibleChoiceParameterDefinition_choiceListProvider() {
+    void testExtensibleChoiceParameterDefinition_choiceListProvider() {
         // Simple value
         {
             ChoiceListProvider provider = new TextareaChoiceListProvider("a\nb\nc\n", null, false, null);
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("name", provider, false, "Some Text");
-            assertEquals("Simple value", provider, target.getChoiceListProvider());
+            assertEquals(provider, target.getChoiceListProvider(), "Simple value");
         }
 
         // null
@@ -105,18 +106,18 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest {
             ChoiceListProvider provider = null;
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("name", provider, false, "Some Text");
-            assertEquals("null", provider, target.getChoiceListProvider());
+            assertEquals(provider, target.getChoiceListProvider(), "null");
         }
     }
 
     @Test
-    public void testExtensibleChoiceParameterDefinition_editable() {
+    void testExtensibleChoiceParameterDefinition_editable() {
         // editable
         {
             boolean editable = true;
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("name", null, editable, "Some Text");
-            assertEquals("editable", editable, target.isEditable());
+            assertEquals(editable, target.isEditable(), "editable");
         }
 
         // noneditable
@@ -124,7 +125,7 @@ public class ExtensibleChoiceParameterDefinitionSimpleTest {
             boolean editable = false;
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition("name", null, editable, "Some Text");
-            assertEquals("noneditable", editable, target.isEditable());
+            assertEquals(editable, target.isEditable(), "noneditable");
         }
     }
 }

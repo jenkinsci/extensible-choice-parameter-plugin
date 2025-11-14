@@ -23,54 +23,55 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for TextareaChoiceListProvider, not corresponding to Jenkins.
  */
-public class TextareaChoiceListProviderSimpleTest {
+class TextareaChoiceListProviderSimpleTest {
+
     @Test
-    public void testTextareaChoiceListProvider_choiceListText() {
+    void testTextareaChoiceListProvider_choiceListText() {
         // complete tests are done in TextareaStringListUtilityTest.
         String choiceListText = "a\nb\nc\n";
         TextareaChoiceListProvider target = new TextareaChoiceListProvider(choiceListText, null, false, null);
         assertEquals(
-                "Basic test of choiceListText in TextareaChoiceListProvider()",
                 Arrays.asList("a", "b", "c"),
-                target.getChoiceList());
+                target.getChoiceList(),
+                "Basic test of choiceListText in TextareaChoiceListProvider()");
     }
 
     @Test
-    public void testTextareaChoiceListProvider_defaultChoice() {
+    void testTextareaChoiceListProvider_defaultChoice() {
         // a value
         {
             String defaultChoice = "b";
             TextareaChoiceListProvider target = new TextareaChoiceListProvider("a\nb\nc", defaultChoice, false, null);
-            assertEquals("a value", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "a value");
         }
 
         // null
         {
             String defaultChoice = null;
             TextareaChoiceListProvider target = new TextareaChoiceListProvider("a\nb\nc", defaultChoice, false, null);
-            assertEquals("null", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "null");
         }
 
         // empty
         {
             String defaultChoice = "";
             TextareaChoiceListProvider target = new TextareaChoiceListProvider("a\nb\nc", defaultChoice, false, null);
-            assertEquals("empty", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "empty");
         }
 
         // blank
         {
             String defaultChoice = "   ";
             TextareaChoiceListProvider target = new TextareaChoiceListProvider("a\nb\nc", defaultChoice, false, null);
-            assertEquals("blank", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "blank");
         }
     }
 }

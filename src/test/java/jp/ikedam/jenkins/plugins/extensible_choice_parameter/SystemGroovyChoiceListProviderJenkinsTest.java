@@ -23,7 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import hudson.cli.BuildCommand;
 import hudson.cli.CLICommandInvoker;
@@ -45,22 +46,25 @@ import org.htmlunit.Page;
 import org.htmlunit.html.DomElement;
 import org.htmlunit.html.HtmlPage;
 import org.htmlunit.html.HtmlSelect;
+import org.jenkinsci.plugins.matrixauth.AuthorizationType;
+import org.jenkinsci.plugins.matrixauth.PermissionEntry;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.hudson.test.recipes.LocalData;
 
 /**
  * Tests for SystemGroovyChoiceListProvider, corresponding to Jenkins.
  */
-public class SystemGroovyChoiceListProviderJenkinsTest {
-    @Rule
-    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+@WithJenkins
+class SystemGroovyChoiceListProviderJenkinsTest {
 
     private static String properScript = "[\"a\", \"b\", \"c\"]";
     private static List<String> properScriptReturn = Arrays.asList("a", "b", "c");
@@ -82,85 +86,92 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
 
     private static String exceptionScript = "hogehoge()";
 
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+    }
+
     protected SystemGroovyChoiceListProvider.DescriptorImpl getDescriptor() {
         return (SystemGroovyChoiceListProvider.DescriptorImpl)
-                Jenkins.getInstance().getDescriptorOrDie(SystemGroovyChoiceListProvider.class);
+                Jenkins.get().getDescriptorOrDie(SystemGroovyChoiceListProvider.class);
     }
 
     @Test
-    public void testDescriptor_doFillDefaultChoiceItems() throws Exception {
+    void testDescriptor_doFillDefaultChoiceItems() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
 
         // Proper script
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, properScript, true, false);
-            assertEquals("Script returned an unexpected list", properScriptReturn.size() + 1, ret.size());
+            assertEquals(properScriptReturn.size() + 1, ret.size(), "Script returned an unexpected list");
             for (int i = 0; i < properScriptReturn.size(); ++i) {
-                assertEquals("Script returned an unexpected list", properScriptReturn.get(i), ret.get(i + 1).value);
+                assertEquals(properScriptReturn.get(i), ret.get(i + 1).value, "Script returned an unexpected list");
             }
         }
 
         // Non-string list script
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, nonstringScript, true, false);
-            assertEquals("Script returned an unexpected list", nonstringScriptReturn.size() + 1, ret.size());
+            assertEquals(nonstringScriptReturn.size() + 1, ret.size(), "Script returned an unexpected list");
             for (int i = 0; i < nonstringScriptReturn.size(); ++i) {
-                assertEquals("Script returned an unexpected list", nonstringScriptReturn.get(i), ret.get(i + 1).value);
+                assertEquals(nonstringScriptReturn.get(i), ret.get(i + 1).value, "Script returned an unexpected list");
             }
         }
 
         // non-list script
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, nonlistScript, true, false);
-            assertEquals("Script returning non-list must return an empty list", 1, ret.size());
+            assertEquals(1, ret.size(), "Script returning non-list must return an empty list");
         }
 
         // Empty list script
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, emptyListScript, true, false);
-            assertEquals("Script must return an empty list", 1, ret.size());
+            assertEquals(1, ret.size(), "Script must return an empty list");
         }
 
         // Null script
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, nullScript, true, false);
-            assertEquals("Script with null must return an empty list", 1, ret.size());
+            assertEquals(1, ret.size(), "Script with null must return an empty list");
         }
 
         // emptyScript
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, emptyScript, true, false);
-            assertEquals("empty script must return an empty list", 1, ret.size());
+            assertEquals(1, ret.size(), "empty script must return an empty list");
         }
 
         // blankScript
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, blankScript, true, false);
-            assertEquals("blank script must return an empty list", 1, ret.size());
+            assertEquals(1, ret.size(), "blank script must return an empty list");
         }
 
         // Syntax broken script
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, syntaxBrokenScript, true, false);
-            assertEquals("Syntax-broken-script must return an empty list", 1, ret.size());
+            assertEquals(1, ret.size(), "Syntax-broken-script must return an empty list");
         }
 
         // exceptionScript
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, exceptionScript, true, false);
-            assertEquals("Script throwing an exception must return an empty list", 1, ret.size());
+            assertEquals(1, ret.size(), "Script throwing an exception must return an empty list");
         }
 
         // null
         {
             ListBoxModel ret = descriptor.doFillDefaultChoiceItems(p, null, true, false);
-            assertEquals("null must return an empty list", 1, ret.size());
+            assertEquals(1, ret.size(), "null must return an empty list");
         }
     }
 
     @Test
-    public void testDescriptor_doFillDefaultChoiceItemsWithoutSandbox() throws Exception {
+    void testDescriptor_doFillDefaultChoiceItemsWithoutSandbox() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
 
@@ -173,7 +184,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testDescriptor_doFillDefaultChoiceItemsWithoutContext() throws Exception {
+    void testDescriptor_doFillDefaultChoiceItemsWithoutContext() {
         SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
 
         ListBoxModel ret = descriptor.doFillDefaultChoiceItems(null, properScript, true, false);
@@ -181,7 +192,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testDescriptor_doFillDefaultChoiceItemsWithoutPermission() throws Exception {
+    void testDescriptor_doFillDefaultChoiceItemsWithoutPermission() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 .grant(Jenkins.READ)
@@ -197,7 +208,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
         wc.getOptions().setThrowExceptionOnFailingStatusCode(false);
 
         // user has no access to the job => 404
-        User user = User.get("user");
+        User user = User.getOrCreateByIdOrFullName("user");
         wc.login(user.getId());
 
         // missing Configure permission
@@ -215,7 +226,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
         assertEquals(HttpServletResponse.SC_OK, page.getWebResponse().getStatusCode());
 
         // configurer has access to the job but without Item/Configure permission => 403
-        User configurer = User.get("configurer");
+        User configurer = User.getOrCreateByIdOrFullName("configurer");
         wc.login(configurer.getId());
 
         // missing Configure permission
@@ -227,45 +238,45 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testDescriptor_doTest() throws Exception {
+    void testDescriptor_doTest() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
 
         // Proper script
         {
             FormValidation formValidation = descriptor.doTest(p, properScript, true, false);
-            assertEquals("Test for proper script must succeed", FormValidation.Kind.OK, formValidation.kind);
+            assertEquals(FormValidation.Kind.OK, formValidation.kind, "Test for proper script must succeed");
         }
 
         // Syntax broken script
         {
             FormValidation formValidation = descriptor.doTest(p, syntaxBrokenScript, true, false);
-            assertEquals("Test for broken script must fail", FormValidation.Kind.ERROR, formValidation.kind);
+            assertEquals(FormValidation.Kind.ERROR, formValidation.kind, "Test for broken script must fail");
         }
 
         // Script raising an exception
         {
             FormValidation formValidation = descriptor.doTest(p, exceptionScript, true, false);
             assertEquals(
-                    "Test for script raising an exception must fail", FormValidation.Kind.ERROR, formValidation.kind);
+                    FormValidation.Kind.ERROR, formValidation.kind, "Test for script raising an exception must fail");
         }
 
         // Script returning non-list
         {
             FormValidation formValidation = descriptor.doTest(p, nonlistScript, true, false);
             assertEquals(
-                    "Test for script returning non-list must fail", FormValidation.Kind.ERROR, formValidation.kind);
+                    FormValidation.Kind.ERROR, formValidation.kind, "Test for script returning non-list must fail");
         }
 
         // Script returning null
         {
             FormValidation formValidation = descriptor.doTest(p, nullScript, true, false);
-            assertEquals("Test for script retuning null must fail", FormValidation.Kind.ERROR, formValidation.kind);
+            assertEquals(FormValidation.Kind.ERROR, formValidation.kind, "Test for script retuning null must fail");
         }
     }
 
     @Test
-    public void testDescriptor_doTestWithoutSandbox() throws Exception {
+    void testDescriptor_doTestWithoutSandbox() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         FormValidation formValidation = descriptor.doTest(
@@ -277,14 +288,14 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testDescriptor_doTestWithoutContext() throws Exception {
+    void testDescriptor_doTestWithoutContext() {
         SystemGroovyChoiceListProvider.DescriptorImpl descriptor = getDescriptor();
         FormValidation formValidation = descriptor.doTest(null, properScript, true, false);
         assertEquals(FormValidation.Kind.WARNING, formValidation.kind);
     }
 
     @Test
-    public void testDescriptor_doTestWithoutPermission() throws Exception {
+    void testDescriptor_doTestWithoutPermission() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 .grant(Jenkins.READ)
@@ -300,7 +311,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
         wc.getOptions().setThrowExceptionOnFailingStatusCode(false);
 
         // user has no access to the job => 404
-        User user = User.get("user");
+        User user = User.getOrCreateByIdOrFullName("user");
         wc.login(user.getId());
 
         // missing Configure permission
@@ -318,7 +329,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
         assertEquals(HttpServletResponse.SC_OK, page.getWebResponse().getStatusCode());
 
         // configurer has access to the job but without Item/Configure permission => 403
-        User configurer = User.get("configurer");
+        User configurer = User.getOrCreateByIdOrFullName("configurer");
         wc.login(configurer.getId());
 
         // missing Configure permission
@@ -330,14 +341,14 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testGetChoiceList() {
+    void testGetChoiceList() {
         // Proper script
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(properScript, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("Script returned an unexpected list", properScriptReturn.size(), ret.size());
+            assertEquals(properScriptReturn.size(), ret.size(), "Script returned an unexpected list");
             for (int i = 0; i < properScriptReturn.size(); ++i) {
-                assertEquals("Script returned an unexpected list", properScriptReturn.get(i), ret.get(i));
+                assertEquals(properScriptReturn.get(i), ret.get(i), "Script returned an unexpected list");
             }
         }
 
@@ -345,9 +356,9 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(nonstringScript, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("Script returned an unexpected list", nonstringScriptReturn.size(), ret.size());
+            assertEquals(nonstringScriptReturn.size(), ret.size(), "Script returned an unexpected list");
             for (int i = 0; i < nonstringScriptReturn.size(); ++i) {
-                assertEquals("Script returned an unexpected list", nonstringScriptReturn.get(i), ret.get(i));
+                assertEquals(nonstringScriptReturn.get(i), ret.get(i), "Script returned an unexpected list");
             }
         }
 
@@ -355,80 +366,80 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(nonlistScript, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("Script retuning non-list must be fixed to an empty list", 0, ret.size());
+            assertEquals(0, ret.size(), "Script retuning non-list must be fixed to an empty list");
         }
 
         // Empty list script
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(emptyListScript, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("Script must return an empty list", 0, ret.size());
+            assertEquals(0, ret.size(), "Script must return an empty list");
         }
 
         // Null script
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(nullScript, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("Script with null must return an empty list", 0, ret.size());
+            assertEquals(0, ret.size(), "Script with null must return an empty list");
         }
 
         // Empty script
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(emptyScript, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("Empty script must return an empty list", 0, ret.size());
+            assertEquals(0, ret.size(), "Empty script must return an empty list");
         }
 
         // Blank script
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(blankScript, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("Blank script must return an empty list", 0, ret.size());
+            assertEquals(0, ret.size(), "Blank script must return an empty list");
         }
 
         // Syntax broken script
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(syntaxBrokenScript, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("Syntax-broken-script must return an empty list", 0, ret.size());
+            assertEquals(0, ret.size(), "Syntax-broken-script must return an empty list");
         }
 
         // exceptionScript
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(exceptionScript, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("Script throwing an exception must return an empty list", 0, ret.size());
+            assertEquals(0, ret.size(), "Script throwing an exception must return an empty list");
         }
 
         // null
         {
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(null, null);
             List<String> ret = target.getChoiceList();
-            assertEquals("null must return an empty list", 0, ret.size());
+            assertEquals(0, ret.size(), "null must return an empty list");
         }
     }
 
     @Test
-    public void testVariables() throws Exception {
+    void testVariables() throws Exception {
         ScriptApproval.get().approveSignature("method hudson.model.Item getFullName");
         ScriptApproval.get().approveSignature("method jenkins.model.FullyNamed getFullName");
         FreeStyleProject p = j.createFreeStyleProject();
         p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
                 "test", new SystemGroovyChoiceListProvider("[project.fullName]", null, true), false, "test")));
 
-        WebClient wc = j.createAllow405WebClient();
+        WebClient wc = j.createWebClient().withThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = wc.getPage(p, "build");
 
         List<DomElement> elements = page.getElementsByTagName("select");
         assertEquals(1, elements.size());
-        assertTrue(elements.get(0) instanceof HtmlSelect);
+        assertInstanceOf(HtmlSelect.class, elements.get(0));
         HtmlSelect sel = (HtmlSelect) elements.get(0);
         assertEquals(1, sel.getOptionSize());
         assertEquals(p.getFullName(), sel.getOption(0).getValueAttribute());
     }
 
     @Test
-    public void testProjectVariable() throws Exception {
+    void testProjectVariable() throws Exception {
         ScriptApproval.get().approveSignature("method hudson.model.Item getFullName");
         ScriptApproval.get().approveSignature("method jenkins.model.FullyNamed getFullName");
         FreeStyleProject p = j.createFreeStyleProject();
@@ -440,12 +451,12 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
                 "test")));
         p.getBuildersList().add(ceb);
 
-        WebClient wc = j.createAllow405WebClient();
+        WebClient wc = j.createWebClient().withThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = wc.getPage(p, "build");
 
         List<DomElement> elements = page.getElementsByTagName("select");
         assertEquals(1, elements.size());
-        assertTrue(elements.get(0) instanceof HtmlSelect);
+        assertInstanceOf(HtmlSelect.class, elements.get(0));
         HtmlSelect sel = (HtmlSelect) elements.get(0);
         assertEquals(1, sel.getOptionSize());
         assertEquals(p.getFullName(), sel.getOption(0).getValueAttribute());
@@ -481,47 +492,47 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testSystemGroovyChoiceListProvider_defaultChoice() {
+    void testSystemGroovyChoiceListProvider_defaultChoice() {
         String scriptText = "abc";
 
         // a value
         {
             String defaultChoice = "some value";
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(scriptText, defaultChoice);
-            assertEquals("a value", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "a value");
         }
 
         // null
         {
             String defaultChoice = null;
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(scriptText, defaultChoice);
-            assertEquals("null", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "null");
         }
 
         // empty
         {
             String defaultChoice = "";
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(scriptText, defaultChoice);
-            assertEquals("empty", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "empty");
         }
 
         // blank
         {
             String defaultChoice = "  ";
             SystemGroovyChoiceListProvider target = new SystemGroovyChoiceListProvider(scriptText, defaultChoice);
-            assertEquals("blank", defaultChoice, target.getDefaultChoice());
+            assertEquals(defaultChoice, target.getDefaultChoice(), "blank");
         }
     }
 
     @Test
-    public void testConfiguration1() throws Exception {
+    void testConfiguration1() throws Exception {
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                 "test",
                 new SystemGroovyChoiceListProvider(
                         new SecureGroovyScript(
                                 "[1, 2, 3]",
                                 true, // sandbox
-                                Collections.<ClasspathEntry>emptyList()),
+                                Collections.emptyList()),
                         "1",
                         true),
                 false,
@@ -537,7 +548,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
     }
 
     @Test
-    public void testConfiguration2() throws Exception {
+    void testConfiguration2() throws Exception {
         // An arbitrary absolute path
         String classPath = new File(j.jenkins.getRootDir(), "userContent/somepath.jar").getAbsolutePath();
 
@@ -547,7 +558,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
                         new SecureGroovyScript(
                                 "[1, 2, 3]",
                                 false, // sandbox
-                                Arrays.asList(new ClasspathEntry(classPath))),
+                                List.of(new ClasspathEntry(classPath))),
                         null, // cannot configure default choice without sandbox.
                         true),
                 false,
@@ -564,7 +575,7 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
 
     @Test
     @LocalData
-    public void testMigrationFrom1_3_2() throws Exception {
+    void testMigrationFrom1_3_2() {
         FreeStyleProject p = j.jenkins.getItemByFullName("test", FreeStyleProject.class);
         ExtensibleChoiceParameterDefinition def = (ExtensibleChoiceParameterDefinition)
                 p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("test");
@@ -582,14 +593,14 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
      * @throws Exception
      */
     @Test
-    public void testApproval() throws Exception {
+    void testApproval() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         GlobalMatrixAuthorizationStrategy auth = new GlobalMatrixAuthorizationStrategy();
-        auth.add(Jenkins.ADMINISTER, "admin");
-        auth.add(Jenkins.READ, "user");
-        auth.add(Item.READ, "user");
-        auth.add(Item.CONFIGURE, "user");
-        auth.add(Item.BUILD, "user");
+        auth.add(Jenkins.ADMINISTER, new PermissionEntry(AuthorizationType.EITHER, "admin"));
+        auth.add(Jenkins.READ, new PermissionEntry(AuthorizationType.EITHER, "user"));
+        auth.add(Item.READ, new PermissionEntry(AuthorizationType.EITHER, "user"));
+        auth.add(Item.CONFIGURE, new PermissionEntry(AuthorizationType.EITHER, "user"));
+        auth.add(Item.BUILD, new PermissionEntry(AuthorizationType.EITHER, "user"));
         j.jenkins.setAuthorizationStrategy(auth);
 
         final String SCRIPT = "return java.util.Arrays.asList(new File('/').list());";
@@ -598,21 +609,20 @@ public class SystemGroovyChoiceListProviderJenkinsTest {
         p.addProperty(new ParametersDefinitionProperty(new ExtensibleChoiceParameterDefinition(
                 "test",
                 new SystemGroovyChoiceListProvider(
-                        new SecureGroovyScript(SCRIPT, false, Collections.<ClasspathEntry>emptyList()), null, false),
+                        new SecureGroovyScript(SCRIPT, false, Collections.emptyList()), null, false),
                 false,
                 "test")));
 
-        WebClient wc = j.createAllow405WebClient();
+        WebClient wc = j.createWebClient();
         wc.login("user");
-        try {
-            j.submit(wc.getPage(p, "build?delay=0sec").getFormByName("parameters"));
-            fail();
-        } catch (FailingHttpStatusCodeException e) {
-            // illegal choice
-        }
+
+        assertThrows(
+                FailingHttpStatusCodeException.class,
+                () -> j.submit(wc.getPage(p, "build?delay=0sec").getFormByName("parameters")));
 
         ScriptApproval.get().preapproveAll();
 
+        wc.setThrowExceptionOnFailingStatusCode(false);
         j.submit(wc.getPage(p, "build?delay=0sec").getFormByName("parameters"));
         j.waitUntilNoActivity();
         j.assertBuildStatusSuccess(p.getLastBuild());

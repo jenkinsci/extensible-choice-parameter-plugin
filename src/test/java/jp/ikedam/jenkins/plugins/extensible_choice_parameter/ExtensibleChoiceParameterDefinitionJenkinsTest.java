@@ -23,9 +23,8 @@
  */
 package jp.ikedam.jenkins.plugins.extensible_choice_parameter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -39,6 +38,7 @@ import hudson.model.ParametersDefinitionProperty;
 import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,12 +62,14 @@ import org.htmlunit.html.HtmlPage;
 import org.htmlunit.html.HtmlSelect;
 import org.htmlunit.html.HtmlTextInput;
 import org.htmlunit.xml.XmlPage;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.hudson.test.recipes.WithTimeout;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest2;
@@ -75,9 +77,15 @@ import org.kohsuke.stapler.StaplerRequest2;
 /**
  * Tests for ExtensibleChoiceParameterDefinition, corresponding to Jenkins.
  */
-public class ExtensibleChoiceParameterDefinitionJenkinsTest {
-    @Rule
-    public ExtensibleChoiceParameterJenkinsRule j = new ExtensibleChoiceParameterJenkinsRule();
+@WithJenkins
+class ExtensibleChoiceParameterDefinitionJenkinsTest {
+
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     private ExtensibleChoiceParameterDefinition.DescriptorImpl getDescriptor() {
         return (ExtensibleChoiceParameterDefinition.DescriptorImpl)
@@ -90,35 +98,35 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
      * So when changing target Jenkins version, the behavior may change.
      */
     @Test
-    public void testDescriptorDoCheckNameOk() {
+    void testDescriptorDoCheckNameOk() {
         ExtensibleChoiceParameterDefinition.DescriptorImpl descriptor = getDescriptor();
 
         // OK: lower alphabets
-        assertEquals(descriptor.doCheckName("abc").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("abc").kind);
 
         // OK: upper alphabets
-        assertEquals(descriptor.doCheckName("ABC").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("ABC").kind);
 
         // OK: alphabets and numbers
-        assertEquals(descriptor.doCheckName("abc123").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("abc123").kind);
 
         // OK: only numbers (amazing!)
-        assertEquals(descriptor.doCheckName("123").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("123").kind);
 
         // OK: alphabets, numbers, and underscores.
-        assertEquals(descriptor.doCheckName("abc_1_2_3").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("abc_1_2_3").kind);
 
         // OK: starts with underscore.
-        assertEquals(descriptor.doCheckName("_abc_1_2_3").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("_abc_1_2_3").kind);
 
         // OK: blank in the beginning
-        assertEquals(descriptor.doCheckName("  _abc_1_2_3").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("  _abc_1_2_3").kind);
 
         // OK: blank in the end
-        assertEquals(descriptor.doCheckName("  _abc_1_2_3   ").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("  _abc_1_2_3   ").kind);
 
         // OK: value contains dots (accepted since Jenkins 1.526)
-        assertEquals(descriptor.doCheckName("a.b").kind, FormValidation.Kind.OK);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckName("a.b").kind);
     }
 
     /**
@@ -127,33 +135,35 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
      * So when changing target Jenkins version, the behavior may change.
      */
     @Test
-    public void testDescriptorDoCheckNameError() {
+    void testDescriptorDoCheckNameError() {
         ExtensibleChoiceParameterDefinition.DescriptorImpl descriptor = getDescriptor();
 
         // ERROR: null
-        assertEquals(descriptor.doCheckName(null).kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName(null).kind);
 
         // ERROR: empty
-        assertEquals(descriptor.doCheckName("").kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName("").kind);
 
         // ERROR: blank
-        assertEquals(descriptor.doCheckName(" ").kind, FormValidation.Kind.ERROR);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckName(" ").kind);
 
         // WARNING: value containing blank
-        assertEquals(descriptor.doCheckName("a b").kind, FormValidation.Kind.WARNING);
+        assertEquals(FormValidation.Kind.WARNING, descriptor.doCheckName("a b").kind);
 
         // WARNING: value contains a letter, not alphabet, number, nor underscore.
-        assertEquals(descriptor.doCheckName("a-b-c").kind, FormValidation.Kind.WARNING);
+        assertEquals(FormValidation.Kind.WARNING, descriptor.doCheckName("a-b-c").kind);
 
         // WARNING: value starts with a letter, not alphabet, number, nor underscore.
-        assertEquals(descriptor.doCheckName("!ab").kind, FormValidation.Kind.WARNING);
+        assertEquals(FormValidation.Kind.WARNING, descriptor.doCheckName("!ab").kind);
 
         // WARNING: value contains a multibyte letter.
-        assertEquals(descriptor.doCheckName("ａb").kind, FormValidation.Kind.WARNING);
+        assertEquals(FormValidation.Kind.WARNING, descriptor.doCheckName("ａb").kind);
     }
 
     public static class MockChoiceListProvider extends ChoiceListProvider {
+        @Serial
         private static final long serialVersionUID = -8216066980119568526L;
+
         private List<String> choiceList = null;
         private String defaultChoice = null;
         private boolean requiresBuildPermission = false;
@@ -203,7 +213,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     public static class EnableConfigurableMockChoiceListProvider extends ChoiceListProvider {
+        @Serial
         private static final long serialVersionUID = 7643544327776225136L;
+
         private List<String> choiceList = null;
         private String defaultChoice = null;
 
@@ -260,28 +272,35 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     /**
-     * @param def
-     * @param value
-     * @return
-     * @throws Exception
-     */
-    /**
+     * Calls {@link #runBuildWithSelectParameter(ParameterDefinition, String, boolean)} with throwExceptions = false
      * @param def
      * @param value
      * @return
      * @throws Exception
      */
     private EnvVars runBuildWithSelectParameter(ParameterDefinition def, String value) throws Exception {
+        return runBuildWithSelectParameter(def, value, false);
+    }
+
+    /**
+     * @param def
+     * @param value
+     * @param throwExceptions sets WebClient#withThrowExceptionOnFailingStatusCode when posting the form
+     * @return
+     * @throws Exception
+     */
+    private EnvVars runBuildWithSelectParameter(ParameterDefinition def, String value, boolean throwExceptions)
+            throws Exception {
         FreeStyleProject job = j.createFreeStyleProject();
         job.addProperty(new ParametersDefinitionProperty(def));
         CaptureEnvironmentBuilder ceb = new CaptureEnvironmentBuilder();
         job.getBuildersList().add(ceb);
 
-        WebClient wc = j.createAllow405WebClient();
+        WebClient wc = j.createWebClient().withThrowExceptionOnFailingStatusCode(false);
 
         HtmlPage page = wc.getPage(job, "build?delay=0sec");
 
-        HtmlForm form = null;
+        HtmlForm form;
 
         try {
             form = page.getFormByName("parameters");
@@ -313,9 +332,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
         } catch (ElementNotFoundException e) {
             // selectbox was not found.
             // selectbox is replaced with input field.
-            HtmlTextInput input = (HtmlTextInput) form.getInputByName("value");
+            HtmlTextInput input = form.getInputByName("value");
             input.setValue(value);
         }
+
+        wc.setThrowExceptionOnFailingStatusCode(throwExceptions);
         j.submit(form);
 
         j.waitUntilNoActivity();
@@ -331,7 +352,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
      */
     @Test
     @WithTimeout(300)
-    public void testCreateValueFromView() throws Exception {
+    void testCreateValueFromView() throws Exception {
         String name = "PARAM1";
         String description = "Some Text";
         ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), null);
@@ -341,7 +362,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             String value = "value3";
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description), value);
-            assertEquals("select with non-editable", value, envVars.get(name));
+            assertEquals(value, envVars.get(name), "select with non-editable");
         }
 
         // select with non-editable
@@ -349,7 +370,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             String value = "value2";
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(name, provider, false, description), value);
-            assertEquals("select with non-editable", value, envVars.get(name));
+            assertEquals(value, envVars.get(name), "select with non-editable");
         }
 
         // input with editable
@@ -357,20 +378,17 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             String value = "valueX";
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description), value);
-            assertEquals("input with editable", value, envVars.get(name));
+            assertEquals(value, envVars.get(name), "input with editable");
         }
 
         // input with non-editable. causes exception.
         {
             String value = "valueX";
-            try {
-                EnvVars envVars = runBuildWithSelectParameter(
-                        new ExtensibleChoiceParameterDefinition(name, provider, false, description), value);
-                assertEquals("input with non-editable", value, envVars.get(name));
-                assertTrue("This code would not be reached.", false);
-            } catch (FailingHttpStatusCodeException e) {
-                assertEquals("Failed with unexpected status code", 500, e.getStatusCode());
-            }
+            FailingHttpStatusCodeException e = assertThrows(
+                    FailingHttpStatusCodeException.class,
+                    () -> runBuildWithSelectParameter(
+                            new ExtensibleChoiceParameterDefinition(name, provider, false, description), value, true));
+            assertEquals(500, e.getStatusCode(), "Failed with unexpected status code");
         }
 
         // not trimmed.
@@ -378,7 +396,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             String value = " a b c d  ";
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description), value);
-            assertEquals("not trimmed", value, envVars.get(name));
+            assertEquals(value, envVars.get(name), "not trimmed");
         }
 
         // no choice is provided and editable. any values can be accepted.
@@ -386,24 +404,22 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             String value = "abc";
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(
-                            name, new MockChoiceListProvider(new ArrayList<String>(0), null), true, description),
+                            name, new MockChoiceListProvider(new ArrayList<>(0), null), true, description),
                     value);
-            assertEquals("provider is null and editable", value, envVars.get(name));
+            assertEquals(value, envVars.get(name), "provider is null and editable");
         }
 
         // no choice is provided and non-editable. always throw exception.
         {
             String value = "";
-            try {
-                EnvVars envVars = runBuildWithSelectParameter(
-                        new ExtensibleChoiceParameterDefinition(
-                                name, new MockChoiceListProvider(new ArrayList<String>(0), null), false, description),
-                        value);
-                assertEquals("no choice is provided and non-editable", value, envVars.get(name));
-                assertTrue("This code would not be reached.", false);
-            } catch (FailingHttpStatusCodeException e) {
-                assertEquals("Failed with unexpected status code", 500, e.getStatusCode());
-            }
+            FailingHttpStatusCodeException e = assertThrows(
+                    FailingHttpStatusCodeException.class,
+                    () -> runBuildWithSelectParameter(
+                            new ExtensibleChoiceParameterDefinition(
+                                    name, new MockChoiceListProvider(new ArrayList<>(0), null), false, description),
+                            value,
+                            true));
+            assertEquals(500, e.getStatusCode(), "Failed with unexpected status code");
         }
     }
 
@@ -418,7 +434,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
      * @throws Exception
      */
     @Test
-    public void testCreateValueFromViewWithInvalidProvider() throws Exception {
+    void testCreateValueFromViewWithInvalidProvider() throws Exception {
         String name = "PARAM1";
         String description = "Some Text";
 
@@ -427,20 +443,17 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             String value = "";
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(name, null, true, description), value);
-            assertEquals("provider is null and editable", value, envVars.get(name));
+            assertEquals(value, envVars.get(name), "provider is null and editable");
         }
 
         // provider is null and non-editable. always throw exception.
         {
             String value = "";
-            try {
-                EnvVars envVars = runBuildWithSelectParameter(
-                        new ExtensibleChoiceParameterDefinition(name, null, false, description), value);
-                assertEquals("provider is null and non-editable", value, envVars.get(name));
-                assertTrue("This code would not be reached.", false);
-            } catch (FailingHttpStatusCodeException e) {
-                assertEquals("Failed with unexpected status code", 500, e.getStatusCode());
-            }
+            FailingHttpStatusCodeException e = assertThrows(
+                    FailingHttpStatusCodeException.class,
+                    () -> runBuildWithSelectParameter(
+                            new ExtensibleChoiceParameterDefinition(name, null, false, description), value, true));
+            assertEquals(500, e.getStatusCode(), "Failed with unexpected status code");
         }
 
         // provider returns null and editable. any values can be accepted.
@@ -450,27 +463,25 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                     new ExtensibleChoiceParameterDefinition(
                             name, new MockChoiceListProvider((List<String>) null, null), true, description),
                     value);
-            assertEquals("provider returns null and editable", value, envVars.get(name));
+            assertEquals(value, envVars.get(name), "provider returns null and editable");
         }
 
         // provider returns null non-editable. always throw exception.
         {
             String value = "";
-            try {
-                EnvVars envVars = runBuildWithSelectParameter(
-                        new ExtensibleChoiceParameterDefinition(
-                                name, new MockChoiceListProvider((List<String>) null, null), false, description),
-                        value);
-                assertEquals("provider returns null non-editable", value, envVars.get(name));
-                assertTrue("This code would not be reached.", false);
-            } catch (FailingHttpStatusCodeException e) {
-                assertEquals("Failed with unexpected status code", 500, e.getStatusCode());
-            }
+            FailingHttpStatusCodeException e = assertThrows(
+                    FailingHttpStatusCodeException.class,
+                    () -> runBuildWithSelectParameter(
+                            new ExtensibleChoiceParameterDefinition(
+                                    name, new MockChoiceListProvider((List<String>) null, null), false, description),
+                            value,
+                            true));
+            assertEquals(500, e.getStatusCode(), "Failed with unexpected status code");
         }
     }
 
     @Test
-    public void testGetDefaultParameterValue() throws Exception {
+    void testGetDefaultParameterValue() throws Exception {
         // editable, in choice
         {
             ChoiceListProvider provider =
@@ -484,7 +495,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             job.save();
 
             j.assertBuildStatusSuccess(job.scheduleBuild2(0));
-            assertEquals("editable, in choice", "value2", ceb.getEnvVars().get("test"));
+            assertEquals("value2", ceb.getEnvVars().get("test"), "editable, in choice");
         }
 
         // non-editable, in choice
@@ -500,7 +511,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             job.save();
 
             j.assertBuildStatusSuccess(job.scheduleBuild2(0));
-            assertEquals("non-editable, in choice", "value2", ceb.getEnvVars().get("test"));
+            assertEquals("value2", ceb.getEnvVars().get("test"), "non-editable, in choice");
         }
 
         // editable, not in choice
@@ -516,7 +527,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             job.save();
 
             j.assertBuildStatusSuccess(job.scheduleBuild2(0));
-            assertEquals("editable, not in choice", "value4", ceb.getEnvVars().get("test"));
+            assertEquals("value4", ceb.getEnvVars().get("test"), "editable, not in choice");
         }
 
         // non-editable, not in choice
@@ -539,7 +550,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
 
     // Test for createValue(String value)
     @Test
-    public void testCreateValueForCli() {
+    void testCreateValueForCli() {
         String name = "name";
         String description = "Some text";
         ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), null);
@@ -550,9 +561,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description);
             String value = "value3";
             assertEquals(
-                    "select with editable",
                     new StringParameterValue(name, value, description),
-                    target.createValue(value));
+                    target.createValue(value),
+                    "select with editable");
         }
 
         // select with non-editable
@@ -561,9 +572,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                     new ExtensibleChoiceParameterDefinition(name, provider, false, description);
             String value = "value2";
             assertEquals(
-                    "select with non-editable",
                     new StringParameterValue(name, value, description),
-                    target.createValue(value));
+                    target.createValue(value),
+                    "select with non-editable");
         }
 
         // input with editable
@@ -572,9 +583,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description);
             String value = "someValue";
             assertEquals(
-                    "input with editable",
                     new StringParameterValue(name, value, description),
-                    target.createValue(value));
+                    target.createValue(value),
+                    "input with editable");
         }
 
         // input with non-editable. causes exception.
@@ -582,16 +593,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, false, description);
             String value = "someValue";
-            try {
-                assertEquals(
-                        "input with non-editable",
-                        new StringParameterValue(name, value, description),
-                        target.createValue(value));
-                assertTrue(
-                        "input with non-editable: Code would not be reached, for an exception was triggered.", false);
-            } catch (IllegalArgumentException e) {
-                assertTrue(true);
-            }
+            assertThrows(IllegalArgumentException.class, () -> target.createValue(value));
         }
 
         // not trimmed.
@@ -599,7 +601,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description);
             String value = "  a b\nc d e  ";
-            assertEquals("not trimmed", new StringParameterValue(name, value, description), target.createValue(value));
+            assertEquals(new StringParameterValue(name, value, description), target.createValue(value), "not trimmed");
         }
 
         // provider is null and non-editable. always throw exception.
@@ -607,16 +609,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, null, false, description);
             String value = "anyValue";
-            try {
-                assertEquals(
-                        "provider is null and non-editable",
-                        new StringParameterValue(name, value, description),
-                        target.createValue(value));
-                assertTrue(
-                        "input with non-editable: Code would not be reached, for an exception was triggered.", false);
-            } catch (IllegalArgumentException e) {
-                assertTrue(true);
-            }
+            assertThrows(IllegalArgumentException.class, () -> target.createValue(value));
         }
 
         // provider is null and editable. any values can be accepted.
@@ -625,37 +618,28 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                     new ExtensibleChoiceParameterDefinition(name, null, true, description);
             String value = "anyValue";
             assertEquals(
-                    "provider is null and editable",
                     new StringParameterValue(name, value, description),
-                    target.createValue(value));
+                    target.createValue(value),
+                    "provider is null and editable");
         }
 
         // no choice is provided and non-editable. always throw exception.
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
-                    name, new MockChoiceListProvider(new ArrayList<String>(0), null), false, description);
+                    name, new MockChoiceListProvider(new ArrayList<>(0), null), false, description);
             String value = "anyValue";
-            try {
-                assertEquals(
-                        "no choice is provided and non-editable",
-                        new StringParameterValue(name, value, description),
-                        target.createValue(value));
-                assertTrue(
-                        "input with non-editable: Code would not be reached, for an exception was triggered.", false);
-            } catch (IllegalArgumentException e) {
-                assertTrue(true);
-            }
+            assertThrows(IllegalArgumentException.class, () -> target.createValue(value));
         }
 
         // no choice is provided and editable. any values can be accepted.
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
-                    name, new MockChoiceListProvider(new ArrayList<String>(0), null), true, description);
+                    name, new MockChoiceListProvider(new ArrayList<>(0), null), true, description);
             String value = "anyValue";
             assertEquals(
-                    "no choice is provided and editable",
                     new StringParameterValue(name, value, description),
-                    target.createValue(value));
+                    target.createValue(value),
+                    "no choice is provided and editable");
         }
 
         // provider returns null non-editable. always throw exception.
@@ -663,16 +647,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name, new MockChoiceListProvider((List<String>) null, null), false, description);
             String value = "anyValue";
-            try {
-                assertEquals(
-                        "provider returns null and non-editable",
-                        new StringParameterValue(name, value, description),
-                        target.createValue(value));
-                assertTrue(
-                        "input with non-editable: Code would not be reached, for an exception was triggered.", false);
-            } catch (IllegalArgumentException e) {
-                assertTrue(true);
-            }
+            assertThrows(IllegalArgumentException.class, () -> target.createValue(value));
         }
 
         // provider returns null and editable. any values can be accepted.
@@ -681,14 +656,14 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                     name, new MockChoiceListProvider((List<String>) null, null), true, description);
             String value = "anyValue";
             assertEquals(
-                    "provider returns null and editable",
                     new StringParameterValue(name, value, description),
-                    target.createValue(value));
+                    target.createValue(value),
+                    "provider returns null and editable");
         }
     }
 
     @Test
-    public void testGetDefaultParameterValue_NoDefaultChoice() {
+    void testGetDefaultParameterValue_NoDefaultChoice() {
         String name = "name";
         String description = "Some text";
         ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), null);
@@ -699,9 +674,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description);
             assertEquals(
-                    "Editable",
                     new StringParameterValue(name, firstValue, description),
-                    target.getDefaultParameterValue());
+                    target.getDefaultParameterValue(),
+                    "Editable");
         }
 
         // Non-editable
@@ -709,56 +684,56 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, false, description);
             assertEquals(
-                    "Editable",
                     new StringParameterValue(name, firstValue, description),
-                    target.getDefaultParameterValue());
+                    target.getDefaultParameterValue(),
+                    "Editable");
         }
 
         // provider is null and non-editable. returns null.
         {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, null, false, description);
-            assertEquals("provider is null and non-editable", null, target.getDefaultParameterValue());
+            assertNull(target.getDefaultParameterValue(), "provider is null and non-editable");
         }
 
         // provider is null and editable. returns null.
         {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, null, true, description);
-            assertEquals("provider is null and editable", null, target.getDefaultParameterValue());
+            assertNull(target.getDefaultParameterValue(), "provider is null and editable");
         }
 
         // no choice is provided and non-editable. returns null.
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
-                    name, new MockChoiceListProvider(new ArrayList<String>(0), null), false, description);
-            assertEquals("no choice is provided and non-editable", null, target.getDefaultParameterValue());
+                    name, new MockChoiceListProvider(new ArrayList<>(0), null), false, description);
+            assertNull(target.getDefaultParameterValue(), "no choice is provided and non-editable");
         }
 
         // no choice is provided and editable. returns null.
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
-                    name, new MockChoiceListProvider(new ArrayList<String>(0), null), true, description);
-            assertEquals("no choice is provided and editable", null, target.getDefaultParameterValue());
+                    name, new MockChoiceListProvider(new ArrayList<>(0), null), true, description);
+            assertNull(target.getDefaultParameterValue(), "no choice is provided and editable");
         }
 
         // provider returns null non-editable. returns null.
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name, new MockChoiceListProvider((List<String>) null, null), false, description);
-            assertEquals("provider returns null and non-editable", null, target.getDefaultParameterValue());
+            assertNull(target.getDefaultParameterValue(), "provider returns null and non-editable");
         }
 
         // provider returns null and editable. returns null.
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
                     name, new MockChoiceListProvider((List<String>) null, null), true, description);
-            assertEquals("provider returns null and editable", null, target.getDefaultParameterValue());
+            assertNull(target.getDefaultParameterValue(), "provider returns null and editable");
         }
     }
 
     @Test
-    public void testGetDefaultParameterValue_SpecifiedDefaultChoice() {
+    void testGetDefaultParameterValue_SpecifiedDefaultChoice() {
         String name = "name";
         String description = "Some text";
 
@@ -770,9 +745,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description);
             assertEquals(
-                    "Editable, in choices",
                     new StringParameterValue(name, defaultChoice, description),
-                    target.getDefaultParameterValue());
+                    target.getDefaultParameterValue(),
+                    "Editable, in choices");
         }
 
         // Non-editable, in choices
@@ -783,9 +758,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, false, description);
             assertEquals(
-                    "Non-Editable, in choices",
                     new StringParameterValue(name, defaultChoice, description),
-                    target.getDefaultParameterValue());
+                    target.getDefaultParameterValue(),
+                    "Non-Editable, in choices");
         }
 
         // Editable, in choices, the first
@@ -796,9 +771,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description);
             assertEquals(
-                    "Editable, in choices, the first",
                     new StringParameterValue(name, defaultChoice, description),
-                    target.getDefaultParameterValue());
+                    target.getDefaultParameterValue(),
+                    "Editable, in choices, the first");
         }
 
         // Non-editable, in choices, the first
@@ -809,9 +784,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, false, description);
             assertEquals(
-                    "Non-Editable, in choices, the first",
                     new StringParameterValue(name, defaultChoice, description),
-                    target.getDefaultParameterValue());
+                    target.getDefaultParameterValue(),
+                    "Non-Editable, in choices, the first");
         }
 
         // Editable, in choices, the last
@@ -822,9 +797,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description);
             assertEquals(
-                    "Editable, in choices, the last",
                     new StringParameterValue(name, defaultChoice, description),
-                    target.getDefaultParameterValue());
+                    target.getDefaultParameterValue(),
+                    "Editable, in choices, the last");
         }
 
         // Non-editable, in choices, the last
@@ -835,9 +810,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, false, description);
             assertEquals(
-                    "Non-Editable, in choices, the last",
                     new StringParameterValue(name, defaultChoice, description),
-                    target.getDefaultParameterValue());
+                    target.getDefaultParameterValue(),
+                    "Non-Editable, in choices, the last");
         }
 
         // Editable, not in choices
@@ -848,9 +823,9 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
             ExtensibleChoiceParameterDefinition target =
                     new ExtensibleChoiceParameterDefinition(name, provider, true, description);
             assertEquals(
-                    "Editable, in choices",
                     new StringParameterValue(name, defaultChoice, description),
-                    target.getDefaultParameterValue());
+                    target.getDefaultParameterValue(),
+                    "Editable, in choices");
         }
 
         // Non-editable, not in choices
@@ -867,20 +842,20 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
         // no choice is provided and non-editable. returns null.
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
-                    name, new MockChoiceListProvider(new ArrayList<String>(0), null), false, description);
-            assertEquals("no choice is provided and non-editable", null, target.getDefaultParameterValue());
+                    name, new MockChoiceListProvider(new ArrayList<>(0), null), false, description);
+            assertNull(target.getDefaultParameterValue(), "no choice is provided and non-editable");
         }
 
         // no choice is provided and editable. returns null.
         {
             ExtensibleChoiceParameterDefinition target = new ExtensibleChoiceParameterDefinition(
-                    name, new MockChoiceListProvider(new ArrayList<String>(0), null), true, description);
-            assertEquals("no choice is provided and editable", null, target.getDefaultParameterValue());
+                    name, new MockChoiceListProvider(new ArrayList<>(0), null), true, description);
+            assertNull(target.getDefaultParameterValue(), "no choice is provided and editable");
         }
     }
 
     @Test
-    public void testDisableChoiceListConfiguration() throws Exception {
+    void testDisableChoiceListConfiguration() throws Exception {
         ExtensibleChoiceParameterDefinition.DescriptorImpl d = getDescriptor();
 
         MockChoiceListProvider.DescriptorImpl providerDesc1 =
@@ -911,7 +886,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
 
         // revert enables
         {
-            Map<String, Boolean> enableMap = new HashMap<String, Boolean>();
+            Map<String, Boolean> enableMap = new HashMap<>();
             enableMap.put(providerDesc1.getId(), false);
             enableMap.put(providerDesc2.getId(), true);
             d.setChoiceListEnabledMap(enableMap);
@@ -937,7 +912,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     @Test
-    public void testDisableChoiceListRuntime() throws Exception {
+    void testDisableChoiceListRuntime() {
         ExtensibleChoiceParameterDefinition d = new ExtensibleChoiceParameterDefinition(
                 "Choice", new MockChoiceListProvider(Arrays.asList("value1", "value2"), null), false, "");
 
@@ -946,7 +921,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
 
         // disable
         {
-            Map<String, Boolean> enableMap = new HashMap<String, Boolean>();
+            Map<String, Boolean> enableMap = new HashMap<>();
             enableMap.put(d.getChoiceListProvider().getDescriptor().getId(), false);
             getDescriptor().setChoiceListEnabledMap(enableMap);
         }
@@ -955,7 +930,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     @Test
-    public void testDisableChoiceListIntegration() throws Exception {
+    void testDisableChoiceListIntegration() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                 "Choice", new MockChoiceListProvider(Arrays.asList("value1", "value2"), null), false, "");
@@ -973,7 +948,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
 
         // disable
         {
-            Map<String, Boolean> enableMap = new HashMap<String, Boolean>();
+            Map<String, Boolean> enableMap = new HashMap<>();
             enableMap.put(def.getChoiceListProvider().getDescriptor().getId(), false);
             getDescriptor().setChoiceListEnabledMap(enableMap);
         }
@@ -995,7 +970,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
 
     @Issue("JENKINS-42903")
     @Test
-    public void testSafeTitle() throws Exception {
+    void testSafeTitle() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                 "<span id=\"test-not-expected\">combinations</span>",
@@ -1004,14 +979,14 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                 "");
         p.addProperty(new ParametersDefinitionProperty(def));
 
-        WebClient wc = j.createAllow405WebClient();
+        WebClient wc = j.createWebClient().withThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = wc.getPage(p, "build");
 
         assertNull(page.getElementById("test-not-expected"));
     }
 
     @Test
-    public void testConfiguration1() throws Exception {
+    void testConfiguration1() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
@@ -1025,7 +1000,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     @Test
-    public void testConfiguration2() throws Exception {
+    void testConfiguration2() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
@@ -1040,7 +1015,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     @Test
-    public void testConfiguration3() throws Exception {
+    void testConfiguration3() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
@@ -1054,8 +1029,8 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                 def, p.getProperty(ParametersDefinitionProperty.class).getParameterDefinition("test"));
     }
 
-    private List<String> extractCombobox(HtmlElement combobox) throws Exception {
-        List<String> ret = new ArrayList<String>();
+    private List<String> extractCombobox(HtmlElement combobox) {
+        List<String> ret = new ArrayList<>();
         for (HtmlElement d : combobox.getElementsByTagName("div")) {
             ret.add(d.getTextContent());
         }
@@ -1063,7 +1038,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     @Test
-    public void testComboboxNoFilter() throws Exception {
+    void testComboboxNoFilter() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
@@ -1074,7 +1049,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
         def.setEditableType(EditableType.NoFilter);
         p.addProperty(new ParametersDefinitionProperty(def));
 
-        WebClient wc = j.createAllow405WebClient();
+        WebClient wc = j.createWebClient().withThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = wc.getPage(p, "build?delay=0sec");
         HtmlTextInput in = page.getElementByName("value");
         assertEquals("foo/bar/baz", in.getValue());
@@ -1088,7 +1063,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     @Test
-    public void testComboboxFilter() throws Exception {
+    void testComboboxFilter() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
@@ -1099,7 +1074,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
         def.setEditableType(EditableType.Filter);
         p.addProperty(new ParametersDefinitionProperty(def));
 
-        WebClient wc = j.createAllow405WebClient();
+        WebClient wc = j.createWebClient().withThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = wc.getPage(p, "build?delay=0sec");
         HtmlTextInput in = page.getElementByName("value");
         assertEquals("foo/bar/baz", in.getValue());
@@ -1129,7 +1104,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     @Test
-    public void testRestApiWithPermission() throws Exception {
+    void testRestApiWithPermission() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 .grant(Item.READ, Item.BUILD, Jenkins.READ)
@@ -1149,16 +1124,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                 Arrays.asList("foo", "bar", "baz"),
                 Lists.transform(
                         page.getByXPath("//freeStyleProject/property/parameterDefinition[name='test']/choice"),
-                        new Function<Object, String>() {
-                            @Override
-                            public String apply(Object e) {
-                                return (e instanceof DomElement) ? ((DomElement) e).getTextContent() : null;
-                            }
-                        }));
+                        e -> (e instanceof DomElement) ? ((DomElement) e).getTextContent() : null));
     }
 
     @Test
-    public void testRestApiForViewWithPermission() throws Exception {
+    void testRestApiForViewWithPermission() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 .grant(Item.READ, Item.BUILD, Jenkins.READ)
@@ -1182,7 +1152,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
     }
 
     @Test
-    public void testRestApiWithoutRequireBuildPermission() throws Exception {
+    void testRestApiWithoutRequireBuildPermission() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         // No Item.BUILD permission!
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
@@ -1208,16 +1178,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                 Arrays.asList("foo", "bar", "baz"),
                 Lists.transform(
                         page.getByXPath("//freeStyleProject/property/parameterDefinition[name='test']/choice"),
-                        new Function<Object, String>() {
-                            @Override
-                            public String apply(Object e) {
-                                return (e instanceof DomElement) ? ((DomElement) e).getTextContent() : null;
-                            }
-                        }));
+                        e -> (e instanceof DomElement) ? ((DomElement) e).getTextContent() : null));
     }
 
     @Test
-    public void testRestApiForViewWithoutRequireBuildPermission() throws Exception {
+    void testRestApiForViewWithoutRequireBuildPermission() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 .grant(Item.READ, Item.BUILD, Jenkins.READ)
@@ -1243,16 +1208,11 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest {
                 Arrays.asList("foo", "bar", "baz"),
                 Lists.transform(
                         page.getByXPath("//hudson/job/property/parameterDefinition[name='test']/choice"),
-                        new Function<Object, String>() {
-                            @Override
-                            public String apply(Object e) {
-                                return (e instanceof DomElement) ? ((DomElement) e).getTextContent() : null;
-                            }
-                        }));
+                        e -> (e instanceof DomElement) ? ((DomElement) e).getTextContent() : null));
     }
 
     @Test
-    public void testRestApiWithoutPermission() throws Exception {
+    void testRestApiWithoutPermission() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         // No Item.BUILD permission!
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
