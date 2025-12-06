@@ -37,6 +37,7 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 
 /**
  * Create a choice list from a list of files.
@@ -367,6 +368,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider {
          * @param baseDirPath
          * @return FormValidation object
          */
+        @POST
         public FormValidation doCheckBaseDirPath(@QueryParameter String baseDirPath) {
             if (StringUtils.isBlank(baseDirPath)) {
                 return FormValidation.error(Messages.FilenameChoiceListProvider_BaseDirPath_empty());
@@ -418,6 +420,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider {
          * @param scanType
          * @return
          */
+        @POST
         public FormValidation doTest(
                 @QueryParameter String baseDirPath,
                 @QueryParameter String includePattern,
