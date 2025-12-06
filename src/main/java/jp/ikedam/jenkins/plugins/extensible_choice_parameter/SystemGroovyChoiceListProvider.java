@@ -52,6 +52,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.verb.POST;
 
 /**
  * A choice provider whose choices are determined by a Groovy script.
@@ -115,6 +116,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider {
          * @param usePredefinedVariables
          * @return the selection of a default choice
          */
+        @POST
         public ListBoxModel doFillDefaultChoiceItems(
                 @AncestorInPath Job<?, ?> job,
                 @RelativePath("groovyScript") @QueryParameter String script,
@@ -166,6 +168,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider {
             return NoDefaultChoice;
         }
 
+        @POST
         public FormValidation doTest(
                 @AncestorInPath Job<?, ?> job,
                 // Define same as `doFillDefaultChoiceItems`
