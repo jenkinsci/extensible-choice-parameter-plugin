@@ -223,7 +223,7 @@ class SystemGroovyChoiceListProviderJenkinsTest {
                 descriptor.getDescriptorUrl() + "/fillDefaultChoiceItems/?script=" + properScript + "&sandbox=" + true
                         + "&usePredefinedVariables=" + false,
                 null);
-        assertEquals(HttpServletResponse.SC_OK, page.getWebResponse().getStatusCode());
+        assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
 
         // configurer has access to the job but without Item/Configure permission => 403
         User configurer = User.getOrCreateByIdOrFullName("configurer");
@@ -234,7 +234,7 @@ class SystemGroovyChoiceListProviderJenkinsTest {
                 p.getUrl() + descriptor.getDescriptorUrl() + "/fillDefaultChoiceItems/?script=" + properScript
                         + "&sandbox=" + true + "&usePredefinedVariables=" + false,
                 null);
-        assertEquals(HttpServletResponse.SC_FORBIDDEN, page.getWebResponse().getStatusCode());
+        assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
     }
 
     @Test
@@ -326,7 +326,7 @@ class SystemGroovyChoiceListProviderJenkinsTest {
                 descriptor.getDescriptorUrl() + "/test/?script=" + properScript + "&sandbox=" + true
                         + "&usePredefinedVariables=" + false,
                 null);
-        assertEquals(HttpServletResponse.SC_OK, page.getWebResponse().getStatusCode());
+        assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
 
         // configurer has access to the job but without Item/Configure permission => 403
         User configurer = User.getOrCreateByIdOrFullName("configurer");
@@ -337,7 +337,7 @@ class SystemGroovyChoiceListProviderJenkinsTest {
                 p,
                 descriptor.getDescriptorUrl() + "/test/?script=" + properScript + "&sandbox=" + true
                         + "&usePredefinedVariables=" + false);
-        assertEquals(HttpServletResponse.SC_FORBIDDEN, page.getWebResponse().getStatusCode());
+        assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
     }
 
     @Test
