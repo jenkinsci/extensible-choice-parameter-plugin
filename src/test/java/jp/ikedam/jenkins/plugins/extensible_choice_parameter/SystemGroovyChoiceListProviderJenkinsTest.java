@@ -42,7 +42,9 @@ import java.util.Collections;
 import java.util.List;
 import jenkins.model.Jenkins;
 import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.HttpMethod;
 import org.htmlunit.Page;
+import org.htmlunit.WebRequest;
 import org.htmlunit.html.DomElement;
 import org.htmlunit.html.HtmlPage;
 import org.htmlunit.html.HtmlSelect;
@@ -230,11 +232,11 @@ class SystemGroovyChoiceListProviderJenkinsTest {
         wc.login(configurer.getId());
 
         // missing Configure permission
-        page = wc.goTo(
-                p.getUrl() + descriptor.getDescriptorUrl() + "/fillDefaultChoiceItems/?script=" + properScript
-                        + "&sandbox=" + true + "&usePredefinedVariables=" + false,
-                null);
-        assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
+        page = wc.getPage(new WebRequest(
+                wc.createCrumbedUrl(p.getUrl() + descriptor.getDescriptorUrl() + "/fillDefaultChoiceItems/?script="
+                        + properScript + "&sandbox=" + true + "&usePredefinedVariables=" + false),
+                HttpMethod.POST));
+        assertEquals(HttpServletResponse.SC_FORBIDDEN, page.getWebResponse().getStatusCode());
     }
 
     @Test
@@ -333,11 +335,11 @@ class SystemGroovyChoiceListProviderJenkinsTest {
         wc.login(configurer.getId());
 
         // missing Configure permission
-        page = wc.getPage(
-                p,
-                descriptor.getDescriptorUrl() + "/test/?script=" + properScript + "&sandbox=" + true
-                        + "&usePredefinedVariables=" + false);
-        assertEquals(HttpServletResponse.SC_NOT_FOUND, page.getWebResponse().getStatusCode());
+        page = wc.getPage(new WebRequest(
+                wc.createCrumbedUrl(p.getUrl() + descriptor.getDescriptorUrl() + "/test/?script=" + properScript
+                        + "&sandbox=" + true + "&usePredefinedVariables=" + false),
+                HttpMethod.POST));
+        assertEquals(HttpServletResponse.SC_FORBIDDEN, page.getWebResponse().getStatusCode());
     }
 
     @Test
