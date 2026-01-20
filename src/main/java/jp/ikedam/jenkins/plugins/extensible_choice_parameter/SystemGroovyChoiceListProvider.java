@@ -44,7 +44,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.kohsuke.stapler.AncestorInPath;
@@ -209,7 +208,7 @@ public class SystemGroovyChoiceListProvider extends ChoiceListProvider {
                 return FormValidation.error("Script returned null.");
             }
 
-            return FormValidation.ok(StringUtils.join(choices, '\n'));
+            return FormValidation.ok(String.join("\n", choices));
         }
     }
 

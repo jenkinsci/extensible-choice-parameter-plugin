@@ -26,7 +26,6 @@ package jp.ikedam.jenkins.plugins.extensible_choice_parameter.utility;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Utility Class to work with a list of strings in a textarea.
@@ -82,7 +81,9 @@ public class TextareaStringListUtility {
         List<String> stringList = (choiceListText != null)
                 ? Arrays.asList(choiceListText.split("\\r?\\n", -1))
                 : new ArrayList<String>(0);
-        if (!stringList.isEmpty() && StringUtils.isEmpty(stringList.get(stringList.size() - 1))) {
+        if (!stringList.isEmpty()
+                && (stringList.get(stringList.size() - 1) == null
+                        || stringList.get(stringList.size() - 1).isEmpty())) {
             // The last empty line will be ignored.
             // The list object returned from asList() does not support remove,
             // so use subList().

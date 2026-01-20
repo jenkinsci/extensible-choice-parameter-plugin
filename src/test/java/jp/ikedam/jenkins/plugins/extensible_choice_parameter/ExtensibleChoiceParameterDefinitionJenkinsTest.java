@@ -50,7 +50,6 @@ import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.ExtensibleChoiceParameterDefinition.EditableType;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.htmlunit.ElementNotFoundException;
 import org.htmlunit.FailingHttpStatusCodeException;
 import org.htmlunit.Page;
@@ -180,7 +179,7 @@ class ExtensibleChoiceParameterDefinitionJenkinsTest {
 
         @DataBoundConstructor
         public MockChoiceListProvider(String choiceListString, String defaultChoice) {
-            this.choiceList = Arrays.asList(StringUtils.split(choiceListString, ","));
+            this.choiceList = Arrays.asList(choiceListString.split(","));
             this.defaultChoice = Util.fixEmpty(defaultChoice);
         }
 
@@ -190,7 +189,7 @@ class ExtensibleChoiceParameterDefinitionJenkinsTest {
         }
 
         public String getChoiceListString() {
-            return StringUtils.join(getChoiceList(), ",");
+            return String.join(",", getChoiceList());
         }
 
         @Override
@@ -226,7 +225,7 @@ class ExtensibleChoiceParameterDefinitionJenkinsTest {
 
         @DataBoundConstructor
         public EnableConfigurableMockChoiceListProvider(String choiceListString, String defaultChoice) {
-            this.choiceList = Arrays.asList(StringUtils.split(choiceListString, ","));
+            this.choiceList = Arrays.asList(choiceListString.split(","));
             this.defaultChoice = Util.fixEmpty(defaultChoice);
         }
 
@@ -241,7 +240,7 @@ class ExtensibleChoiceParameterDefinitionJenkinsTest {
         }
 
         public String getChoiceListString() {
-            return StringUtils.join(getChoiceList(), ",");
+            return String.join(",", getChoiceList());
         }
 
         @Extension

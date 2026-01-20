@@ -48,7 +48,6 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
@@ -262,11 +261,11 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
         }
 
         public FormValidation doCheckName(@QueryParameter String name) {
-            if (StringUtils.isBlank(name)) {
+            if (name == null || name.trim().isEmpty()) {
                 return FormValidation.error(Messages.ExtensibleChoiceParameterDefinition_Name_empty());
             }
 
-            final String trimmedName = StringUtils.trim(name);
+            final String trimmedName = name.trim();
             final String EXPANDED = "GOOD";
             String expanded = Util.replaceMacro(String.format("${%s}", trimmedName), new VariableResolver<String>() {
                 @Override
@@ -417,7 +416,7 @@ public class ExtensibleChoiceParameterDefinition extends SimpleParameterDefiniti
             String name, ChoiceListProvider choiceListProvider, boolean editable, String description) {
         // There seems no way to forbid invalid values to be submitted.
         // SimpleParameterDefinition seems not to trim name parameter, so trim here.
-        super(StringUtils.trim(name), description);
+        super(name != null ? name.trim() : "", description);
 
         this.choiceListProvider = choiceListProvider;
         this.editable = editable;

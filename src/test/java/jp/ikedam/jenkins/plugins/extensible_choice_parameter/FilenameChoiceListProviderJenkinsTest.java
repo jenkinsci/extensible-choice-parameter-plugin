@@ -34,7 +34,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.htmlunit.html.HtmlElement;
 import org.htmlunit.html.HtmlPage;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,7 +68,9 @@ class FilenameChoiceListProviderJenkinsTest {
 
         // absolute path
         {
-            String path = (SystemUtils.IS_OS_WINDOWS) ? "C:\\path\\abosolute" : "/path/absolute";
+            String path = System.getProperty("os.name").toLowerCase().contains("windows")
+                    ? "C:\\path\\abosolute"
+                    : "/path/absolute";
             File test = FilenameChoiceListProvider.getBaseDir(path);
             File expect = new File(path);
             assertEquals(expect, test, "absolute path must be treat as is.");
