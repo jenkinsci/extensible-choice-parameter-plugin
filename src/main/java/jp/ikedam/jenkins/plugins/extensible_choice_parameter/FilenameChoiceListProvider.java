@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -193,9 +192,9 @@ public class FilenameChoiceListProvider extends ChoiceListProvider {
             ScanType scanType,
             boolean reverseOrder,
             EmptyChoiceType emptyChoiceType) {
-        this.baseDirPath = StringUtils.trim(baseDirPath);
-        this.includePattern = StringUtils.trim(includePattern);
-        this.excludePattern = StringUtils.trim(excludePattern);
+        this.baseDirPath = baseDirPath != null ? baseDirPath.trim() : null;
+        this.includePattern = includePattern != null ? includePattern.trim() : null;
+        this.excludePattern = excludePattern != null ? excludePattern.trim() : null;
         this.scanType = scanType;
         this.reverseOrder = reverseOrder;
         this.emptyChoiceType = emptyChoiceType;
@@ -241,7 +240,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider {
         if (baseDir == null || !baseDir.exists() || !baseDir.isDirectory()) {
             return new ArrayList<String>(0);
         }
-        if (StringUtils.isBlank(includePattern)) {
+        if (includePattern == null || includePattern.trim().isEmpty()) {
             return new ArrayList<String>(0);
         }
         if (scanType == null) {
@@ -251,7 +250,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider {
         DirectoryScanner ds = new DirectoryScanner();
         ds.setBasedir(baseDir);
         ds.setIncludes(includePattern.split("\\s*,(?:\\s*,)*\\s*"));
-        if (!StringUtils.isBlank(excludePattern)) {
+        if (excludePattern != null && !excludePattern.trim().isEmpty()) {
             ds.setExcludes(excludePattern.split("\\s*,(?:\\s*,)*\\s*"));
         }
         ds.scan();
@@ -370,7 +369,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider {
          */
         @POST
         public FormValidation doCheckBaseDirPath(@QueryParameter String baseDirPath) {
-            if (StringUtils.isBlank(baseDirPath)) {
+            if (baseDirPath == null || baseDirPath.trim().isEmpty()) {
                 return FormValidation.error(Messages.FilenameChoiceListProvider_BaseDirPath_empty());
             }
 
@@ -392,7 +391,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider {
          * @return FormValidation object
          */
         public FormValidation doCheckIncludePattern(@QueryParameter String includePattern) {
-            if (StringUtils.isBlank(includePattern)) {
+            if (includePattern == null || includePattern.trim().isEmpty()) {
                 return FormValidation.error(Messages.FilenameChoiceListProvider_IncludePattern_empty());
             }
 
@@ -435,7 +434,7 @@ public class FilenameChoiceListProvider extends ChoiceListProvider {
                 return FormValidation.ok("(No file matched)");
             }
 
-            return FormValidation.ok(StringUtils.join(fileList, '\n'));
+            return FormValidation.ok(String.join("\n", fileList));
         }
     }
 }

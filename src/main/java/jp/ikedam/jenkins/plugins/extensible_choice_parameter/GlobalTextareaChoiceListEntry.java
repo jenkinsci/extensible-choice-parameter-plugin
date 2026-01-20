@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import jp.ikedam.jenkins.plugins.extensible_choice_parameter.utility.TextareaStringListUtility;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -90,7 +89,7 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
          * @return FormValidation object.
          */
         public FormValidation doCheckName(@QueryParameter String name) {
-            if (StringUtils.isBlank(name)) {
+            if (name == null || name.trim().isEmpty()) {
                 return FormValidation.error(Messages.GlobalTextareaChoiceListEntry_Name_empty());
             }
 
@@ -249,7 +248,6 @@ public class GlobalTextareaChoiceListEntry extends AbstractDescribableImpl<Globa
     @Override
     public String toString() {
         return String.format(
-                "[%s: name=%s, choiceList=%s]",
-                getClass().getName(), getName(), StringUtils.join(getChoiceList(), ","));
+                "[%s: name=%s, choiceList=%s]", getClass().getName(), getName(), String.join(",", getChoiceList()));
     }
 }
